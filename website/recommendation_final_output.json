@@ -1,0 +1,172 @@
+{
+  "executive_summary": "Prioritize high-energy action and sci-fi (virtual/digital worlds, AI) plus revenge/post‑apocalyptic titles and prestige drama — matching recent franchise binges (Tron, Mission: Impossible, LOTR), survival narratives, and crime/thriller interest. On-server picks are available in the provided Plex candidates and skew 75% movies / 25% shows; off-server picks fill gaps for dystopian/post‑apoc, revenge, and auteur-driven sci‑fi.",
+  "on_server_recommendations": [
+    {
+      "title": "Back to the Future",
+      "media_type": "movie",
+      "year": 1985,
+      "why_it_matches": "Classic time‑travel sci‑fi that aligns with interest in virtual/digital-world concepts and genre‑blend sci‑fi.",
+      "supporting_signals": [
+        "genre: sci‑fi/nostalgia",
+        "plot_context: digital/virtual-world curiosity",
+        "viewer_profile: Sci‑Fi & Virtual Worlds"
+      ]
+    },
+    {
+      "title": "Edge of Tomorrow",
+      "media_type": "movie",
+      "year": 2014,
+      "why_it_matches": "Action-forward sci‑fi with repetitive virtual‑simulation structure and high-energy set pieces.",
+      "supporting_signals": [
+        "genre: action/sci‑fi",
+        "theme: simulation/time loop",
+        "viewer_profile: Action-heavy; Sci‑Fi"
+      ]
+    },
+    {
+      "title": "Minority Report",
+      "media_type": "movie",
+      "year": 2002,
+      "why_it_matches": "Tech-driven crime thriller that matches interest in AI/virtual surveillance and crime/institutional narratives.",
+      "supporting_signals": [
+        "genre: sci‑fi/crime",
+        "plot_context: AI & surveillance",
+        "viewer_profile: Crime/Thriller; Sci‑Fi"
+      ]
+    },
+    {
+      "title": "Django Unchained",
+      "media_type": "movie",
+      "year": 2012,
+      "why_it_matches": "Revenge-driven, auteur-directed violent drama — fits the user's interest in revenge narratives and prestige directors.",
+      "supporting_signals": [
+        "theme: revenge/vigilantism",
+        "viewer_profile: Revenge-driven narratives",
+        "tone: auteur/violent"
+      ]
+    },
+    {
+      "title": "Mad Max: Fury Road",
+      "media_type": "movie",
+      "year": 2015,
+      "why_it_matches": "Relentless post‑apocalyptic action and survival focus that echoes the user's post‑apoc viewing (Fallout, The Last of Us).",
+      "supporting_signals": [
+        "genre: post‑apocalyptic/action",
+        "theme: survival",
+        "viewer_profile: Post-apocalyptic; Action-heavy"
+      ]
+    },
+    {
+      "title": "John Wick",
+      "media_type": "movie",
+      "year": 2014,
+      "why_it_matches": "Stylized, high‑octane action with revenge at its core — directly aligns with action and revenge preferences.",
+      "supporting_signals": [
+        "genre: action/crime",
+        "theme: revenge-driven",
+        "viewer_profile: Action-heavy; Revenge narratives"
+      ]
+    },
+    {
+      "title": "Westworld",
+      "media_type": "show",
+      "year": 2016,
+      "why_it_matches": "Series about AI, virtual realities and moral ambiguity — closely matches digital/virtual world interests and prestige TV appetite.",
+      "supporting_signals": [
+        "genre: sci‑fi/psychological",
+        "plot_context: virtual/digital worlds; AI",
+        "viewer_profile: Sci‑Fi & Virtual Worlds; Prestige auteurs"
+      ]
+    },
+    {
+      "title": "The Peripheral",
+      "media_type": "show",
+      "year": 2022,
+      "why_it_matches": "Near‑future tech thriller that explores virtual interfaces and surveillance — complements Tron/AI viewing patterns.",
+      "supporting_signals": [
+        "genre: sci‑fi/thriller",
+        "plot_context: virtual interfaces; surveillance",
+        "viewer_profile: Sci‑Fi; Crime/Thriller"
+      ]
+    }
+  ],
+  "off_server_recommendations": [
+    {
+      "title": "Children of Men",
+      "media_type": "movie",
+      "year": 2006,
+      "why_it_matches": "Dystopian, politically charged survival drama matching interest in post‑apocalyptic and historical/war stakes.",
+      "supporting_signals": [
+        "genre: dystopia/survival",
+        "theme: societal collapse; gritty realism",
+        "viewer_profile: Post-apocalyptic; Historical & War dramas"
+      ],
+      "lookup_hint": "Acquire: Alfonso Cuarón (dir); 2006; dystopian survival"
+    },
+    {
+      "title": "Snowpiercer",
+      "media_type": "movie",
+      "year": 2013,
+      "why_it_matches": "Class-driven post‑apocalyptic action with survival and revenge elements — fits post‑apoc and institutional-conflict interests.",
+      "supporting_signals": [
+        "genre: post‑apocalyptic/action",
+        "theme: class conflict; survival",
+        "viewer_profile: Survival/Post-apocalyptic; Crime/Thriller"
+      ],
+      "lookup_hint": "Acquire: Bong Joon‑ho (dir); 2013; post‑apoc class allegory"
+    },
+    {
+      "title": "Oldboy",
+      "media_type": "movie",
+      "year": 2003,
+      "why_it_matches": "Intense revenge thriller with genre‑blending violence and psychological twists — aligns with revenge-driven preferences.",
+      "supporting_signals": [
+        "genre: revenge/thriller",
+        "theme: vigilante/psychological",
+        "viewer_profile: Revenge-driven narratives; Dark genre interest"
+      ],
+      "lookup_hint": "Acquire: Park Chan‑wook (dir); 2003; revenge thriller"
+    },
+    {
+      "title": "District 9",
+      "media_type": "movie",
+      "year": 2009,
+      "why_it_matches": "Sci‑fi allegory combining social conflict with high‑concept tech themes — complements interest in sociopolitical sci‑fi.",
+      "supporting_signals": [
+        "genre: sci‑fi/social allegory",
+        "theme: segregation/tech exploitation",
+        "viewer_profile: Sci‑Fi & Virtual Worlds; Crime/Thriller"
+      ],
+      "lookup_hint": "Acquire: Neill Blomkamp (dir); 2009; sci‑fi social allegory"
+    },
+    {
+      "title": "The Road",
+      "media_type": "movie",
+      "year": 2009,
+      "why_it_matches": "Bleak, intimate survival and grief story that dovetails with the user's interest in family/grief dramas within post‑apoc settings.",
+      "supporting_signals": [
+        "genre: post‑apocalyptic/drama",
+        "theme: survival; family grief",
+        "viewer_profile: Family/grief; Post-apocalyptic"
+      ],
+      "lookup_hint": "Acquire: Cormac McCarthy adaptation; 2009; bleak survival drama"
+    },
+    {
+      "title": "Moon",
+      "media_type": "movie",
+      "year": 2009,
+      "why_it_matches": "Isolated, introspective sci‑fi exploring identity and AI — echoes the user's AI/virtual world and auteur tastes.",
+      "supporting_signals": [
+        "genre: sci‑fi/psychological",
+        "theme: identity; AI",
+        "viewer_profile: Sci‑Fi & Virtual Worlds; Prestige auteurs"
+      ],
+      "lookup_hint": "Acquire: Duncan Jones (dir); 2009; solitary AI identity drama"
+    }
+  ],
+  "source_gaps": [
+    "Cinematographer credits are absent or empty for nearly all items in the provided history — cannot report on DP preferences.",
+    "Some entries lack metadata (e.g., missing summary, cast or director for items like 'Warfare', 'Beauty and the Beast', 'The Man in the High Castle', 'The Rehearsal'); conclusions drawn only from available fields.",
+    "Cinematographer metadata was not present in the supplied Plex items."
+  ]
+}

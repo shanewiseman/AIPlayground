@@ -1,0 +1,25 @@
+<span class="status ok">Connected</span>
+<h1>Plex Token Gateway</h1>
+<p class="lede">This session is authenticated against Plex and is ready to call plex.tv APIs with the captured token.</p>
+<div class="actions">
+  <a class="button secondary" href="/login">Login page</a>
+  <a class="button" href="/token.json">View token JSON</a>
+  <a class="button secondary" href="/account">Display account id</a>
+  <a class="button secondary" href="/history">Last watched items</a>
+  <a class="button secondary" href="/summary" data-loading="1">AI viewing summary</a>
+  <a class="button secondary" href="/recommendations" data-loading="1">AI recommendations</a>
+  <a class="button secondary" href="/logout">Log out</a>
+</div>
+<div class="panel">
+  <h2>Current session</h2>
+  <p><strong>Plex username:</strong> {username}</p>
+  <p><strong>Plex account id:</strong> {account_id}</p>
+  <p><strong>Auth token:</strong></p>
+  <pre><code>{token}</code></pre>
+</div>
+<div class="panel">
+  <h2>Example plex.tv call</h2>
+  <pre><code>curl https://plex.tv/api/v2/user \
+  -H 'Accept: application/json' \
+  -H 'X-Plex-Token: {token}'</code></pre>
+</div>

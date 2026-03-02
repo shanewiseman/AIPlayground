@@ -1,0 +1,3461 @@
+{
+  "secret": "63381baecb657d2005e4cb742251e21690c5df63112150660d6abddaa183a884",
+  "sessions": {
+    "a9XnujEO1eDAfwoHdY1BFQPvc2kxMTTic2-5eS59brg": {
+      "created_at": 1772475981.1531825,
+      "plex_token": "Cs9htuTgHTjxqUks9not",
+      "plex_username": "plex.wiseman",
+      "plex_account_id": 6189978,
+      "history_summary": {
+        "schema_version": "plex_viewing_summary.v1",
+        "generated_at": "2026-03-02T18:26:30.256989+00:00",
+        "account_id": 6189978,
+        "item_count": 100,
+        "content_type_breakdown": [
+          {
+            "media_type": "movie",
+            "count": 65
+          },
+          {
+            "media_type": "show",
+            "count": 24
+          },
+          {
+            "media_type": "track",
+            "count": 11
+          }
+        ],
+        "recurring_actors": [
+          {
+            "name": "Tom Cruise",
+            "appearances": 7,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "Mission: Impossible - Rogue Nation",
+              "Mission: Impossible - Ghost Protocol",
+              "Vanilla Sky",
+              "Mission: Impossible III",
+              "Mission: Impossible II",
+              "Mission: Impossible"
+            ]
+          },
+          {
+            "name": "Ving Rhames",
+            "appearances": 6,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "Mission: Impossible - Rogue Nation",
+              "Mission: Impossible - Ghost Protocol",
+              "Mission: Impossible III",
+              "Mission: Impossible II",
+              "Mission: Impossible"
+            ]
+          },
+          {
+            "name": "Elijah Wood",
+            "appearances": 5,
+            "titles": [
+              "The Toxic Avenger",
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Simon Pegg",
+            "appearances": 5,
+            "titles": [
+              "Band of Brothers",
+              "Mission: Impossible - The Final Reckoning",
+              "Mission: Impossible - Rogue Nation",
+              "Mission: Impossible - Ghost Protocol",
+              "Mission: Impossible III"
+            ]
+          },
+          {
+            "name": "Andy Serkis",
+            "appearances": 4,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Hugo Weaving",
+            "appearances": 4,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "Slow Horses",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Liv Tyler",
+            "appearances": 4,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring",
+              "Armageddon"
+            ]
+          },
+          {
+            "name": "Timoth\u00e9e Chalamet",
+            "appearances": 4,
+            "titles": [
+              "Marty Supreme",
+              "Interstellar",
+              "Dune: Part One",
+              "A Complete Unknown"
+            ]
+          },
+          {
+            "name": "Abraham Popoola",
+            "appearances": 3,
+            "titles": [
+              "Slow Horses",
+              "Ballerina.2025.2160p.iT.WEB-DL.DV.HDR10+[Ben The Men]",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Alan Tudyk",
+            "appearances": 3,
+            "titles": [
+              "Superman",
+              "Andor",
+              "Moana 2"
+            ]
+          },
+          {
+            "name": "Bernard Hill",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "Titanic",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Bill Paxton",
+            "appearances": 3,
+            "titles": [
+              "The Terminator",
+              "U-571",
+              "Titanic"
+            ]
+          },
+          {
+            "name": "Billy Boyd",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Billy Jackson",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Bronwyn James",
+            "appearances": 3,
+            "titles": [
+              "Slow Horses",
+              "Mickey 17",
+              "Wicked"
+            ]
+          },
+          {
+            "name": "Cate Blanchett",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Christopher Lee",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring",
+              "Corpse Bride"
+            ]
+          },
+          {
+            "name": "Craig Parker",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Dominic Monaghan",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Edward Norton",
+            "appearances": 3,
+            "titles": [
+              "The American Revolution (2025)",
+              "Modern Family",
+              "A Complete Unknown"
+            ]
+          },
+          {
+            "name": "Ian McKellen",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Jarl Benzon",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Jason Momoa",
+            "appearances": 3,
+            "titles": [
+              "Game of Thrones",
+              "Chief of War",
+              "Dune: Part One"
+            ]
+          },
+          {
+            "name": "Jed Brophy",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Jeff Bridges",
+            "appearances": 3,
+            "titles": [
+              "Tron: Ares",
+              "Tron",
+              "Tron: Legacy"
+            ]
+          },
+          {
+            "name": "John Cena",
+            "appearances": 3,
+            "titles": [
+              "PLUR1BUS",
+              "Superman",
+              "The Bear"
+            ]
+          },
+          {
+            "name": "John Rhys-Davies",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Jon Bernthal",
+            "appearances": 3,
+            "titles": [
+              "The Accountant",
+              "The Bear",
+              "The Amateur"
+            ]
+          },
+          {
+            "name": "Josh Brolin",
+            "appearances": 3,
+            "titles": [
+              "The American Revolution (2025)",
+              "Weapons",
+              "Dune: Part One"
+            ]
+          },
+          {
+            "name": "J\u00f8rn Benzon",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Katie Jackson",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Keanu Reeves",
+            "appearances": 3,
+            "titles": [
+              "Good Fortune",
+              "Ballerina.2025.2160p.iT.WEB-DL.DV.HDR10+[Ben The Men]",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Lee Hartley",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Michael Pe\u00f1a",
+            "appearances": 3,
+            "titles": [
+              "Landman",
+              "Tom Clancy's Jack Ryan",
+              "End of Watch"
+            ]
+          },
+          {
+            "name": "Michelle Monaghan",
+            "appearances": 3,
+            "titles": [
+              "Mission: Impossible - Ghost Protocol",
+              "Mission: Impossible III",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Orlando Bloom",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Pedro Pascal",
+            "appearances": 3,
+            "titles": [
+              "Game of Thrones",
+              "Prospect",
+              "The Last of Us"
+            ]
+          },
+          {
+            "name": "Peter Dinklage",
+            "appearances": 3,
+            "titles": [
+              "Game of Thrones",
+              "The Toxic Avenger",
+              "Wicked"
+            ]
+          },
+          {
+            "name": "Peter Jackson",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Peter Stark",
+            "appearances": 3,
+            "titles": [
+              "Band of Brothers",
+              "U-571",
+              "Mission: Impossible - Rogue Nation"
+            ]
+          },
+          {
+            "name": "Richard E. Grant",
+            "appearances": 3,
+            "titles": [
+              "Game of Thrones",
+              "Nuremberg",
+              "Corpse Bride"
+            ]
+          },
+          {
+            "name": "Sala Baker",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Sam Kelly",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Sean Astin",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Sean Bean",
+            "appearances": 3,
+            "titles": [
+              "Game of Thrones",
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Siaosi Fonua",
+            "appearances": 3,
+            "titles": [
+              "Chief of War",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Steve Zahn",
+            "appearances": 3,
+            "titles": [
+              "Chad Powers",
+              "Modern Family",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Taylor Valentine Lupini",
+            "appearances": 3,
+            "titles": [
+              "Fallout",
+              "Superman",
+              "A Complete Unknown"
+            ]
+          },
+          {
+            "name": "Tobias Menzies",
+            "appearances": 3,
+            "titles": [
+              "Game of Thrones",
+              "The American Revolution (2025)",
+              "F1: The Movie"
+            ]
+          },
+          {
+            "name": "Viggo Mortensen",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Wendell Pierce",
+            "appearances": 3,
+            "titles": [
+              "Tom Clancy's Jack Ryan",
+              "The American Revolution (2025)",
+              "Superman"
+            ]
+          },
+          {
+            "name": "Adam James",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "Wicked"
+            ]
+          },
+          {
+            "name": "Adrian Martinez",
+            "appearances": 2,
+            "titles": [
+              "The Amateur",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Adrian Rawlins",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Alan Howard",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Alan Lee",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Alden Ehrenreich",
+            "appearances": 2,
+            "titles": [
+              "The American Revolution (2025)",
+              "Weapons"
+            ]
+          },
+          {
+            "name": "Alec Utgoff",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Mission: Impossible - Rogue Nation"
+            ]
+          },
+          {
+            "name": "Alex Huynh",
+            "appearances": 2,
+            "titles": [
+              "The Accountant",
+              "Sinners.2025.2160p.WEB-DL.DV.HDR10+[Ben The Men]"
+            ]
+          },
+          {
+            "name": "Alfie Todd",
+            "appearances": 2,
+            "titles": [
+              "Andor",
+              "Here"
+            ]
+          },
+          {
+            "name": "Alistair Browning",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Allan McLeod",
+            "appearances": 2,
+            "titles": [
+              "PLUR1BUS",
+              "Interior Chinatown"
+            ]
+          },
+          {
+            "name": "Amy Madigan",
+            "appearances": 2,
+            "titles": [
+              "Weapons",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Andreas Wisniewski",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - Ghost Protocol",
+              "Mission: Impossible"
+            ]
+          },
+          {
+            "name": "Andrew Borba",
+            "appearances": 2,
+            "titles": [
+              "Interstellar",
+              "Modern Family"
+            ]
+          },
+          {
+            "name": "Andrew Stehlin",
+            "appearances": 2,
+            "titles": [
+              "Chief of War",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Anita Anand",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "The Amateur"
+            ]
+          },
+          {
+            "name": "Anna Kendrick",
+            "appearances": 2,
+            "titles": [
+              "The Accountant",
+              "End of Watch"
+            ]
+          },
+          {
+            "name": "Annabelle Toomey",
+            "appearances": 2,
+            "titles": [
+              "The Pitt",
+              "The Bear"
+            ]
+          },
+          {
+            "name": "Anton Lesser",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Aron Eastwood",
+            "appearances": 2,
+            "titles": [
+              "Chief of War",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Bella Ramsey",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "The Last of Us"
+            ]
+          },
+          {
+            "name": "Ben Affleck",
+            "appearances": 2,
+            "titles": [
+              "The Accountant",
+              "Armageddon"
+            ]
+          },
+          {
+            "name": "Ben Britton",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Ben Fransham",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Ben Miles",
+            "appearances": 2,
+            "titles": [
+              "Nuremberg",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Benito Martinez",
+            "appearances": 2,
+            "titles": [
+              "Tom Clancy's Jack Ryan",
+              "Saw"
+            ]
+          },
+          {
+            "name": "Benjamin Bratt",
+            "appearances": 2,
+            "titles": [
+              "Modern Family",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Billy Bob Thornton",
+            "appearances": 2,
+            "titles": [
+              "Landman",
+              "Armageddon"
+            ]
+          },
+          {
+            "name": "Bobby Ray Cauley Jr.",
+            "appearances": 2,
+            "titles": [
+              "The Pitt",
+              "Landman"
+            ]
+          },
+          {
+            "name": "Brendan Burke",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "A Complete Unknown"
+            ]
+          },
+          {
+            "name": "Brendan Gleeson",
+            "appearances": 2,
+            "titles": [
+              "28 Days Later",
+              "Mission: Impossible II"
+            ]
+          },
+          {
+            "name": "Bret McKenzie",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Brian Thompson",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "The Terminator"
+            ]
+          },
+          {
+            "name": "Bruce Boxleitner",
+            "appearances": 2,
+            "titles": [
+              "Tron",
+              "Tron: Legacy"
+            ]
+          },
+          {
+            "name": "Bruce Hopkins",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Bruce Phillips",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Cameron Diaz",
+            "appearances": 2,
+            "titles": [
+              "The Mask",
+              "Vanilla Sky"
+            ]
+          },
+          {
+            "name": "Cameron Watson",
+            "appearances": 2,
+            "titles": [
+              "Frasier",
+              "Vanilla Sky"
+            ]
+          },
+          {
+            "name": "Cary Elwes",
+            "appearances": 2,
+            "titles": [
+              "Saw",
+              "Mission: Impossible - The Final Reckoning"
+            ]
+          },
+          {
+            "name": "Christian Friedel",
+            "appearances": 2,
+            "titles": [
+              "The American Revolution (2025)",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Christopher Darga",
+            "appearances": 2,
+            "titles": [
+              "The Mask",
+              "Modern Family"
+            ]
+          },
+          {
+            "name": "Cillian Murphy",
+            "appearances": 2,
+            "titles": [
+              "Tron: Legacy",
+              "28 Days Later"
+            ]
+          },
+          {
+            "name": "Clare Coulter",
+            "appearances": 2,
+            "titles": [
+              "The Apprentice",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Clint Elvy",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Colin Hanks",
+            "appearances": 2,
+            "titles": [
+              "Nuremberg",
+              "Band of Brothers"
+            ]
+          },
+          {
+            "name": "Conan O'Brien",
+            "appearances": 2,
+            "titles": [
+              "If I had Legs Id Kick You",
+              "Vanilla Sky"
+            ]
+          },
+          {
+            "name": "Dale Dye",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "Mission: Impossible"
+            ]
+          },
+          {
+            "name": "Damian Lewis",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "The American Revolution (2025)"
+            ]
+          },
+          {
+            "name": "Darren Dolynski",
+            "appearances": 2,
+            "titles": [
+              "Tron: Legacy",
+              "The Last of Us"
+            ]
+          },
+          {
+            "name": "Dave Power",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "U-571"
+            ]
+          },
+          {
+            "name": "David Alan Basche",
+            "appearances": 2,
+            "titles": [
+              "Frasier",
+              "A Complete Unknown"
+            ]
+          },
+          {
+            "name": "David Casta\u00f1eda",
+            "appearances": 2,
+            "titles": [
+              "Ballerina.2025.2160p.iT.WEB-DL.DV.HDR10+[Ben The Men]",
+              "End of Watch"
+            ]
+          },
+          {
+            "name": "David Oyelowo",
+            "appearances": 2,
+            "titles": [
+              "The American Revolution (2025)",
+              "Interstellar"
+            ]
+          },
+          {
+            "name": "David Schneider",
+            "appearances": 2,
+            "titles": [
+              "28 Days Later",
+              "Mission: Impossible"
+            ]
+          },
+          {
+            "name": "David Warner",
+            "appearances": 2,
+            "titles": [
+              "Titanic",
+              "Tron"
+            ]
+          },
+          {
+            "name": "David Wenham",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Dean Morganty",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Derek Cecil",
+            "appearances": 2,
+            "titles": [
+              "The Pitt",
+              "Tom Clancy's Jack Ryan"
+            ]
+          },
+          {
+            "name": "Donald Sage Mackay",
+            "appearances": 2,
+            "titles": [
+              "Nuremberg",
+              "Tom Clancy's Jack Ryan"
+            ]
+          },
+          {
+            "name": "Doug Cockle",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "The Amateur"
+            ]
+          },
+          {
+            "name": "Duncan Pow",
+            "appearances": 2,
+            "titles": [
+              "Dune: Part One",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Ebon Moss-Bachrach",
+            "appearances": 2,
+            "titles": [
+              "The Bear",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Edward Davis",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Mickey 17"
+            ]
+          },
+          {
+            "name": "Edwin Lee Gibson",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "The Bear"
+            ]
+          },
+          {
+            "name": "Elizabeth Dulau",
+            "appearances": 2,
+            "titles": [
+              "Andor",
+              "Wicked"
+            ]
+          },
+          {
+            "name": "Elliot Baxter",
+            "appearances": 2,
+            "titles": [
+              "Hamnet",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Elyes Gabel",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Interstellar"
+            ]
+          },
+          {
+            "name": "Emily Watson",
+            "appearances": 2,
+            "titles": [
+              "Hamnet",
+              "Corpse Bride"
+            ]
+          },
+          {
+            "name": "Eric Berryman",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "A Complete Unknown"
+            ]
+          },
+          {
+            "name": "Erik Estrada Loaiza",
+            "appearances": 2,
+            "titles": [
+              "Good Fortune",
+              "Interior Chinatown"
+            ]
+          },
+          {
+            "name": "Ethan Hawke",
+            "appearances": 2,
+            "titles": [
+              "The American Revolution (2025)",
+              "The Black Phone"
+            ]
+          },
+          {
+            "name": "F. Murray Abraham",
+            "appearances": 2,
+            "titles": [
+              "Serpico",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Faith Delaney",
+            "appearances": 2,
+            "titles": [
+              "Hamnet",
+              "Here"
+            ]
+          },
+          {
+            "name": "Faye Marsay",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Frank Grillo",
+            "appearances": 2,
+            "titles": [
+              "Superman",
+              "End of Watch"
+            ]
+          },
+          {
+            "name": "Frankie A. Rodriguez",
+            "appearances": 2,
+            "titles": [
+              "Chad Powers",
+              "Modern Family"
+            ]
+          },
+          {
+            "name": "Frankie McCafferty",
+            "appearances": 2,
+            "titles": [
+              "Blue Lights",
+              "In the Name of the Father"
+            ]
+          },
+          {
+            "name": "Fred Hechinger",
+            "appearances": 2,
+            "titles": [
+              "Marty Supreme",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Gabriel Byrne",
+            "appearances": 2,
+            "titles": [
+              "Hereditary",
+              "Ballerina.2025.2160p.iT.WEB-DL.DV.HDR10+[Ben The Men]"
+            ]
+          },
+          {
+            "name": "Gareth Jensen",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Gerard Jordan",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Blue Lights"
+            ]
+          },
+          {
+            "name": "Gino Acevedo",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Gloria Obianyo",
+            "appearances": 2,
+            "titles": [
+              "Dune: Part One",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Goran Kosti\u0107",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "Tom Clancy's Jack Ryan"
+            ]
+          },
+          {
+            "name": "Gwendoline Christie",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Hannah Waddingham",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Mission: Impossible - The Final Reckoning"
+            ]
+          },
+          {
+            "name": "Harry Sinclair",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Henry Czerny",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "Mission: Impossible"
+            ]
+          },
+          {
+            "name": "Henry Kingi",
+            "appearances": 2,
+            "titles": [
+              "PLUR1BUS",
+              "The Mask"
+            ]
+          },
+          {
+            "name": "Henry Mortensen",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Holt McCallany",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "The Amateur"
+            ]
+          },
+          {
+            "name": "Iain Fletcher",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "Slow Horses"
+            ]
+          },
+          {
+            "name": "Ian Hanmore",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Mickey 17"
+            ]
+          },
+          {
+            "name": "Ian Holm",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Ian Whyte",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Isaach de Bankol\u00e9",
+            "appearances": 2,
+            "titles": [
+              "Task",
+              "The Brutalist"
+            ]
+          },
+          {
+            "name": "Isabela Merced",
+            "appearances": 2,
+            "titles": [
+              "Superman",
+              "The Last of Us"
+            ]
+          },
+          {
+            "name": "Ivy Wolk",
+            "appearances": 2,
+            "titles": [
+              "If I had Legs Id Kick You",
+              "Anora"
+            ]
+          },
+          {
+            "name": "James Cosmo",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Tom Clancy's Jack Ryan"
+            ]
+          },
+          {
+            "name": "James Faulkner",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Slow Horses"
+            ]
+          },
+          {
+            "name": "Jason Hood",
+            "appearances": 2,
+            "titles": [
+              "Chief of War",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Jason Isaacs",
+            "appearances": 2,
+            "titles": [
+              "Armageddon",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Javier Bardem",
+            "appearances": 2,
+            "titles": [
+              "F1: The Movie",
+              "Dune: Part One"
+            ]
+          },
+          {
+            "name": "Jean Smart",
+            "appearances": 2,
+            "titles": [
+              "The Accountant",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Jeff Chen",
+            "appearances": 2,
+            "titles": [
+              "The Pitt",
+              "Interior Chinatown"
+            ]
+          },
+          {
+            "name": "Jenna Boyd",
+            "appearances": 2,
+            "titles": [
+              "Here",
+              "Wicked"
+            ]
+          },
+          {
+            "name": "Jeremiah Latrell Caldwell",
+            "appearances": 2,
+            "titles": [
+              "PLUR1BUS",
+              "The Bear"
+            ]
+          },
+          {
+            "name": "Jeremy Renner",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - Rogue Nation",
+              "Mission: Impossible - Ghost Protocol"
+            ]
+          },
+          {
+            "name": "Jeremy Wheeler",
+            "appearances": 2,
+            "titles": [
+              "Nuremberg",
+              "The Brutalist"
+            ]
+          },
+          {
+            "name": "Jimmy Walker",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Dune: Part One"
+            ]
+          },
+          {
+            "name": "Joe Alwyn",
+            "appearances": 2,
+            "titles": [
+              "Hamnet",
+              "The Brutalist"
+            ]
+          },
+          {
+            "name": "Joe Mande",
+            "appearances": 2,
+            "titles": [
+              "Good Fortune",
+              "Modern Family"
+            ]
+          },
+          {
+            "name": "Joel Gelman",
+            "appearances": 2,
+            "titles": [
+              "The Bear",
+              "Modern Family"
+            ]
+          },
+          {
+            "name": "John Bach",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "John Hoogenakker",
+            "appearances": 2,
+            "titles": [
+              "One Battle After Another",
+              "Tom Clancy's Jack Ryan"
+            ]
+          },
+          {
+            "name": "John Lithgow",
+            "appearances": 2,
+            "titles": [
+              "The Accountant",
+              "Interstellar"
+            ]
+          },
+          {
+            "name": "John Lynch",
+            "appearances": 2,
+            "titles": [
+              "Blue Lights",
+              "In the Name of the Father"
+            ]
+          },
+          {
+            "name": "John Noble",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Jon Gries",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Jonathan Bailey",
+            "appearances": 2,
+            "titles": [
+              "Tom Clancy's Jack Ryan",
+              "Wicked"
+            ]
+          },
+          {
+            "name": "Jonathan Groff",
+            "appearances": 2,
+            "titles": [
+              "The American Revolution (2025)",
+              "A Nice Indian Boy"
+            ]
+          },
+          {
+            "name": "Jonathan Harding",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Jonathan Hyde",
+            "appearances": 2,
+            "titles": [
+              "Titanic",
+              "The Brutalist"
+            ]
+          },
+          {
+            "name": "Jonathan Pryce",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Slow Horses"
+            ]
+          },
+          {
+            "name": "Jonjo O'Neill",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Joseph Balderrama",
+            "appearances": 2,
+            "titles": [
+              "Tom Clancy's Jack Ryan",
+              "F1: The Movie"
+            ]
+          },
+          {
+            "name": "Joseph Mika-Hunt",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Josh Pais",
+            "appearances": 2,
+            "titles": [
+              "If I had Legs Id Kick You",
+              "Teenage Mutant Ninja Turtles"
+            ]
+          },
+          {
+            "name": "Jude Mack",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "Mickey 17"
+            ]
+          },
+          {
+            "name": "Judith Hoag",
+            "appearances": 2,
+            "titles": [
+              "Teenage Mutant Ninja Turtles",
+              "Armageddon"
+            ]
+          },
+          {
+            "name": "Judy Greer",
+            "appearances": 2,
+            "titles": [
+              "The Long Walk",
+              "Modern Family"
+            ]
+          },
+          {
+            "name": "Julian Kostov",
+            "appearances": 2,
+            "titles": [
+              "The Toxic Avenger",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Julian Moore-Cook",
+            "appearances": 2,
+            "titles": [
+              "Blue Lights",
+              "Mission: Impossible - Rogue Nation"
+            ]
+          },
+          {
+            "name": "Justin William Davis",
+            "appearances": 2,
+            "titles": [
+              "Landman",
+              "Sinners.2025.2160p.WEB-DL.DV.HDR10+[Ben The Men]"
+            ]
+          },
+          {
+            "name": "Karan Soni",
+            "appearances": 2,
+            "titles": [
+              "PLUR1BUS",
+              "A Nice Indian Boy"
+            ]
+          },
+          {
+            "name": "Karl Urban",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Katie Pattinson",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Mission: Impossible - Rogue Nation"
+            ]
+          },
+          {
+            "name": "Keith Dallas",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - Ghost Protocol",
+              "A Nice Indian Boy"
+            ]
+          },
+          {
+            "name": "Keith David",
+            "appearances": 2,
+            "titles": [
+              "The American Revolution (2025)",
+              "Armageddon"
+            ]
+          },
+          {
+            "name": "Ken Leung",
+            "appearances": 2,
+            "titles": [
+              "Saw",
+              "Vanilla Sky"
+            ]
+          },
+          {
+            "name": "Kester Fordham",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Kieran O'Brien",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Kristin Scott Thomas",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Mission: Impossible"
+            ]
+          },
+          {
+            "name": "Kurt Egyiawan",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Lani Jackson",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Laura Linney",
+            "appearances": 2,
+            "titles": [
+              "The American Revolution (2025)",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Laurence Fishburne",
+            "appearances": 2,
+            "titles": [
+              "The Amateur",
+              "Mission: Impossible III"
+            ]
+          },
+          {
+            "name": "Lawrence Makoare",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Leo Woodall",
+            "appearances": 2,
+            "titles": [
+              "Nuremberg",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Leonardo DiCaprio",
+            "appearances": 2,
+            "titles": [
+              "One Battle After Another",
+              "Titanic"
+            ]
+          },
+          {
+            "name": "Leroy Kincaide",
+            "appearances": 2,
+            "titles": [
+              "Tom Clancy's Jack Ryan",
+              "Slow Horses"
+            ]
+          },
+          {
+            "name": "Linda Hamilton",
+            "appearances": 2,
+            "titles": [
+              "The Terminator",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Lloyd Kaufman",
+            "appearances": 2,
+            "titles": [
+              "The Toxic Avenger",
+              "Superman"
+            ]
+          },
+          {
+            "name": "Lombardo Boyar",
+            "appearances": 2,
+            "titles": [
+              "Modern Family",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Mackenzie Astin",
+            "appearances": 2,
+            "titles": [
+              "The Pitt",
+              "Landman"
+            ]
+          },
+          {
+            "name": "Mana Hira Davis",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Marc Rissmann",
+            "appearances": 2,
+            "titles": [
+              "The Amateur",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Marek Va\u0161ut",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Mission: Impossible"
+            ]
+          },
+          {
+            "name": "Mark Capri",
+            "appearances": 2,
+            "titles": [
+              "Titanic",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Mark Gatiss",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Mission: Impossible - The Final Reckoning"
+            ]
+          },
+          {
+            "name": "Mark Ruffalo",
+            "appearances": 2,
+            "titles": [
+              "Task",
+              "Mickey 17"
+            ]
+          },
+          {
+            "name": "Mark Stewart",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Tron"
+            ]
+          },
+          {
+            "name": "Marsha Kramer",
+            "appearances": 2,
+            "titles": [
+              "Modern Family",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Martin Hub",
+            "appearances": 2,
+            "titles": [
+              "Titanic",
+              "Mission: Impossible - Ghost Protocol"
+            ]
+          },
+          {
+            "name": "Marton Csokas",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Matthew McConaughey",
+            "appearances": 2,
+            "titles": [
+              "U-571",
+              "Interstellar"
+            ]
+          },
+          {
+            "name": "Matthew Settle",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "U-571"
+            ]
+          },
+          {
+            "name": "Mia Soteriou",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Michael Abbott Jr.",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "The Last of Us"
+            ]
+          },
+          {
+            "name": "Michael Akinsulire",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Michael Chernus",
+            "appearances": 2,
+            "titles": [
+              "Severance",
+              "A Complete Unknown"
+            ]
+          },
+          {
+            "name": "Michael Elsworth",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Michael Emerson",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "Saw"
+            ]
+          },
+          {
+            "name": "Michael Epp",
+            "appearances": 2,
+            "titles": [
+              "Tom Clancy's Jack Ryan",
+              "The Brutalist"
+            ]
+          },
+          {
+            "name": "Michael G. Kehoe",
+            "appearances": 2,
+            "titles": [
+              "Vanilla Sky",
+              "Mission: Impossible III"
+            ]
+          },
+          {
+            "name": "Michael McElhatton",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Tom Clancy's Jack Ryan"
+            ]
+          },
+          {
+            "name": "Michael Shannon",
+            "appearances": 2,
+            "titles": [
+              "Nuremberg",
+              "Vanilla Sky"
+            ]
+          },
+          {
+            "name": "Michael Teigen",
+            "appearances": 2,
+            "titles": [
+              "Tron: Legacy",
+              "The Last of Us"
+            ]
+          },
+          {
+            "name": "Mike Butters",
+            "appearances": 2,
+            "titles": [
+              "Saw",
+              "Titanic"
+            ]
+          },
+          {
+            "name": "Miltos Yerolemou",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Slow Horses"
+            ]
+          },
+          {
+            "name": "Miranda Otto",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Murray Bartlett",
+            "appearances": 2,
+            "titles": [
+              "The Last of Us",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Nathan Fillion",
+            "appearances": 2,
+            "titles": [
+              "Superman",
+              "Modern Family"
+            ]
+          },
+          {
+            "name": "Nathan Lane",
+            "appearances": 2,
+            "titles": [
+              "Modern Family",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Neil Bell",
+            "appearances": 2,
+            "titles": [
+              "Dune: Part One",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Nick Blood",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Nick Moss",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Nick Offerman",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "The Last of Us"
+            ]
+          },
+          {
+            "name": "Noah Taylor",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Vanilla Sky"
+            ]
+          },
+          {
+            "name": "Noel Appleby",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Oliver Platt",
+            "appearances": 2,
+            "titles": [
+              "The Bear",
+              "Modern Family"
+            ]
+          },
+          {
+            "name": "Paul Bentley",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Band of Brothers"
+            ]
+          },
+          {
+            "name": "Paul Bullion",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "Dune: Part One"
+            ]
+          },
+          {
+            "name": "Paul Grimstad",
+            "appearances": 2,
+            "titles": [
+              "Marty Supreme",
+              "One Battle After Another"
+            ]
+          },
+          {
+            "name": "Paul Norell",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Peter Tait",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "Chief of War"
+            ]
+          },
+          {
+            "name": "Phil Davis",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "In the Name of the Father"
+            ]
+          },
+          {
+            "name": "Phil Grieve",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Pierro Niel-Mee",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Pom Klementieff",
+            "appearances": 2,
+            "titles": [
+              "Superman",
+              "Mission: Impossible - The Final Reckoning"
+            ]
+          },
+          {
+            "name": "Rachel Brosnahan",
+            "appearances": 2,
+            "titles": [
+              "Superman",
+              "The Amateur"
+            ]
+          },
+          {
+            "name": "Rade \u0160erbed\u017eija",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Mission: Impossible II"
+            ]
+          },
+          {
+            "name": "Rajat Suresh",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Rami Malek",
+            "appearances": 2,
+            "titles": [
+              "Nuremberg",
+              "The Amateur"
+            ]
+          },
+          {
+            "name": "Rebecca Ferguson",
+            "appearances": 2,
+            "titles": [
+              "Dune: Part One",
+              "Mission: Impossible - Rogue Nation"
+            ]
+          },
+          {
+            "name": "Rebecca Tilney",
+            "appearances": 2,
+            "titles": [
+              "The Pitt",
+              "U-571"
+            ]
+          },
+          {
+            "name": "Richard Brake",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Sisu: Road to Revenge"
+            ]
+          },
+          {
+            "name": "Richard Dormer",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Blue Lights"
+            ]
+          },
+          {
+            "name": "Richard Graham",
+            "appearances": 2,
+            "titles": [
+              "Titanic",
+              "In the Name of the Father"
+            ]
+          },
+          {
+            "name": "Riley Brophy",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Rob Reiner",
+            "appearances": 2,
+            "titles": [
+              "The Bear",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Robert Jackson",
+            "appearances": 2,
+            "titles": [
+              "Tom Clancy's Jack Ryan",
+              "The Brutalist"
+            ]
+          },
+          {
+            "name": "Robert Maaser",
+            "appearances": 2,
+            "titles": [
+              "Ballerina.2025.2160p.iT.WEB-DL.DV.HDR10+[Ben The Men]",
+              "Mission: Impossible - Rogue Nation"
+            ]
+          },
+          {
+            "name": "Robert Pattinson",
+            "appearances": 2,
+            "titles": [
+              "Marty Supreme",
+              "Mickey 17"
+            ]
+          },
+          {
+            "name": "Robert Pollock",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Robin Berry",
+            "appearances": 2,
+            "titles": [
+              "Andor",
+              "Wicked"
+            ]
+          },
+          {
+            "name": "Rolf Saxon",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "Mission: Impossible"
+            ]
+          },
+          {
+            "name": "Ron Donachie",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Titanic"
+            ]
+          },
+          {
+            "name": "Ronald Bronstein",
+            "appearances": 2,
+            "titles": [
+              "If I had Legs Id Kick You",
+              "Marty Supreme"
+            ]
+          },
+          {
+            "name": "Ross McCall",
+            "appearances": 2,
+            "titles": [
+              "Band of Brothers",
+              "Mission: Impossible - The Final Reckoning"
+            ]
+          },
+          {
+            "name": "Rupert Vansittart",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Ryan Carey",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Sam La Hood",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Sam Rockwell",
+            "appearances": 2,
+            "titles": [
+              "Teenage Mutant Ninja Turtles",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Samuel E. Shore",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Sandra Bernhard",
+            "appearances": 2,
+            "titles": [
+              "Marty Supreme",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Sandro Kopp",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Sandy Robson",
+            "appearances": 2,
+            "titles": [
+              "Tron: Ares",
+              "The Last of Us"
+            ]
+          },
+          {
+            "name": "Sarah McLeod",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Sarah Niles",
+            "appearances": 2,
+            "titles": [
+              "The Toxic Avenger",
+              "F1: The Movie"
+            ]
+          },
+          {
+            "name": "Sean Lawlor",
+            "appearances": 2,
+            "titles": [
+              "Titanic",
+              "In the Name of the Father"
+            ]
+          },
+          {
+            "name": "Shane Dawson",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Shane Rangi",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Sharon Duncan-Brewster",
+            "appearances": 2,
+            "titles": [
+              "Dune: Part One",
+              "Ballerina.2025.2160p.iT.WEB-DL.DV.HDR10+[Ben The Men]"
+            ]
+          },
+          {
+            "name": "Shawnee Smith",
+            "appearances": 2,
+            "titles": [
+              "Saw",
+              "Armageddon"
+            ]
+          },
+          {
+            "name": "Shea Whigham",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "F1: The Movie"
+            ]
+          },
+          {
+            "name": "Shelley Long",
+            "appearances": 2,
+            "titles": [
+              "Modern Family",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Sh\u014dichi Hirose",
+            "appearances": 2,
+            "titles": [
+              "Seven Samurai",
+              "Lady Snowblood"
+            ]
+          },
+          {
+            "name": "Sisa Grey",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "Chief of War"
+            ]
+          },
+          {
+            "name": "Stanley Townsend",
+            "appearances": 2,
+            "titles": [
+              "Andor",
+              "In the Name of the Father"
+            ]
+          },
+          {
+            "name": "Stellan Skarsg\u00e5rd",
+            "appearances": 2,
+            "titles": [
+              "Dune: Part One",
+              "Andor"
+            ]
+          },
+          {
+            "name": "Stephen McKinley Henderson",
+            "appearances": 2,
+            "titles": [
+              "Good Fortune",
+              "Dune: Part One"
+            ]
+          },
+          {
+            "name": "Stephen Ure",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers"
+            ]
+          },
+          {
+            "name": "Sydney Cole Alexander",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Teddy Newton",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - Rogue Nation",
+              "Mission: Impossible - Ghost Protocol"
+            ]
+          },
+          {
+            "name": "Temuera Morrison",
+            "appearances": 2,
+            "titles": [
+              "Chief of War",
+              "Moana 2"
+            ]
+          },
+          {
+            "name": "Thomas Robins",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Tim Wong",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Timothy Omundson",
+            "appearances": 2,
+            "titles": [
+              "Frasier",
+              "Mission: Impossible III"
+            ]
+          },
+          {
+            "name": "Tom Hanks",
+            "appearances": 2,
+            "titles": [
+              "The American Revolution (2025)",
+              "Here"
+            ]
+          },
+          {
+            "name": "Tom Hollander",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - Rogue Nation",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Tom Wilkinson",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - Ghost Protocol",
+              "In the Name of the Father"
+            ]
+          },
+          {
+            "name": "Tom Wlaschiha",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Tom Clancy's Jack Ryan"
+            ]
+          },
+          {
+            "name": "Toni Collette",
+            "appearances": 2,
+            "titles": [
+              "Hereditary",
+              "Mickey 17"
+            ]
+          },
+          {
+            "name": "Tony Dalton",
+            "appearances": 2,
+            "titles": [
+              "PLUR1BUS",
+              "The Last of Us"
+            ]
+          },
+          {
+            "name": "Tony Way",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "Here"
+            ]
+          },
+          {
+            "name": "Tramell Tillman",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Tucker Smallwood",
+            "appearances": 2,
+            "titles": [
+              "Modern Family",
+              "Frasier"
+            ]
+          },
+          {
+            "name": "Victoria Beynon-Cole",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Walton Goggins",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "William Mapother",
+            "appearances": 2,
+            "titles": [
+              "Vanilla Sky",
+              "Mission: Impossible II"
+            ]
+          },
+          {
+            "name": "Winham Hammond",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Wolfgang Cerny",
+            "appearances": 2,
+            "titles": [
+              "Nuremberg",
+              "Mission: Impossible - Rogue Nation"
+            ]
+          },
+          {
+            "name": "Yul Vazquez",
+            "appearances": 2,
+            "titles": [
+              "The American Revolution (2025)",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Yuri Kolokolnikov",
+            "appearances": 2,
+            "titles": [
+              "Game of Thrones",
+              "The White Lotus"
+            ]
+          },
+          {
+            "name": "Zach Cherry",
+            "appearances": 2,
+            "titles": [
+              "Fallout",
+              "Severance"
+            ]
+          },
+          {
+            "name": "Zahari Baharov",
+            "appearances": 2,
+            "titles": [
+              "Slow Horses",
+              "Mission: Impossible - The Final Reckoning"
+            ]
+          },
+          {
+            "name": "Zo Hartley",
+            "appearances": 2,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          }
+        ],
+        "recurring_directors": [
+          {
+            "name": "Peter Jackson",
+            "appearances": 3,
+            "titles": [
+              "The Lord of the Rings: The Return of the King",
+              "The Lord of the Rings: The Two Towers",
+              "The Lord of the Rings: The Fellowship of the Ring"
+            ]
+          },
+          {
+            "name": "Christopher McQuarrie",
+            "appearances": 2,
+            "titles": [
+              "Mission: Impossible - The Final Reckoning",
+              "Mission: Impossible - Rogue Nation"
+            ]
+          },
+          {
+            "name": "James Cameron",
+            "appearances": 2,
+            "titles": [
+              "The Terminator",
+              "Titanic"
+            ]
+          },
+          {
+            "name": "Joseph Kosinski",
+            "appearances": 2,
+            "titles": [
+              "F1: The Movie",
+              "Tron: Legacy"
+            ]
+          }
+        ],
+        "recurring_cinematographers": [],
+        "viewer_profile_tags": [
+          "Action-heavy",
+          "Franchise binge (Mission: Impossible, LOTR, Tron)",
+          "Sci-Fi & Virtual Worlds",
+          "Revenge-driven narratives",
+          "Historical & War dramas",
+          "Survival/Post-apocalyptic",
+          "Prestige auteurs",
+          "Crime/Thriller",
+          "Horror interest",
+          "Music listener (classic rock)"
+        ],
+        "plot_context_observations": [
+          "Action/espionage and franchise set-pieces (multiple Mission: Impossible entries; Jack Ryan; Tom Cruise recurring)",
+          "Science-fiction focus on digital/virtual worlds and AI (Tron, Tron: Ares, Tron: Legacy; The Terminator; Dune; Mickey 17)",
+          "Revenge and vigilantism arcs (Sisu: Road to Revenge; Lady Snowblood; Monkey Man; One Battle After Another)",
+          "War, legal aftermath and historical dramas (Nuremberg; Band of Brothers; The American Revolution; Chief of War)",
+          "Post-apocalyptic and survival scenarios (Fallout; The Last of Us; 28 Days Later; Prospect)",
+          "Family, grief and intimate character drama (Hamnet; Hereditary; If I Had Legs I'd Kick You; Titanic)",
+          "Crime, police and institutional-corruption stories (End of Watch; U-571; Blue Lights; Task)",
+          "Dark/genre-blending horror and mystery (The Black Phone; Hereditary; Saw; Weapons)",
+          "Musical/album consumption alongside films (Pink Floyd album tracks and concert/album content present)"
+        ],
+        "executive_summary": "Recent viewing skews toward high-energy action, science fiction (including virtual/digital worlds), and prestige drama \u2014 a mix of blockbuster/franchise binges (Mission: Impossible, Lord of the Rings, Tron) and auteur-driven releases (Nolan, Bong, Chlo\u00e9 Zhao, Paul Thomas Anderson). The history also shows interest in revenge narratives, war/historical dramas, survival/post-apocalyptic stories, and occasional comedy/rom-com and music listening (Pink Floyd, Santana).",
+        "source_gaps": [
+          "Cinematographer credits are absent or empty for nearly all items in the provided history \u2014 cannot report on DP preferences.",
+          "Some entries lack metadata (e.g., missing summary, cast or director for items like 'Warfare', 'Beauty and the Beast', 'The Man in the High Castle', 'The Rehearsal'); conclusions drawn only from available fields.",
+          "Cinematographer metadata was not present in the supplied Plex items."
+        ],
+        "watched_items": {
+          "fields": [
+            "title",
+            "media_type",
+            "year"
+          ],
+          "items": [
+            [
+              "If I had Legs Id Kick You",
+              "movie",
+              2025
+            ],
+            [
+              "Hamnet",
+              "movie",
+              2025
+            ],
+            [
+              "The Pitt",
+              "show",
+              2025
+            ],
+            [
+              "Game of Thrones",
+              "show",
+              2011
+            ],
+            [
+              "Sisu: Road to Revenge",
+              "movie",
+              2025
+            ],
+            [
+              "Marty Supreme",
+              "movie",
+              2025
+            ],
+            [
+              "Serpico",
+              "movie",
+              1973
+            ],
+            [
+              "Nuremberg",
+              "movie",
+              2025
+            ],
+            [
+              "Fallout",
+              "show",
+              2024
+            ],
+            [
+              "Teenage Mutant Ninja Turtles",
+              "movie",
+              1990
+            ],
+            [
+              "Landman",
+              "show",
+              2024
+            ],
+            [
+              "Good Fortune",
+              "movie",
+              2025
+            ],
+            [
+              "Pink Floyd: Animals",
+              "movie",
+              2022
+            ],
+            [
+              "Band of Brothers",
+              "show",
+              2001
+            ],
+            [
+              "One Battle After Another",
+              "movie",
+              2025
+            ],
+            [
+              "Tom Clancy's Jack Ryan",
+              "show",
+              2018
+            ],
+            [
+              "Tron: Ares",
+              "movie",
+              2025
+            ],
+            [
+              "Bugonia",
+              "movie",
+              2025
+            ],
+            [
+              "PLUR1BUS",
+              "show",
+              2025
+            ],
+            [
+              "Blue Lights",
+              "show",
+              2023
+            ],
+            [
+              "Prospect",
+              "movie",
+              2018
+            ],
+            [
+              "The Terminator",
+              "movie",
+              1984
+            ],
+            [
+              "Seven Samurai",
+              "movie",
+              1954
+            ],
+            [
+              "The Long Walk",
+              "movie",
+              2025
+            ],
+            [
+              "The American Revolution (2025)",
+              "show",
+              2025
+            ],
+            [
+              "U-571",
+              "movie",
+              2000
+            ],
+            [
+              "The Toxic Avenger",
+              "movie",
+              2023
+            ],
+            [
+              "Task",
+              "show",
+              2025
+            ],
+            [
+              "Chad Powers",
+              "show",
+              2025
+            ],
+            [
+              "The Lord of the Rings: The Return of the King",
+              "movie",
+              2003
+            ],
+            [
+              "The Black Phone",
+              "movie",
+              2021
+            ],
+            [
+              "Saw",
+              "movie",
+              2004
+            ],
+            [
+              "Slow Horses",
+              "show",
+              2022
+            ],
+            [
+              "The Mask",
+              "movie",
+              1994
+            ],
+            [
+              "Chief of War",
+              "show",
+              2025
+            ],
+            [
+              "Hereditary",
+              "movie",
+              2018
+            ],
+            [
+              "Superman",
+              "movie",
+              2025
+            ],
+            [
+              "Mission: Impossible - The Final Reckoning",
+              "movie",
+              2025
+            ],
+            [
+              "Titanic",
+              "movie",
+              1997
+            ],
+            [
+              "Weapons",
+              "movie",
+              2025
+            ],
+            [
+              "Tron",
+              "movie",
+              1982
+            ],
+            [
+              "The Lord of the Rings: The Two Towers",
+              "movie",
+              2002
+            ],
+            [
+              "F1: The Movie",
+              "movie",
+              2025
+            ],
+            [
+              "Tron: Legacy",
+              "movie",
+              2010
+            ],
+            [
+              "The Lord of the Rings: The Fellowship of the Ring",
+              "movie",
+              2001
+            ],
+            [
+              "Dolby Blu Ray Demo Disk",
+              "show",
+              2018
+            ],
+            [
+              "Mildred Pierce",
+              "movie",
+              1945
+            ],
+            [
+              "Lady Snowblood",
+              "movie",
+              1973
+            ],
+            [
+              "28 Days Later",
+              "movie",
+              2002
+            ],
+            [
+              "Sister Midnight",
+              "movie",
+              2025
+            ],
+            [
+              "The Accountant",
+              "movie",
+              2016
+            ],
+            [
+              "Interstellar",
+              "movie",
+              2014
+            ],
+            [
+              "The Music Room",
+              "movie",
+              1958
+            ],
+            [
+              "Monkey Man",
+              "movie",
+              2024
+            ],
+            [
+              "Dune: Part One",
+              "movie",
+              2021
+            ],
+            [
+              "The Bear",
+              "show",
+              2022
+            ],
+            [
+              "Ballerina.2025.2160p.iT.WEB-DL.DV.HDR10+[Ben The Men]",
+              "movie",
+              2025
+            ],
+            [
+              "Jingo",
+              "track",
+              null
+            ],
+            [
+              "Wish You Were Here",
+              "track",
+              null
+            ],
+            [
+              "Have a Cigar",
+              "track",
+              null
+            ],
+            [
+              "Welcome to the Machine",
+              "track",
+              null
+            ],
+            [
+              "Welcome to the Machine",
+              "track",
+              null
+            ],
+            [
+              "Jingo",
+              "track",
+              null
+            ],
+            [
+              "Witch Hunt",
+              "track",
+              null
+            ],
+            [
+              "The Camera Eye",
+              "track",
+              null
+            ],
+            [
+              "Limelight",
+              "track",
+              null
+            ],
+            [
+              "YYZ",
+              "track",
+              null
+            ],
+            [
+              "Tiny Dancer",
+              "track",
+              null
+            ],
+            [
+              "Armageddon",
+              "movie",
+              1998
+            ],
+            [
+              "Sinners.2025.2160p.WEB-DL.DV.HDR10+[Ben The Men]",
+              "movie",
+              2025
+            ],
+            [
+              "Mission: Impossible - Rogue Nation",
+              "movie",
+              2015
+            ],
+            [
+              "Mission: Impossible - Ghost Protocol",
+              "movie",
+              2011
+            ],
+            [
+              "Modern Family",
+              "show",
+              2009
+            ],
+            [
+              "Frasier",
+              "show",
+              1993
+            ],
+            [
+              "The Amateur",
+              "movie",
+              2025
+            ],
+            [
+              "Andor",
+              "show",
+              2022
+            ],
+            [
+              "Vanilla Sky",
+              "movie",
+              2001
+            ],
+            [
+              "Mission: Impossible III",
+              "movie",
+              2006
+            ],
+            [
+              "The Rehearsal",
+              "show",
+              null
+            ],
+            [
+              "The Last of Us",
+              "show",
+              2023
+            ],
+            [
+              "Mission: Impossible II",
+              "movie",
+              2000
+            ],
+            [
+              "Moana 2",
+              "movie",
+              2024
+            ],
+            [
+              "Mission: Impossible",
+              "movie",
+              1996
+            ],
+            [
+              "Here",
+              "movie",
+              2024
+            ],
+            [
+              "Interior Chinatown",
+              "show",
+              2024
+            ],
+            [
+              "Warfare",
+              "movie",
+              null
+            ],
+            [
+              "Corpse Bride",
+              "movie",
+              2005
+            ],
+            [
+              "A Nice Indian Boy",
+              "movie",
+              2025
+            ],
+            [
+              "The Apprentice",
+              "movie",
+              2024
+            ],
+            [
+              "End of Watch",
+              "movie",
+              2012
+            ],
+            [
+              "Beauty and the Beast",
+              "movie",
+              null
+            ],
+            [
+              "The White Lotus",
+              "show",
+              2021
+            ],
+            [
+              "Mickey 17",
+              "movie",
+              2025
+            ],
+            [
+              "The Brutalist",
+              "movie",
+              2024
+            ],
+            [
+              "In the Name of the Father",
+              "movie",
+              1993
+            ],
+            [
+              "Wicked",
+              "movie",
+              2024
+            ],
+            [
+              "The Man in the High Castle",
+              "show",
+              null
+            ],
+            [
+              "Severance",
+              "show",
+              2022
+            ],
+            [
+              "A Complete Unknown",
+              "movie",
+              2024
+            ],
+            [
+              "Anora",
+              "movie",
+              2024
+            ]
+          ]
+        }
+      },
+      "recommendations": {
+        "schema_version": "plex_recommendations.v1",
+        "generated_at": "2026-03-02T18:27:03.230247+00:00",
+        "account_id": 6189978,
+        "based_on_summary_version": "plex_viewing_summary.v1",
+        "executive_summary": "Prioritize high-energy action and sci-fi (virtual/digital worlds, AI) plus revenge/post\u2011apocalyptic titles and prestige drama \u2014 matching recent franchise binges (Tron, Mission: Impossible, LOTR), survival narratives, and crime/thriller interest. On-server picks are available in the provided Plex candidates and skew 75% movies / 25% shows; off-server picks fill gaps for dystopian/post\u2011apoc, revenge, and auteur-driven sci\u2011fi.",
+        "on_server_recommendations": [
+          {
+            "title": "Back to the Future",
+            "media_type": "movie",
+            "year": 1985,
+            "plex_rating_key": "39893",
+            "library_section_title": "4K",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Back+to+the+Future+1985",
+            "rotten_tomatoes_critic_score": 93,
+            "rotten_tomatoes_audience_score": 95,
+            "why_it_matches": "Classic time\u2011travel sci\u2011fi that aligns with interest in virtual/digital-world concepts and genre\u2011blend sci\u2011fi.",
+            "supporting_signals": [
+              "genre: sci\u2011fi/nostalgia",
+              "plot_context: digital/virtual-world curiosity",
+              "viewer_profile: Sci\u2011Fi & Virtual Worlds"
+            ]
+          },
+          {
+            "title": "Edge of Tomorrow",
+            "media_type": "movie",
+            "year": 2014,
+            "plex_rating_key": "33235",
+            "library_section_title": "4K",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Edge+of+Tomorrow+2014",
+            "rotten_tomatoes_critic_score": 91,
+            "rotten_tomatoes_audience_score": 90,
+            "why_it_matches": "Action-forward sci\u2011fi with repetitive virtual\u2011simulation structure and high-energy set pieces.",
+            "supporting_signals": [
+              "genre: action/sci\u2011fi",
+              "theme: simulation/time loop",
+              "viewer_profile: Action-heavy; Sci\u2011Fi"
+            ]
+          },
+          {
+            "title": "Minority Report",
+            "media_type": "movie",
+            "year": 2002,
+            "plex_rating_key": "39127",
+            "library_section_title": "4K",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Minority+Report+2002",
+            "rotten_tomatoes_critic_score": 89,
+            "rotten_tomatoes_audience_score": 80,
+            "why_it_matches": "Tech-driven crime thriller that matches interest in AI/virtual surveillance and crime/institutional narratives.",
+            "supporting_signals": [
+              "genre: sci\u2011fi/crime",
+              "plot_context: AI & surveillance",
+              "viewer_profile: Crime/Thriller; Sci\u2011Fi"
+            ]
+          },
+          {
+            "title": "Django Unchained",
+            "media_type": "movie",
+            "year": 2012,
+            "plex_rating_key": "39878",
+            "library_section_title": "Movies",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Django+Unchained+2012",
+            "rotten_tomatoes_critic_score": 87,
+            "rotten_tomatoes_audience_score": 92,
+            "why_it_matches": "Revenge-driven, auteur-directed violent drama \u2014 fits the user's interest in revenge narratives and prestige directors.",
+            "supporting_signals": [
+              "theme: revenge/vigilantism",
+              "viewer_profile: Revenge-driven narratives",
+              "tone: auteur/violent"
+            ]
+          },
+          {
+            "title": "Mad Max: Fury Road",
+            "media_type": "movie",
+            "year": 2015,
+            "plex_rating_key": "5623",
+            "library_section_title": "4K",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Mad+Max%3A+Fury+Road+2015",
+            "rotten_tomatoes_critic_score": 97,
+            "rotten_tomatoes_audience_score": 86,
+            "why_it_matches": "Relentless post\u2011apocalyptic action and survival focus that echoes the user's post\u2011apoc viewing (Fallout, The Last of Us).",
+            "supporting_signals": [
+              "genre: post\u2011apocalyptic/action",
+              "theme: survival",
+              "viewer_profile: Post-apocalyptic; Action-heavy"
+            ]
+          },
+          {
+            "title": "John Wick",
+            "media_type": "movie",
+            "year": 2014,
+            "plex_rating_key": "9949",
+            "library_section_title": "4K",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=John+Wick+2014",
+            "rotten_tomatoes_critic_score": 86,
+            "rotten_tomatoes_audience_score": 82,
+            "why_it_matches": "Stylized, high\u2011octane action with revenge at its core \u2014 directly aligns with action and revenge preferences.",
+            "supporting_signals": [
+              "genre: action/crime",
+              "theme: revenge-driven",
+              "viewer_profile: Action-heavy; Revenge narratives"
+            ]
+          },
+          {
+            "title": "Westworld",
+            "media_type": "show",
+            "year": 2016,
+            "plex_rating_key": "35552",
+            "library_section_title": "TV Shows",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Westworld+2016",
+            "rotten_tomatoes_critic_score": null,
+            "rotten_tomatoes_audience_score": null,
+            "why_it_matches": "Series about AI, virtual realities and moral ambiguity \u2014 closely matches digital/virtual world interests and prestige TV appetite.",
+            "supporting_signals": [
+              "genre: sci\u2011fi/psychological",
+              "plot_context: virtual/digital worlds; AI",
+              "viewer_profile: Sci\u2011Fi & Virtual Worlds; Prestige auteurs"
+            ]
+          },
+          {
+            "title": "The Peripheral",
+            "media_type": "show",
+            "year": 2022,
+            "plex_rating_key": "26628",
+            "library_section_title": "TV Shows",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Peripheral+2022",
+            "rotten_tomatoes_critic_score": null,
+            "rotten_tomatoes_audience_score": null,
+            "why_it_matches": "Near\u2011future tech thriller that explores virtual interfaces and surveillance \u2014 complements Tron/AI viewing patterns.",
+            "supporting_signals": [
+              "genre: sci\u2011fi/thriller",
+              "plot_context: virtual interfaces; surveillance",
+              "viewer_profile: Sci\u2011Fi; Crime/Thriller"
+            ]
+          }
+        ],
+        "off_server_recommendations": [
+          {
+            "title": "Children of Men",
+            "media_type": "movie",
+            "year": 2006,
+            "why_it_matches": "Dystopian, politically charged survival drama matching interest in post\u2011apocalyptic and historical/war stakes.",
+            "supporting_signals": [
+              "genre: dystopia/survival",
+              "theme: societal collapse; gritty realism",
+              "viewer_profile: Post-apocalyptic; Historical & War dramas"
+            ],
+            "lookup_hint": "Acquire: Alfonso Cuar\u00f3n (dir); 2006; dystopian survival",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Children+of+Men+2006",
+            "rotten_tomatoes_critic_score": null,
+            "rotten_tomatoes_audience_score": null
+          },
+          {
+            "title": "Snowpiercer",
+            "media_type": "movie",
+            "year": 2013,
+            "why_it_matches": "Class-driven post\u2011apocalyptic action with survival and revenge elements \u2014 fits post\u2011apoc and institutional-conflict interests.",
+            "supporting_signals": [
+              "genre: post\u2011apocalyptic/action",
+              "theme: class conflict; survival",
+              "viewer_profile: Survival/Post-apocalyptic; Crime/Thriller"
+            ],
+            "lookup_hint": "Acquire: Bong Joon\u2011ho (dir); 2013; post\u2011apoc class allegory",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Snowpiercer+2013",
+            "rotten_tomatoes_critic_score": null,
+            "rotten_tomatoes_audience_score": null
+          },
+          {
+            "title": "Oldboy",
+            "media_type": "movie",
+            "year": 2003,
+            "why_it_matches": "Intense revenge thriller with genre\u2011blending violence and psychological twists \u2014 aligns with revenge-driven preferences.",
+            "supporting_signals": [
+              "genre: revenge/thriller",
+              "theme: vigilante/psychological",
+              "viewer_profile: Revenge-driven narratives; Dark genre interest"
+            ],
+            "lookup_hint": "Acquire: Park Chan\u2011wook (dir); 2003; revenge thriller",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Oldboy+2003",
+            "rotten_tomatoes_critic_score": null,
+            "rotten_tomatoes_audience_score": null
+          },
+          {
+            "title": "District 9",
+            "media_type": "movie",
+            "year": 2009,
+            "why_it_matches": "Sci\u2011fi allegory combining social conflict with high\u2011concept tech themes \u2014 complements interest in sociopolitical sci\u2011fi.",
+            "supporting_signals": [
+              "genre: sci\u2011fi/social allegory",
+              "theme: segregation/tech exploitation",
+              "viewer_profile: Sci\u2011Fi & Virtual Worlds; Crime/Thriller"
+            ],
+            "lookup_hint": "Acquire: Neill Blomkamp (dir); 2009; sci\u2011fi social allegory",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=District+9+2009",
+            "rotten_tomatoes_critic_score": null,
+            "rotten_tomatoes_audience_score": null
+          },
+          {
+            "title": "The Road",
+            "media_type": "movie",
+            "year": 2009,
+            "why_it_matches": "Bleak, intimate survival and grief story that dovetails with the user's interest in family/grief dramas within post\u2011apoc settings.",
+            "supporting_signals": [
+              "genre: post\u2011apocalyptic/drama",
+              "theme: survival; family grief",
+              "viewer_profile: Family/grief; Post-apocalyptic"
+            ],
+            "lookup_hint": "Acquire: Cormac McCarthy adaptation; 2009; bleak survival drama",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Road+2009",
+            "rotten_tomatoes_critic_score": null,
+            "rotten_tomatoes_audience_score": null
+          },
+          {
+            "title": "Moon",
+            "media_type": "movie",
+            "year": 2009,
+            "why_it_matches": "Isolated, introspective sci\u2011fi exploring identity and AI \u2014 echoes the user's AI/virtual world and auteur tastes.",
+            "supporting_signals": [
+              "genre: sci\u2011fi/psychological",
+              "theme: identity; AI",
+              "viewer_profile: Sci\u2011Fi & Virtual Worlds; Prestige auteurs"
+            ],
+            "lookup_hint": "Acquire: Duncan Jones (dir); 2009; solitary AI identity drama",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Moon+2009",
+            "rotten_tomatoes_critic_score": null,
+            "rotten_tomatoes_audience_score": null
+          }
+        ],
+        "source_gaps": [
+          "Cinematographer credits are absent or empty for nearly all items in the provided history \u2014 cannot report on DP preferences.",
+          "Some entries lack metadata (e.g., missing summary, cast or director for items like 'Warfare', 'Beauty and the Beast', 'The Man in the High Castle', 'The Rehearsal'); conclusions drawn only from available fields.",
+          "Cinematographer metadata was not present in the supplied Plex items.",
+          "Recommendation pass considered 1294 Plex library candidates after filtering recently watched items.",
+          "Some on-server titles were excluded because they were already in recent viewing history."
+        ]
+      }
+    }
+  }
+}

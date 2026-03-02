@@ -1,172 +1,215 @@
 {
-  "executive_summary": "Prioritize high-energy action and sci-fi (virtual/digital worlds, AI) plus revenge/post‑apocalyptic titles and prestige drama — matching recent franchise binges (Tron, Mission: Impossible, LOTR), survival narratives, and crime/thriller interest. On-server picks are available in the provided Plex candidates and skew 75% movies / 25% shows; off-server picks fill gaps for dystopian/post‑apoc, revenge, and auteur-driven sci‑fi.",
+  "executive_summary": "Based on a strong appetite for espionage thrillers, historical biopics, and crime dramas plus a taste for auteur-driven titles, these off-server picks broaden the palette with acclaimed, non-overlapping works that complement the viewer’s Mission: Impossible and LOTR affinities while expanding into standout bio-pics, noir thrillers, and detective dramas.",
   "on_server_recommendations": [
     {
-      "title": "Back to the Future",
+      "title": "Pulp Fiction",
       "media_type": "movie",
-      "year": 1985,
-      "why_it_matches": "Classic time‑travel sci‑fi that aligns with interest in virtual/digital-world concepts and genre‑blend sci‑fi.",
+      "year": 1994,
+      "why_it_matches": "Iconic crime drama with sharp dialogue and a standout ensemble cast; aligns with your preference for action/crime thrillers and director-driven classics.",
       "supporting_signals": [
-        "genre: sci‑fi/nostalgia",
-        "plot_context: digital/virtual-world curiosity",
-        "viewer_profile: Sci‑Fi & Virtual Worlds"
-      ]
-    },
-    {
-      "title": "Edge of Tomorrow",
-      "media_type": "movie",
-      "year": 2014,
-      "why_it_matches": "Action-forward sci‑fi with repetitive virtual‑simulation structure and high-energy set pieces.",
-      "supporting_signals": [
-        "genre: action/sci‑fi",
-        "theme: simulation/time loop",
-        "viewer_profile: Action-heavy; Sci‑Fi"
-      ]
-    },
-    {
-      "title": "Minority Report",
-      "media_type": "movie",
-      "year": 2002,
-      "why_it_matches": "Tech-driven crime thriller that matches interest in AI/virtual surveillance and crime/institutional narratives.",
-      "supporting_signals": [
-        "genre: sci‑fi/crime",
-        "plot_context: AI & surveillance",
-        "viewer_profile: Crime/Thriller; Sci‑Fi"
+        "iconic director",
+        "ensemble cast",
+        "crime/drama",
+        "non-linear storytelling",
+        "cult classic"
       ]
     },
     {
       "title": "Django Unchained",
       "media_type": "movie",
       "year": 2012,
-      "why_it_matches": "Revenge-driven, auteur-directed violent drama — fits the user's interest in revenge narratives and prestige directors.",
+      "why_it_matches": "Stylish Western with a revenge arc and strong performances; matches your taste for genre-blending action/historical thrillers.",
       "supporting_signals": [
-        "theme: revenge/vigilantism",
-        "viewer_profile: Revenge-driven narratives",
-        "tone: auteur/violent"
+        "western/revenge motif",
+        "ensemble cast",
+        "Tarantino",
+        "historical context"
       ]
     },
     {
-      "title": "Mad Max: Fury Road",
+      "title": "Back to the Future",
       "media_type": "movie",
+      "year": 1985,
+      "why_it_matches": "Iconic time-travel adventure; pure fun and sci-fi nostalgia, fitting your love for franchise-era sci-fi with broad appeal.",
+      "supporting_signals": [
+        "time-travel",
+        "80s classic",
+        "franchise appeal"
+      ]
+    },
+    {
+      "title": "The Godfather",
+      "media_type": "movie",
+      "year": 1972,
+      "why_it_matches": "Legendary crime saga with rich characters and historic scope; aligns with interest in historical crime narratives and classic cinema.",
+      "supporting_signals": [
+        "mafia epic",
+        "ensemble cast",
+        "classic cinema",
+        "power dynamics"
+      ]
+    },
+    {
+      "title": "The Shawshank Redemption",
+      "media_type": "movie",
+      "year": 1994,
+      "why_it_matches": "Powerful, character-driven drama about resilience and hope; a timeless favorite that complements a taste for strong storytelling.",
+      "supporting_signals": [
+        "prison drama",
+        "redemption arc",
+        "emotional stakes"
+      ]
+    },
+    {
+      "title": "Inception",
+      "media_type": "movie",
+      "year": 2010,
+      "why_it_matches": "Mind-bending sci-fi thriller with layered storytelling; aligns with your director-driven tastes and love of blockbuster cinema.",
+      "supporting_signals": [
+        "mind-bending premise",
+        "dream heist",
+        "Nolan"
+      ]
+    },
+    {
+      "title": "Arcane",
+      "media_type": "show",
+      "year": 2021,
+      "why_it_matches": "Acclaimed animated series with rich world-building and deep character arcs; suits a taste for high-concept fantasy and serialized storytelling.",
+      "supporting_signals": [
+        "animated series",
+        "world-building",
+        "fantasy/sci-fi"
+      ]
+    },
+    {
+      "title": "Narcos",
+      "media_type": "show",
       "year": 2015,
-      "why_it_matches": "Relentless post‑apocalyptic action and survival focus that echoes the user's post‑apoc viewing (Fallout, The Last of Us).",
+      "why_it_matches": "Gripping crime drama about cartel history; resonates with espionage/thriller tastes and real-world crime narratives.",
       "supporting_signals": [
-        "genre: post‑apocalyptic/action",
-        "theme: survival",
-        "viewer_profile: Post-apocalyptic; Action-heavy"
-      ]
-    },
-    {
-      "title": "John Wick",
-      "media_type": "movie",
-      "year": 2014,
-      "why_it_matches": "Stylized, high‑octane action with revenge at its core — directly aligns with action and revenge preferences.",
-      "supporting_signals": [
-        "genre: action/crime",
-        "theme: revenge-driven",
-        "viewer_profile: Action-heavy; Revenge narratives"
-      ]
-    },
-    {
-      "title": "Westworld",
-      "media_type": "show",
-      "year": 2016,
-      "why_it_matches": "Series about AI, virtual realities and moral ambiguity — closely matches digital/virtual world interests and prestige TV appetite.",
-      "supporting_signals": [
-        "genre: sci‑fi/psychological",
-        "plot_context: virtual/digital worlds; AI",
-        "viewer_profile: Sci‑Fi & Virtual Worlds; Prestige auteurs"
-      ]
-    },
-    {
-      "title": "The Peripheral",
-      "media_type": "show",
-      "year": 2022,
-      "why_it_matches": "Near‑future tech thriller that explores virtual interfaces and surveillance — complements Tron/AI viewing patterns.",
-      "supporting_signals": [
-        "genre: sci‑fi/thriller",
-        "plot_context: virtual interfaces; surveillance",
-        "viewer_profile: Sci‑Fi; Crime/Thriller"
+        "biographical crime",
+        "serial arc",
+        "global setting"
       ]
     }
   ],
   "off_server_recommendations": [
     {
-      "title": "Children of Men",
+      "title": "Argo",
       "media_type": "movie",
-      "year": 2006,
-      "why_it_matches": "Dystopian, politically charged survival drama matching interest in post‑apocalyptic and historical/war stakes.",
+      "year": 2012,
+      "why_it_matches": "Espionage thriller with political history aligns with the viewer’s spy/thriller motif and real-world tension vibe.",
       "supporting_signals": [
-        "genre: dystopia/survival",
-        "theme: societal collapse; gritty realism",
-        "viewer_profile: Post-apocalyptic; Historical & War dramas"
+        "historical espionage context",
+        "award-winning director/wlicks (Ben Affleck)",
+        "tightly plotted thriller with high-stakes political stakes"
       ],
-      "lookup_hint": "Acquire: Alfonso Cuarón (dir); 2006; dystopian survival"
+      "lookup_hint": "Argo 2012 espionage thriller"
     },
     {
-      "title": "Snowpiercer",
+      "title": "The Imitation Game",
       "media_type": "movie",
-      "year": 2013,
-      "why_it_matches": "Class-driven post‑apocalyptic action with survival and revenge elements — fits post‑apoc and institutional-conflict interests.",
+      "year": 2014,
+      "why_it_matches": "World War II codebreaking biopic complements the viewer’s interest in historical biopics and high-intensity problem-solving narratives.",
       "supporting_signals": [
-        "genre: post‑apocalyptic/action",
-        "theme: class conflict; survival",
-        "viewer_profile: Survival/Post-apocalyptic; Crime/Thriller"
+        "biopic",
+        "codes/cryptography theme",
+        "director Morten Tyldum; star Benedict Cumberbatch"
       ],
-      "lookup_hint": "Acquire: Bong Joon‑ho (dir); 2013; post‑apoc class allegory"
+      "lookup_hint": "The Imitation Game 2014 biopic"
     },
     {
-      "title": "Oldboy",
+      "title": "Mystic River",
       "media_type": "movie",
       "year": 2003,
-      "why_it_matches": "Intense revenge thriller with genre‑blending violence and psychological twists — aligns with revenge-driven preferences.",
+      "why_it_matches": "Crime drama with revenge and tortured pasts; fits the viewer’s dark, character-driven thrillers.",
       "supporting_signals": [
-        "genre: revenge/thriller",
-        "theme: vigilante/psychological",
-        "viewer_profile: Revenge-driven narratives; Dark genre interest"
+        "revenge/drama tone",
+        "ensemble cast",
+        "crime investigation under emotional strain"
       ],
-      "lookup_hint": "Acquire: Park Chan‑wook (dir); 2003; revenge thriller"
+      "lookup_hint": "Mystic River 2003 crime drama"
     },
     {
-      "title": "District 9",
+      "title": "LA Confidential",
       "media_type": "movie",
-      "year": 2009,
-      "why_it_matches": "Sci‑fi allegory combining social conflict with high‑concept tech themes — complements interest in sociopolitical sci‑fi.",
+      "year": 1997,
+      "why_it_matches": "Stylish noir crime saga with intricate plotting and a moody detective milieu, echoing classic crime thrillers in the watch history.",
       "supporting_signals": [
-        "genre: sci‑fi/social allegory",
-        "theme: segregation/tech exploitation",
-        "viewer_profile: Sci‑Fi & Virtual Worlds; Crime/Thriller"
+        "noir sensibility",
+        "crime investigation ensemble",
+        "award-caliber writing/directing"
       ],
-      "lookup_hint": "Acquire: Neill Blomkamp (dir); 2009; sci‑fi social allegory"
+      "lookup_hint": "LA Confidential 1997 noir crime"
     },
     {
-      "title": "The Road",
+      "title": "The Insider",
       "media_type": "movie",
-      "year": 2009,
-      "why_it_matches": "Bleak, intimate survival and grief story that dovetails with the user's interest in family/grief dramas within post‑apoc settings.",
+      "year": 1999,
+      "why_it_matches": "Investigative journalism thriller that mirrors real-world power plays and ethical tension familiar to espionage-minded viewers.",
       "supporting_signals": [
-        "genre: post‑apocalyptic/drama",
-        "theme: survival; family grief",
-        "viewer_profile: Family/grief; Post-apocalyptic"
+        "corporate/power intrigue",
+        "high-tension courtroom/boardroom drama",
+        "strong, grounded performances"
       ],
-      "lookup_hint": "Acquire: Cormac McCarthy adaptation; 2009; bleak survival drama"
+      "lookup_hint": "The Insider 1999 investigative thriller"
     },
     {
-      "title": "Moon",
+      "title": "The Aviator",
       "media_type": "movie",
-      "year": 2009,
-      "why_it_matches": "Isolated, introspective sci‑fi exploring identity and AI — echoes the user's AI/virtual world and auteur tastes.",
+      "year": 2004,
+      "why_it_matches": "BIOPIC of aviation pioneer and media magnate; fits auteur-driven biopics and historical settings the viewer enjoys.",
       "supporting_signals": [
-        "genre: sci‑fi/psychological",
-        "theme: identity; AI",
-        "viewer_profile: Sci‑Fi & Virtual Worlds; Prestige auteurs"
+        "Martin Scorsese direction",
+        "biographical epic",
+        "glossy production with historical detail"
       ],
-      "lookup_hint": "Acquire: Duncan Jones (dir); 2009; solitary AI identity drama"
+      "lookup_hint": "The Aviator 2004 biopic"
+    },
+    {
+      "title": "The English Patient",
+      "media_type": "movie",
+      "year": 1996,
+      "why_it_matches": "Epic historical romance with sweeping scope and period detail, broadening the historical biopic angle the viewer already appreciates.",
+      "supporting_signals": [
+        "epic narrative",
+        "historical setting",
+        "strong adaptation credentials"
+      ],
+      "lookup_hint": "The English Patient 1996 history drama"
+    },
+    {
+      "title": "The Night Manager",
+      "media_type": "show",
+      "year": 2016,
+      "why_it_matches": "Prime-age espionage thriller show that complements the franchise/spy motif while offering a TV-series format in the same lane as Jack Ryan-esque content.",
+      "supporting_signals": [
+        "spy thriller",
+        "limited series",
+        "high-gloss production value"
+      ],
+      "lookup_hint": "The Night Manager 2016 spy miniseries"
+    },
+    {
+      "title": "The Americans",
+      "media_type": "show",
+      "year": 2013,
+      "why_it_matches": "Cold War espionage drama with intricate plotting and character-driven tension, aligning with the viewer’s preference for espionage thrillers and ensemble casts.",
+      "supporting_signals": [
+        "period espionage",
+        "covert operations",
+        "rich character arcs"
+      ],
+      "lookup_hint": "The Americans 2013 espionage series"
     }
   ],
   "source_gaps": [
-    "Cinematographer credits are absent or empty for nearly all items in the provided history — cannot report on DP preferences.",
-    "Some entries lack metadata (e.g., missing summary, cast or director for items like 'Warfare', 'Beauty and the Beast', 'The Man in the High Castle', 'The Rehearsal'); conclusions drawn only from available fields.",
-    "Cinematographer metadata was not present in the supplied Plex items."
+    "Cinematographer credits are absent across the provided history (no cinematographer entries present).",
+    "Many TV-series entries and multiple movies lack director/writer metadata in this export (e.g., The Pitt, Fallout, The Bear, Slow Horses, many others show empty director/writer fields).",
+    "Several history items have incomplete metadata (null or missing fields and artwork) \u001914 examples: Warfare, Beauty and the Beast (null credits/art), The Rehearsal (null summary/art).",
+    "Music track entries contain only titles/album info with minimal metadata (no performer/credits beyond track/album in many cases).",
+    "Cinematographer metadata was not present in the supplied Plex items.",
+    "Several history items have incomplete metadata (null or missing fields and artwork) – examples: Warfare, Beauty and the Beast (null credits/art), The Rehearsal (null summary/art)."
   ]
 }

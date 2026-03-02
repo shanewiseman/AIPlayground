@@ -47,11 +47,9 @@ class PlexHistorySummaryService:
     def summarize(
         self, *, account_id: int, history_items: list[dict[str, Any]]
     ) -> dict[str, Any]:
-        generated_at = datetime.now(timezone.utc).isoformat()
         if not history_items:
             return {
                 "schema_version": "plex_viewing_summary.v1",
-                "generated_at": generated_at,
                 "account_id": account_id,
                 "item_count": 0,
                 "content_type_breakdown": [],
@@ -68,7 +66,6 @@ class PlexHistorySummaryService:
         narrative = self._generate_narrative_summary(history_items)
         summary_object = {
             "schema_version": "plex_viewing_summary.v1",
-            "generated_at": generated_at,
             "account_id": account_id,
             "item_count": len(history_items),
             "content_type_breakdown": self._content_type_breakdown(history_items),
@@ -185,8 +182,8 @@ class PlexHistorySummaryService:
                     titles.append(title)
         people = [
             PersonFrequency(name=name, appearances=count, titles=titles_by_person[name]).model_dump()
-            # Only include people who appear in more than one watched item to focus on recurring collaborators.
-            for name, count in sorted(appearances.items(), key=lambda item: (-item[1], item[0])) if count > 1
+            # Only include people who appear in more than two watched items to focus on recurring collaborators.
+            for name, count in sorted(appearances.items(), key=lambda item: (-item[1], item[0])) if count > 2
         ]
         return people
 

@@ -1,11 +1,24 @@
 {
-  "model": "gpt-5-mini",
-  "method": "tiktoken",
-  "notes": null,
-  "input_tokens": {
-    "instructions": 153,
-    "prompt": 26247,
-    "output_schema": 932,
-    "total": 27332
+  "on_server": {
+    "model": "gpt-5-nano",
+    "method": "tiktoken",
+    "notes": null,
+    "input_tokens": {
+      "instructions": 105,
+      "prompt": 18293,
+      "output_schema": 467,
+      "total": 18865
+    }
+  },
+  "off_server": {
+    "model": "gpt-5-nano",
+    "method": "tiktoken",
+    "notes": null,
+    "input_tokens": {
+      "instructions": 108,
+      "prompt": 19261,
+      "output_schema": 564,
+      "total": 19933
+    }
   }
 }

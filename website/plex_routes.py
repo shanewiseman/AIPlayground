@@ -541,6 +541,7 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
                 - An executive summary of recommendations
                 - On-server recommendations (available in user's Plex library)
                 - Off-server recommendations (not in user's library)
+                - End-to-end recommendation retrieval duration for this HTTP request
                 - JSON representation of the full recommendation object
 
         Raises:
@@ -555,6 +556,7 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
             - Calls Plex PMS API to fetch enriched history and library candidates
             - Invokes history summarization and recommendation services
         """
+        request_started_at = time.perf_counter()
         _, session = self.get_or_create_session()
         token = session.get("plex_token")
         account_id = session.get("plex_account_id")
@@ -590,6 +592,9 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
                 library_candidates=library_candidates,
             )
             session["recommendations"] = recommendation_object
+        recommendation_retrieval_duration = self._format_elapsed_duration(
+            time.perf_counter() - request_started_at
+        )
 
         on_server_markup = self._render_recommendation_group(
             recommendation_object.get("on_server_recommendations", []),
@@ -607,6 +612,9 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
             ),
             generated_at=html.escape(
                 str(recommendation_object.get("generated_at", "unknown"))
+            ),
+            recommendation_retrieval_duration=html.escape(
+                recommendation_retrieval_duration
             ),
             on_server_markup=on_server_markup,
             off_server_markup=off_server_markup,
@@ -669,6 +677,15 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
         if isinstance(value, int):
             return f"{value}%"
         return "Unavailable"
+
+    def _format_elapsed_duration(self, seconds: float) -> str:
+        if seconds < 1:
+            return f"{seconds * 1000:.0f} ms"
+        if seconds < 60:
+            return f"{seconds:.2f} s"
+        minutes = int(seconds // 60)
+        remaining_seconds = seconds - (minutes * 60)
+        return f"{minutes}m {remaining_seconds:.1f}s"
 
     def handle_artwork(self, parsed: Any) -> None:
         _, session = self.get_or_create_session()

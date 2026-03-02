@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 import sys
@@ -59,6 +60,27 @@ class RecommendationNarrative(BaseModel):
     )
 
 
+class OnServerRecommendationNarrative(BaseModel):
+    on_server_recommendations: list[ExistingContentRecommendation] = Field(
+        description="Recommended titles that already exist on the Plex server."
+    )
+    source_gaps: list[str] = Field(
+        description="Data caveats specific to the on-server recommendation pass."
+    )
+
+
+class OffServerRecommendationNarrative(BaseModel):
+    executive_summary: str = Field(
+        description="A concise explanation of the recommendation strategy for this user."
+    )
+    off_server_recommendations: list[ExternalContentRecommendation] = Field(
+        description="Recommended titles that do not currently exist on the Plex server."
+    )
+    source_gaps: list[str] = Field(
+        description="Data caveats specific to the off-server recommendation pass."
+    )
+
+
 class PlexRecommendationService:
     def __init__(self) -> None:
         self._agents_src = (
@@ -70,9 +92,11 @@ class PlexRecommendationService:
         self._token_estimate_dump_path = (
             Path(__file__).resolve().parent / "recommendation_token_estimate.json"
         )
-        self._prompt_dump_path = (
-            Path(__file__).resolve().parent / "recommendation_prompt_submission.json"
-        )
+        prompt_dump_dir = Path(__file__).resolve().parent
+        self._prompt_dump_paths = {
+            "on_server": prompt_dump_dir / "recommendation_on_server_prompt_submission.json",
+            "off_server": prompt_dump_dir / "recommendation_off_server_prompt_submission.json",
+        }
         self._final_output_dump_path = (
             Path(__file__).resolve().parent / "recommendation_final_output.json"
         )
@@ -91,7 +115,9 @@ class PlexRecommendationService:
         filtered_candidates = self._exclude_recently_watched(
             library_candidates, viewing_summary.get("watched_items", [])
         )
-        narrative = self._generate_recommendations(viewing_summary, library_candidates)
+        narrative = self._generate_recommendations(
+            viewing_summary, library_candidates, filtered_candidates
+        )
         on_server_recommendations = self._normalize_on_server_recommendations(
             narrative.on_server_recommendations, filtered_candidates
         )
@@ -115,7 +141,10 @@ class PlexRecommendationService:
         }
 
     def _generate_recommendations(
-        self, viewing_summary: dict[str, Any], library_candidates: list[dict[str, Any]],
+        self,
+        viewing_summary: dict[str, Any],
+        library_candidates: list[dict[str, Any]],
+        filtered_candidates: list[dict[str, Any]],
     ) -> RecommendationNarrative:
         if not os.environ.get("OPENAI_API_KEY"):
             raise RecommendationError(
@@ -123,60 +152,122 @@ class PlexRecommendationService:
             )
         Agent, Runner, set_tracing_disabled = self._load_agents_sdk()
         set_tracing_disabled(True)
-        model_name = os.environ.get("OPENAI_AGENT_MODEL", "gpt-5-mini")
-        agent = Agent(
-            name="PlexRecommendations",
+        model_name = os.environ.get("OPENAI_AGENT_MODEL", "gpt-5-nano")
+        on_server_agent = Agent(
+            name="PlexOnServerRecommendations",
             model=model_name,
             instructions=(
-                "You produce structured entertainment recommendations from a viewing summary. "
+                "You produce structured on-server entertainment recommendations from a viewing summary. "
+                "Use only the supplied viewing summary and supplied filtered_candidates. "
+                "The filtered_candidates payload uses a fields legend with row arrays in that exact order. "
+                "Choose 5 to 10 on-server recommendations only from the provided filtered_candidates list, "
+                "with movies representing 75% of recommendations and shows 25%, "
+                "preserving exact title, media_type, and year values. "
+                "Ensure recommendations are distinct from each other and should not appear in watched_items. "
+                "Return only on-server recommendations and source_gaps."
+            ),
+            output_type=OnServerRecommendationNarrative,
+        )
+        off_server_agent = Agent(
+            name="PlexOffServerRecommendations",
+            model=model_name,
+            instructions=(
+                "You produce structured off-server entertainment recommendations from a viewing summary. "
                 "Use only the supplied viewing summary and supplied Plex library candidates. "
                 "The library_candidates payload uses a fields legend with row arrays in that exact order. "
-                "Rules: choose 5 to 10 on-server recommendations only from the provided library_candidates list, "
-                "with movies representing 75% of recommendations and shows 25%,"
-                "preserving exact title, media_type, and year values. "
-                "Ensure on-server recommendations are distinct from each other and should not appear in the watched_items list."
-                "Choose 5 to 10 off-server recommendations "
-                "that do not appear in the provided library_candidates. Use plot_context_observations, executive_summary, viewer_profile_tags, actors, directors, "
-                "cinematographers, and genres where available. Keep reasons compact and database-friendly."
+                "Choose 5 to 10 off-server recommendations that do not appear in the provided library_candidates. "
+                "Use plot_context_observations, executive_summary, viewer_profile_tags, actors, directors, "
+                "cinematographers, and genres where available. Keep reasons compact and database-friendly. "
+                "Return an executive_summary, off_server_recommendations, and source_gaps."
             ),
-            output_type=RecommendationNarrative,
+            output_type=OffServerRecommendationNarrative,
         )
         prompt_library_candidates = self._serialize_library_candidates_for_prompt(
             library_candidates
         )
-
-        viewing_summary["watched_items"] = self._serialize_library_candidates_for_prompt(viewing_summary.get("watched_items", []))
-        
+        prompt_filtered_candidates = self._serialize_library_candidates_for_prompt(
+            filtered_candidates
+        )
+        prompt_viewing_summary = self._serialize_viewing_summary_for_prompt(viewing_summary)
         self._write_library_candidates_dump(prompt_library_candidates)
-        prompt = json.dumps(
+        on_server_prompt = json.dumps(
             {
-                "task": "Generate recommendations in two groups: already on Plex and not currently on Plex.",
-                "viewing_summary": viewing_summary,
+                "task": "Generate only recommendations that already exist on Plex.",
+                "viewing_summary": prompt_viewing_summary,
+                "filtered_candidates": prompt_filtered_candidates,
+            },
+            separators=(",", ":"),
+        )
+        off_server_prompt = json.dumps(
+            {
+                "task": "Generate only recommendations that do not currently exist on Plex.",
+                "viewing_summary": prompt_viewing_summary,
                 "library_candidates": prompt_library_candidates,
             },
             separators=(",", ":"),
         )
-        estimated_token_usage = self._build_estimated_token_usage(
-            model_name=model_name,
-            instructions=agent.instructions,
-            prompt=prompt,
-        )
+        estimated_token_usage = {
+            "on_server": self._build_estimated_token_usage(
+                model_name=model_name,
+                instructions=on_server_agent.instructions,
+                prompt=on_server_prompt,
+                output_type=OnServerRecommendationNarrative,
+            ),
+            "off_server": self._build_estimated_token_usage(
+                model_name=model_name,
+                instructions=off_server_agent.instructions,
+                prompt=off_server_prompt,
+                output_type=OffServerRecommendationNarrative,
+            ),
+        }
         self._write_token_estimate_dump(estimated_token_usage)
-        self._write_prompt_dump(prompt)
+        self._write_prompt_dump("on_server", on_server_prompt)
+        self._write_prompt_dump("off_server", off_server_prompt)
         try:
-            result = Runner.run_sync(agent, prompt)
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                on_server_future = executor.submit(
+                    self._run_recommendation_call,
+                    Runner=Runner,
+                    agent=on_server_agent,
+                    prompt=on_server_prompt,
+                    call_name="on_server",
+                )
+                off_server_future = executor.submit(
+                    self._run_recommendation_call,
+                    Runner=Runner,
+                    agent=off_server_agent,
+                    prompt=off_server_prompt,
+                    call_name="off_server",
+                )
+                on_server_result = on_server_future.result()
+                off_server_result = off_server_future.result()
         except Exception as exc:  # pragma: no cover - runtime integration path
+            if isinstance(exc, RecommendationError):
+                raise exc
             raise RecommendationError(
                 f"OpenAI recommendation generation failed: {exc}"
             ) from exc
-        self._write_final_output_dump(result.final_output)
-        return result.final_output
+        narrative = RecommendationNarrative(
+            executive_summary=off_server_result.executive_summary,
+            on_server_recommendations=on_server_result.on_server_recommendations,
+            off_server_recommendations=off_server_result.off_server_recommendations,
+            source_gaps=self._dedupe_strings(
+                [*on_server_result.source_gaps, *off_server_result.source_gaps]
+            ),
+        )
+        self._write_final_output_dump(narrative)
+        return narrative
 
     def _build_estimated_token_usage(
-        self, *, model_name: str, instructions: str | None, prompt: str
+        self,
+        *,
+        model_name: str,
+        instructions: str | None,
+        prompt: str,
+        output_type: type[BaseModel],
     ) -> dict[str, Any]:
         instructions_text = instructions if isinstance(instructions, str) else str(instructions or "")
-        output_schema = json.dumps(RecommendationNarrative.model_json_schema(), indent=2)
+        output_schema = json.dumps(output_type.model_json_schema(), indent=2)
         instructions_estimate = self._estimate_tokens(instructions_text, model_name)
         prompt_estimate = self._estimate_tokens(prompt, model_name)
         schema_estimate = self._estimate_tokens(output_schema, model_name)
@@ -223,8 +314,11 @@ class PlexRecommendationService:
             encoding="utf-8",
         )
 
-    def _write_prompt_dump(self, prompt: str) -> None:
-        self._prompt_dump_path.write_text(prompt, encoding="utf-8")
+    def _write_prompt_dump(self, prompt_name: str, prompt: str) -> None:
+        prompt_dump_path = self._prompt_dump_paths.get(prompt_name)
+        if prompt_dump_path is None:
+            raise RecommendationError(f"Unknown prompt dump target: {prompt_name}")
+        prompt_dump_path.write_text(prompt, encoding="utf-8")
 
     def _write_final_output_dump(self, final_output: Any) -> None:
         model_dump_json = getattr(final_output, "model_dump_json", None)
@@ -250,6 +344,17 @@ class PlexRecommendationService:
             ) from exc
         return Agent, Runner, set_tracing_disabled
 
+    def _run_recommendation_call(
+        self, *, Runner: Any, agent: Any, prompt: str, call_name: str
+    ) -> Any:
+        try:
+            result = Runner.run_sync(agent, prompt)
+        except Exception as exc:  # pragma: no cover - runtime integration path
+            raise RecommendationError(
+                f"OpenAI {call_name} recommendation generation failed: {exc}"
+            ) from exc
+        return result.final_output
+
     def _serialize_library_candidates_for_prompt(
         self, library_candidates: list[dict[str, Any]]
     ) -> dict[str, Any]:
@@ -264,6 +369,15 @@ class PlexRecommendationService:
                 for candidate in library_candidates
             ],
         }
+
+    def _serialize_viewing_summary_for_prompt(
+        self, viewing_summary: dict[str, Any]
+    ) -> dict[str, Any]:
+        prompt_viewing_summary = dict(viewing_summary)
+        prompt_viewing_summary["watched_items"] = self._serialize_library_candidates_for_prompt(
+            viewing_summary.get("watched_items", [])
+        )
+        return prompt_viewing_summary
 
     def _write_library_candidates_dump(
         self, library_candidates: dict[str, Any]
@@ -307,6 +421,13 @@ class PlexRecommendationService:
         for gap in gaps:
             if gap not in deduped:
                 deduped.append(gap)
+        return deduped
+
+    def _dedupe_strings(self, values: list[str]) -> list[str]:
+        deduped: list[str] = []
+        for value in values:
+            if value not in deduped:
+                deduped.append(value)
         return deduped
 
     def _normalize_on_server_recommendations(

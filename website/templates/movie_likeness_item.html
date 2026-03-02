@@ -1,0 +1,21 @@
+<article class="history-card">
+  <div class="history-meta">
+    <div class="eyebrow">Movie on Plex</div>
+    <h2 class="history-title">{title}</h2>
+    <p class="history-subtitle">Year: {year}</p>
+    <p><strong>Why it matches:</strong> {why_it_matches}</p>
+    <p><strong>Signals:</strong> {supporting_signals}</p>
+    <p><strong>Current rating:</strong> {current_rating}</p>
+    <fieldset class="rating-scale">
+      <legend>Perceived likeness</legend>
+      <div class="rating-options">
+        <label class="rating-option"><input type="radio" name="rating_{rating_key}" value="1" {rating_checked_1}>1</label>
+        <label class="rating-option"><input type="radio" name="rating_{rating_key}" value="2" {rating_checked_2}>2</label>
+        <label class="rating-option"><input type="radio" name="rating_{rating_key}" value="3" {rating_checked_3}>3</label>
+        <label class="rating-option"><input type="radio" name="rating_{rating_key}" value="4" {rating_checked_4}>4</label>
+        <label class="rating-option"><input type="radio" name="rating_{rating_key}" value="5" {rating_checked_5}>5</label>
+        <label class="rating-option"><input type="radio" name="rating_{rating_key}" value="never_seen" {never_seen_checked}>Never seen</label>
+      </div>
+    </fieldset>
+  </div>
+</article>

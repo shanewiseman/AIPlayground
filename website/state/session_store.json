@@ -1,8 +1,8 @@
 {
   "secret": "63381baecb657d2005e4cb742251e21690c5df63112150660d6abddaa183a884",
   "sessions": {
-    "ApK-qR7xWk1QnSKoogHjoH4OFCsPX6MbMIOwFEEfWyE": {
-      "created_at": 1772479706.8927805,
+    "oe5l72c1-EsLmllKTYpqumWtgT_c4HgXzaeNmzmiVaw": {
+      "created_at": 1772491958.878453,
       "plex_token": "Cs9htuTgHTjxqUks9not",
       "plex_username": "plex.wiseman",
       "plex_account_id": 6189978,
@@ -513,35 +513,45 @@
         ],
         "recurring_cinematographers": [],
         "viewer_profile_tags": [
-          "action_blockbusters",
-          "espionage_thrillers",
-          "sci-fi_and_cyber",
-          "dystopia_post-apoc",
-          "historical_biopics",
-          "revenge_theme",
-          "dark_horror_thrillers",
-          "auteur_director_interest",
-          "franchise_binger",
-          "classic_rock_listener"
+          "Action-Franchise-Fan",
+          "Prestige-Auteur-Interest",
+          "SciFi-Tech-Aficionado",
+          "Survival/Post-Apoc-Preference",
+          "Historical/War-Drama-Viewer",
+          "Horror/Thriller-Audience",
+          "Revenge-Driven-Narratives",
+          "Serialized-TV-Binger",
+          "Music/Concert-Film-Fan",
+          "Dark-Drama-and-Absurdist-Comedy",
+          "Directors:PeterJackson",
+          "Directors:ChristopherNolan",
+          "Directors:JamesCameron",
+          "Directors:BongJoonHo",
+          "Directors:PaulThomasAnderson",
+          "Actors:TomCruise",
+          "Actors:Timoth\u00e9eChalamet",
+          "Actors:RobertPattinson",
+          "Actors:LeonardoDiCaprio",
+          "Actors:KeanuReeves"
         ],
         "plot_context_observations": [
-          "Frequent high-stakes action/espionage and international thriller settings (Mission: Impossible entries, Jack Ryan, Jack Ryan adjacent titles).",
-          "Recurring science-fiction motifs: AI/cyberspace, colonization, time/technology-driven threats (Tron, Tron: Ares, Mickey 17, Dune, The Terminator, Interstellar).",
-          "Post-apocalyptic and dystopian survival narratives (Fallout, The Long Walk, 28 Days Later).",
-          "War, military history and courtroom/judicial reckonings (Band of Brothers, U-571, Nuremberg, The American Revolution, Chief of War).",
-          "Revenge and vigilante arcs appear repeatedly (Sisu: Road to Revenge, Monkey Man, One Battle After Another).",
-          "Ensemble workplace and institutional dramas with emotional stakes (The Pitt hospital drama, The Bear, Task, Blue Lights).",
-          "Horror/thriller interest spans contemporary psychological and supernatural (Hereditary, The Black Phone, Saw, The Toxic Avenger, Weapons).",
-          "Franchise and trilogy completions/box sets consumption (Lord of the Rings, Tron series, multiple Mission: Impossible films).",
-          "Music and concert/documentary listening/viewing leaning to classic rock/prog (Pink Floyd tracks and Pink Floyd: Animals).",
-          "Preference for director-driven or auteur projects alongside mainstream tentpoles (titles by Bong Joon Ho, Chlo\u00e9 Zhao, Paul Thomas Anderson, James Cameron, Christopher Nolan)."
+          "Revenge and vigilantism are recurring motives (Sisu: Road to Revenge; Monkey Man; Weapons; One Battle After Another).",
+          "Survival/post\u2011apocalyptic settings appear frequently (Fallout; The Last of Us; 28 Days Later; The Long Walk).",
+          "Espionage, spycraft and covert ops recur across TV and film (Mission: Impossible series; Tom Clancy's Jack Ryan; Slow Horses; Andor).",
+          "Digital/virtual worlds, AI and tech\u2011centric sci\u2011fi are common (Tron, Tron: Legacy, Tron: Ares; Interstellar; Mickey 17; Dune references).",
+          "Historical and wartime narratives are regularly consumed (Band of Brothers; Nuremberg; The American Revolution (2025); Chief of War; U\u2011571).",
+          "Family, grief and intimate drama show up in prestige/arthouse selections (Hamnet; If I had Legs I'd Kick You; Hereditary).",
+          "Horror and psychological thriller tones recur (Hereditary; The Black Phone; Saw; The Toxic Avenger; Weapons).",
+          "Several viewings are franchise or sequel\u2011driven (Mission: Impossible catalog, Lord of the Rings trilogy, Tron films, LOTR marathon).",
+          "Music and concert/album films are present (Pink Floyd: Animals; multiple Pink Floyd tracks played).",
+          "Mix of contemporary (many 2024\u20132025 releases) and classic cinema (Seven Samurai, Serpico, Titanic) indicating broad temporal tastes."
         ],
-        "executive_summary": "Recent viewing skews toward high-energy action/espionage franchises and contemporary science fiction (both big-budget and indie), with substantial interest in historical/biographical dramas and genre horror. The viewer also streams ensemble workplace/medical dramas and listens to classic rock/prog artists. Notable repeat affinities include Tom Cruise / Mission: Impossible entries, Peter Jackson / LOTR box set, and director-driven titles from auteurs (e.g., Christopher Nolan, James Cameron, Bong Joon Ho, Paul Thomas Anderson).",
+        "executive_summary": "Recent watching favors action-heavy franchise films and prestige auteur releases, with a strong secondary interest in sci\u2011fi, survival/post\u2011apocalypse stories, historical/war dramas, and psychological horror \u2014 supplemented by serialized TV drama binges and music/album films.",
         "source_gaps": [
-          "Cinematographer credits are absent across the provided history (no cinematographer entries present).",
-          "Many TV-series entries and multiple movies lack director/writer metadata in this export (e.g., The Pitt, Fallout, The Bear, Slow Horses, many others show empty director/writer fields).",
-          "Several history items have incomplete metadata (null or missing fields and artwork) \u2014 examples: Warfare, Beauty and the Beast (null credits/art), The Rehearsal (null summary/art).",
-          "Music track entries contain only titles/album info with minimal metadata (no performer/credits beyond track/album in many cases).",
+          "Cinematographer metadata is almost entirely absent across the history (nearly all items have empty 'cinematographers' arrays) \u2014 e.g., If I had Legs I'd Kick You; Hamnet; Mission: Impossible entries; many TV series.",
+          "Several TV entries and films lack credited directors/writers in the provided data (e.g., The Pitt, Fallout, Blue Lights, many recent series episodes).",
+          "Some items have missing basic metadata fields (null art/thumb or null summaries) \u2014 examples: The Rehearsal, Warfare, Beauty and the Beast entries show null or minimal metadata.",
+          "Music track entries (individual songs) lack year/credit details in the provided history (Santana, Pink Floyd, Rush tracks have empty credit fields).",
           "Cinematographer metadata was not present in the supplied Plex items."
         ],
         "watched_items": [
@@ -2172,10 +2182,10 @@
       },
       "recommendations": {
         "schema_version": "plex_recommendations.v1",
-        "generated_at": "2026-03-02T19:54:20.593325+00:00",
+        "generated_at": "2026-03-02T23:15:39.452157+00:00",
         "account_id": 6189978,
         "based_on_summary_version": "plex_viewing_summary.v1",
-        "executive_summary": "Based on a strong appetite for espionage thrillers, historical biopics, and crime dramas plus a taste for auteur-driven titles, these off-server picks broaden the palette with acclaimed, non-overlapping works that complement the viewer\u2019s Mission: Impossible and LOTR affinities while expanding into standout bio-pics, noir thrillers, and detective dramas.",
+        "executive_summary": "The user leans toward prestige cinema, historical/war dramas, espionage thrillers, and select horror. Off-server picks focus on underrepresented classics and craft-driven titles that echo those tastes while avoiding items already present in Plex's library_candidates.",
         "on_server_recommendations": [
           {
             "title": "Pulp Fiction",
@@ -2186,13 +2196,13 @@
             "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Pulp+Fiction+1994",
             "rotten_tomatoes_critic_score": 92,
             "rotten_tomatoes_audience_score": 96,
-            "why_it_matches": "Iconic crime drama with sharp dialogue and a standout ensemble cast; aligns with your preference for action/crime thrillers and director-driven classics.",
+            "why_it_matches": "Iconic nonlinear crime drama with sharp dialogue and ensemble cast; aligns with user's appetite for stylish genre cinema and prestige storytelling.",
             "supporting_signals": [
-              "iconic director",
-              "ensemble cast",
-              "crime/drama",
-              "non-linear storytelling",
-              "cult classic"
+              "Director: Quentin Tarantino",
+              "Genre: Crime/Drama",
+              "Nonlinear narrative",
+              "Cult classic",
+              "Memorable soundtrack"
             ]
           },
           {
@@ -2204,12 +2214,12 @@
             "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Django+Unchained+2012",
             "rotten_tomatoes_critic_score": 87,
             "rotten_tomatoes_audience_score": 92,
-            "why_it_matches": "Stylish Western with a revenge arc and strong performances; matches your taste for genre-blending action/historical thrillers.",
+            "why_it_matches": "Stylish genre filmmaking with historical and action elements; fits the user\u2019s taste for high-energy, character-driven cinema from acclaimed auteurs.",
             "supporting_signals": [
-              "western/revenge motif",
-              "ensemble cast",
-              "Tarantino",
-              "historical context"
+              "Director: Quentin Tarantino",
+              "Genre: Western/Crime",
+              "Vivid visual style",
+              "Strong ensemble cast"
             ]
           },
           {
@@ -2221,60 +2231,61 @@
             "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Back+to+the+Future+1985",
             "rotten_tomatoes_critic_score": 93,
             "rotten_tomatoes_audience_score": 95,
-            "why_it_matches": "Iconic time-travel adventure; pure fun and sci-fi nostalgia, fitting your love for franchise-era sci-fi with broad appeal.",
+            "why_it_matches": "Iconic sci\u2011fi adventure with broad appeal and time-travel themes; complements the user\u2019s interest in blockbuster, franchise-oriented cinema.",
             "supporting_signals": [
-              "time-travel",
-              "80s classic",
-              "franchise appeal"
+              "Genre: Sci\u2011Fi/Adventure",
+              "Time travel",
+              "1980s blockbuster",
+              "Quirky humor and memorable score"
             ]
           },
           {
-            "title": "The Godfather",
+            "title": "A Fistful of Dollars",
             "media_type": "movie",
-            "year": 1972,
-            "plex_rating_key": "20453",
+            "year": 1964,
+            "plex_rating_key": "39974",
             "library_section_title": "4K",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Godfather+1972",
-            "rotten_tomatoes_critic_score": 97,
-            "rotten_tomatoes_audience_score": 98,
-            "why_it_matches": "Legendary crime saga with rich characters and historic scope; aligns with interest in historical crime narratives and classic cinema.",
-            "supporting_signals": [
-              "mafia epic",
-              "ensemble cast",
-              "classic cinema",
-              "power dynamics"
-            ]
-          },
-          {
-            "title": "The Shawshank Redemption",
-            "media_type": "movie",
-            "year": 1994,
-            "plex_rating_key": "11407",
-            "library_section_title": "4K",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Shawshank+Redemption+1994",
-            "rotten_tomatoes_critic_score": 89,
-            "rotten_tomatoes_audience_score": 98,
-            "why_it_matches": "Powerful, character-driven drama about resilience and hope; a timeless favorite that complements a taste for strong storytelling.",
-            "supporting_signals": [
-              "prison drama",
-              "redemption arc",
-              "emotional stakes"
-            ]
-          },
-          {
-            "title": "Inception",
-            "media_type": "movie",
-            "year": 2010,
-            "plex_rating_key": "8834",
-            "library_section_title": "4K",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Inception+2010",
-            "rotten_tomatoes_critic_score": 87,
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=A+Fistful+of+Dollars+1964",
+            "rotten_tomatoes_critic_score": 98,
             "rotten_tomatoes_audience_score": 91,
-            "why_it_matches": "Mind-bending sci-fi thriller with layered storytelling; aligns with your director-driven tastes and love of blockbuster cinema.",
+            "why_it_matches": "Spaghetti Western staple with lean storytelling and brisk action; aligns with the user\u2019s interest in genre history and action epics.",
             "supporting_signals": [
-              "mind-bending premise",
-              "dream heist",
-              "Nolan"
+              "Genre: Western",
+              "Spaghetti Western",
+              "Iconic duels",
+              "Minimalist dialogue"
+            ]
+          },
+          {
+            "title": "Ben-Hur",
+            "media_type": "movie",
+            "year": 1959,
+            "plex_rating_key": "39954",
+            "library_section_title": "4K",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Ben-Hur+1959",
+            "rotten_tomatoes_critic_score": 88,
+            "rotten_tomatoes_audience_score": 89,
+            "why_it_matches": "Historical epic with grand scale; matches the user\u2019s taste for historical/war drama and cinematic milestones.",
+            "supporting_signals": [
+              "Genre: Historical/War",
+              "Epic scope",
+              "Classic cinema symbolism"
+            ]
+          },
+          {
+            "title": "Matilda",
+            "media_type": "movie",
+            "year": 1996,
+            "plex_rating_key": "39927",
+            "library_section_title": "4K",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Matilda+1996",
+            "rotten_tomatoes_critic_score": 92,
+            "rotten_tomatoes_audience_score": 73,
+            "why_it_matches": "Family-friendly comedy with clever humor; adds variety to a lineup dominated by action/franchise titles.",
+            "supporting_signals": [
+              "Genre: Family/Comedy",
+              "Adaptation",
+              "Whimsical tone"
             ]
           },
           {
@@ -2286,174 +2297,160 @@
             "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Arcane+2021",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null,
-            "why_it_matches": "Acclaimed animated series with rich world-building and deep character arcs; suits a taste for high-concept fantasy and serialized storytelling.",
+            "why_it_matches": "Rich world-building and serialized fantasy storytelling; aligns with the user's interest in high\u2011quality TV drama and fantasy narratives.",
             "supporting_signals": [
-              "animated series",
-              "world-building",
-              "fantasy/sci-fi"
+              "Animation/Genre Fantasy",
+              "Serialized TV",
+              "Character-driven arcs"
             ]
           },
           {
-            "title": "Narcos",
+            "title": "Westworld",
             "media_type": "show",
-            "year": 2015,
-            "plex_rating_key": "34655",
+            "year": 2016,
+            "plex_rating_key": "35552",
             "library_section_title": "TV Shows",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Narcos+2015",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Westworld+2016",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null,
-            "why_it_matches": "Gripping crime drama about cartel history; resonates with espionage/thriller tastes and real-world crime narratives.",
+            "why_it_matches": "Sci\u2011fi/psychological thriller with high-concept narratives and prestige TV pedigree; complements the sci\u2011fi and auteur-focused viewing taste.",
             "supporting_signals": [
-              "biographical crime",
-              "serial arc",
-              "global setting"
+              "Genre: Sci\u2011Fi/Thriller",
+              "Complex narratives",
+              "Prestige TV"
             ]
           }
         ],
         "off_server_recommendations": [
           {
-            "title": "Argo",
+            "title": "The Seventh Seal",
             "media_type": "movie",
-            "year": 2012,
-            "why_it_matches": "Espionage thriller with political history aligns with the viewer\u2019s spy/thriller motif and real-world tension vibe.",
+            "year": 1957,
+            "why_it_matches": "Prestige auteur drama with existential/moral themes; fits historical/arthouse sensibility.",
             "supporting_signals": [
-              "historical espionage context",
-              "award-winning director/wlicks (Ben Affleck)",
-              "tightly plotted thriller with high-stakes political stakes"
+              "Director: Ingmar Bergman",
+              "Medieval plague-era setting",
+              "Philosophical tone",
+              "Cinema landmark (1957)"
             ],
-            "lookup_hint": "Argo 2012 espionage thriller",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Argo+2012",
+            "lookup_hint": "The_Seventh_Seal_Bergman_1957",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Seventh+Seal+1957",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null
           },
           {
-            "title": "The Imitation Game",
+            "title": "Paths of Glory",
             "media_type": "movie",
-            "year": 2014,
-            "why_it_matches": "World War II codebreaking biopic complements the viewer\u2019s interest in historical biopics and high-intensity problem-solving narratives.",
+            "year": 1957,
+            "why_it_matches": "WWI war drama with anti-war subtext; aligns with Historical/War-Drama and prestige storytelling.",
             "supporting_signals": [
-              "biopic",
-              "codes/cryptography theme",
-              "director Morten Tyldum; star Benedict Cumberbatch"
+              "Director: Stanley Kubrick",
+              "Anti-war wartime courtroom/field dynamics",
+              "Classic Kubrick craftsmanship"
             ],
-            "lookup_hint": "The Imitation Game 2014 biopic",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Imitation+Game+2014",
+            "lookup_hint": "Paths_of_Glory_Kubrick_1957",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Paths+of+Glory+1957",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null
           },
           {
-            "title": "Mystic River",
+            "title": "The Exorcist",
             "media_type": "movie",
-            "year": 2003,
-            "why_it_matches": "Crime drama with revenge and tortured pasts; fits the viewer\u2019s dark, character-driven thrillers.",
+            "year": 1973,
+            "why_it_matches": "Iconic horror/thriller with lasting influence; aligns with Horror/Thriller-Audience.",
             "supporting_signals": [
-              "revenge/drama tone",
-              "ensemble cast",
-              "crime investigation under emotional strain"
+              "Director: William Friedkin",
+              "Religious/occult horror, procedural tension",
+              "Iconic cinematic milestone"
             ],
-            "lookup_hint": "Mystic River 2003 crime drama",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Mystic+River+2003",
+            "lookup_hint": "The_Exorcist_Friedkin_1973",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Exorcist+1973",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null
           },
           {
-            "title": "LA Confidential",
+            "title": "The Manchurian Candidate",
             "media_type": "movie",
-            "year": 1997,
-            "why_it_matches": "Stylish noir crime saga with intricate plotting and a moody detective milieu, echoing classic crime thrillers in the watch history.",
+            "year": 1962,
+            "why_it_matches": "Cold War espionage thriller; strong fit for espionage and mind-control narratives.",
             "supporting_signals": [
-              "noir sensibility",
-              "crime investigation ensemble",
-              "award-caliber writing/directing"
+              "Director: John Frankenheimer",
+              "Cold War paranoia",
+              "Psychological/spy suspense"
             ],
-            "lookup_hint": "LA Confidential 1997 noir crime",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=LA+Confidential+1997",
+            "lookup_hint": "The_Manchurian_Candidate_Frankenheimer_1962",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Manchurian+Candidate+1962",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null
           },
           {
-            "title": "The Insider",
+            "title": "The Witch",
             "media_type": "movie",
-            "year": 1999,
-            "why_it_matches": "Investigative journalism thriller that mirrors real-world power plays and ethical tension familiar to espionage-minded viewers.",
+            "year": 2015,
+            "why_it_matches": "Period folk horror with restrained dread; complements Horror/Thriller-Audience and prestige sensibility.",
             "supporting_signals": [
-              "corporate/power intrigue",
-              "high-tension courtroom/boardroom drama",
-              "strong, grounded performances"
+              "Director: Robert Eggers",
+              "Period piece, atmospheric dread",
+              "Critical acclaim in horror/arthouse space"
             ],
-            "lookup_hint": "The Insider 1999 investigative thriller",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Insider+1999",
+            "lookup_hint": "The_Witch_Eggers_2015",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Witch+2015",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null
           },
           {
-            "title": "The Aviator",
+            "title": "The Day of the Jackal",
             "media_type": "movie",
-            "year": 2004,
-            "why_it_matches": "BIOPIC of aviation pioneer and media magnate; fits auteur-driven biopics and historical settings the viewer enjoys.",
+            "year": 1973,
+            "why_it_matches": "Espionage thriller with procedural precision; classic Cold War spy craft.",
             "supporting_signals": [
-              "Martin Scorsese direction",
-              "biographical epic",
-              "glossy production with historical detail"
+              "Director: Fred Zinnemann",
+              "Covert operations, assassin thriller",
+              "Tense, methodical plotting"
             ],
-            "lookup_hint": "The Aviator 2004 biopic",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Aviator+2004",
+            "lookup_hint": "The_Day_of_the_Jackal_Zinnemann_1973",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Day+of+the+Jackal+1973",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null
           },
           {
-            "title": "The English Patient",
+            "title": "Three Days of the Condor",
             "media_type": "movie",
-            "year": 1996,
-            "why_it_matches": "Epic historical romance with sweeping scope and period detail, broadening the historical biopic angle the viewer already appreciates.",
+            "year": 1975,
+            "why_it_matches": "Espionage thriller with paranoia and political intrigue; fits espionage and historical thriller tastes.",
             "supporting_signals": [
-              "epic narrative",
-              "historical setting",
-              "strong adaptation credentials"
+              "Director: Sydney Pollack",
+              "Cold War-era corporate/espionage tension",
+              "Sharp, grounded thriller"
             ],
-            "lookup_hint": "The English Patient 1996 history drama",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+English+Patient+1996",
+            "lookup_hint": "Three_Days_of_the_Condor_Pollack_1975",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=Three+Days+of+the+Condor+1975",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null
           },
           {
-            "title": "The Night Manager",
-            "media_type": "show",
-            "year": 2016,
-            "why_it_matches": "Prime-age espionage thriller show that complements the franchise/spy motif while offering a TV-series format in the same lane as Jack Ryan-esque content.",
+            "title": "The Wages of Fear",
+            "media_type": "movie",
+            "year": 1953,
+            "why_it_matches": "Survival/road thriller with high-stakes tension; aligns with survival/post-apocalypse sensibilities.",
             "supporting_signals": [
-              "spy thriller",
-              "limited series",
-              "high-gloss production value"
+              "Director: Henri-Georges Clouzot",
+              "Nerve-wracking journey under pressure",
+              "Classical international suspense"
             ],
-            "lookup_hint": "The Night Manager 2016 spy miniseries",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Night+Manager+2016",
-            "rotten_tomatoes_critic_score": null,
-            "rotten_tomatoes_audience_score": null
-          },
-          {
-            "title": "The Americans",
-            "media_type": "show",
-            "year": 2013,
-            "why_it_matches": "Cold War espionage drama with intricate plotting and character-driven tension, aligning with the viewer\u2019s preference for espionage thrillers and ensemble casts.",
-            "supporting_signals": [
-              "period espionage",
-              "covert operations",
-              "rich character arcs"
-            ],
-            "lookup_hint": "The Americans 2013 espionage series",
-            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Americans+2013",
+            "lookup_hint": "The_Wages_of_Fear_Clouzot_1953",
+            "rotten_tomatoes_url": "https://www.rottentomatoes.com/search?search=The+Wages+of+Fear+1953",
             "rotten_tomatoes_critic_score": null,
             "rotten_tomatoes_audience_score": null
           }
         ],
         "source_gaps": [
-          "Cinematographer credits are absent across the provided history (no cinematographer entries present).",
-          "Many TV-series entries and multiple movies lack director/writer metadata in this export (e.g., The Pitt, Fallout, The Bear, Slow Horses, many others show empty director/writer fields).",
-          "Several history items have incomplete metadata (null or missing fields and artwork) \u001914 examples: Warfare, Beauty and the Beast (null credits/art), The Rehearsal (null summary/art).",
-          "Music track entries contain only titles/album info with minimal metadata (no performer/credits beyond track/album in many cases).",
+          "Cinematographer metadata is almost entirely absent across the history (nearly all items have empty 'cinematographers' arrays) \u2014 e.g., If I had Legs I'd Kick You; Hamnet; Mission: Impossible entries; many TV series.",
+          "Several TV entries and films lack credited directors/writers in the provided data (e.g., The Pitt, Fallout, Blue Lights, many recent series episodes).",
+          "Some items have missing basic metadata fields (null art/thumb or null summaries) \u2014 examples: The Rehearsal, Warfare, Beauty and the Beast entries show null or minimal metadata.",
+          "Music track entries (individual songs) lack year/credit details in the provided history (Santana, Pink Floyd, Rush tracks have empty credit fields).",
           "Cinematographer metadata was not present in the supplied Plex items.",
-          "Several history items have incomplete metadata (null or missing fields and artwork) \u2013 examples: Warfare, Beauty and the Beast (null credits/art), The Rehearsal (null summary/art).",
+          "Cinematographer metadata is almost entirely absent across the history (nearly all items have empty 'cinematographers' arrays) \u2014 e.g., If I had Legs Id Kick You; Hamnet; Mission: Impossible entries; many TV series.",
           "Recommendation pass considered 1294 Plex library candidates after filtering recently watched items.",
           "Some on-server titles were excluded because they were already in recent viewing history."
         ]

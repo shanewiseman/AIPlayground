@@ -20,6 +20,7 @@ class AppConfig:
     pms_base_url: str
     session_secret: str | None
     session_store_path: str
+    movie_likeness_store_path: str
     pin_poll_attempts: int
     pin_poll_interval_seconds: float
     history_item_limit: int
@@ -31,7 +32,10 @@ class AppConfig:
         port = int(os.environ.get("PORT", "8000"))
         base_url = os.environ.get("APP_BASE_URL", f"http://{host}:{port}").rstrip("/")
         default_session_store_path = (
-            Path(__file__).resolve().parent / "session_store.json"
+            Path(__file__).resolve().parent / "state" / "session_store.json"
+        )
+        default_movie_likeness_store_path = (
+            Path(__file__).resolve().parent / "state" / "movie_likeness_store.json"
         )
         return cls(
             host=host,
@@ -50,6 +54,9 @@ class AppConfig:
             session_secret=os.environ.get("SESSION_SECRET"),
             session_store_path=os.environ.get(
                 "SESSION_STORE_PATH", str(default_session_store_path)
+            ),
+            movie_likeness_store_path=os.environ.get(
+                "MOVIE_LIKENESS_STORE_PATH", str(default_movie_likeness_store_path)
             ),
             pin_poll_attempts=int(os.environ.get("PLEX_PIN_POLL_ATTEMPTS", "12")),
             pin_poll_interval_seconds=float(

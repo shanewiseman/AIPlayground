@@ -87,18 +87,18 @@ class PlexRecommendationService:
             Path(__file__).resolve().parent.parent / "openai-agents-python" / "src"
         )
         self._library_candidates_dump_path = (
-            Path(__file__).resolve().parent / "library_candidates_submission.json"
+            Path(__file__).resolve().parent / "debug_output" / "recommendation_candidates_submission.json"
         )
         self._token_estimate_dump_path = (
-            Path(__file__).resolve().parent / "recommendation_token_estimate.json"
+            Path(__file__).resolve().parent / "debug_output" / "recommendation_token_estimate.json"
         )
-        prompt_dump_dir = Path(__file__).resolve().parent
+        prompt_dump_dir = Path(__file__).resolve().parent / "debug_output"
         self._prompt_dump_paths = {
             "on_server": prompt_dump_dir / "recommendation_on_server_prompt_submission.json",
             "off_server": prompt_dump_dir / "recommendation_off_server_prompt_submission.json",
         }
         self._final_output_dump_path = (
-            Path(__file__).resolve().parent / "recommendation_final_output.json"
+            Path(__file__).resolve().parent / "debug_output" / "recommendation_final_output.json"
         )
 
     def recommend(

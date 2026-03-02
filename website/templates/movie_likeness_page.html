@@ -1,0 +1,26 @@
+<span class="status ok">Movie likeness</span>
+<h1>Rate On-Server Movies</h1>
+<p class="lede">Each visit pulls up to 5 random unrated movies from your Plex library. Use the 1-5 scale to store a likeness score, or choose Never seen to skip scoring without removing the movie from future batches.</p>
+<div class="actions">
+  <a class="button secondary" href="/recommendations" data-loading="1">Back to recommendations</a>
+  <a class="button secondary" href="/movie-likeness?refresh=1" data-loading="1">Refresh movie set</a>
+  <a class="button secondary" href="/login">Back to login</a>
+</div>
+<div class="panel">
+  <h2>Current batch</h2>
+  <p><strong>Movies shown:</strong> {movie_count}</p>
+  <p><strong>Stored likeness scores:</strong> {rated_count}</p>
+  <p><strong>Batch sampled at:</strong> {generated_at}</p>
+  {save_status}
+</div>
+<div class="panel">
+  <h2>Likeness input</h2>
+  <form class="rating-form" method="post" action="/movie-likeness" data-loading="1">
+    <div class="history-grid">
+      {movie_likeness_markup}
+    </div>
+    <div class="actions">
+      <button class="button" type="submit">Save likeness ratings</button>
+    </div>
+  </form>
+</div>

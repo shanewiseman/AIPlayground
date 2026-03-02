@@ -5,9 +5,9 @@
     "notes": null,
     "input_tokens": {
       "instructions": 105,
-      "prompt": 18293,
+      "prompt": 18392,
       "output_schema": 467,
-      "total": 18865
+      "total": 18964
     }
   },
   "off_server": {
@@ -16,9 +16,9 @@
     "notes": null,
     "input_tokens": {
       "instructions": 108,
-      "prompt": 19261,
+      "prompt": 19360,
       "output_schema": 564,
-      "total": 19933
+      "total": 20032
     }
   }
 }

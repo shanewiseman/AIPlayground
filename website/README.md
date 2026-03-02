@@ -13,6 +13,7 @@ Plex's hosted login flow and captures the resulting Plex token for later
 - `plex_pms.py`: Plex Media Server history, metadata, and artwork calls.
 - `plex_history_summary.py`: `openai-agents-python` integration for structured viewing summaries.
 - `plex_recommendations.py`: `openai-agents-python` integration for structured recommendation objects.
+- `plex_movie_likeness_store.py`: File-backed store for movie likeness batches and ratings, separate from the signed session payload.
 - `plex_api.py`: Shared Plex HTTP request helpers and error handling.
 - `plex_config.py`: Environment-driven configuration.
 - `plex_session.py`: Signed session store persisted to a JSON file on disk.
@@ -45,6 +46,7 @@ Then open `http://127.0.0.1:8000`.
 - `OPENAI_AGENT_MODEL`: Optional model override for the summary agent. Defaults to `gpt-5-mini`.
 - `SESSION_SECRET`: Optional. If unset, a stable secret is generated and stored in the session store file so cookies continue working across restarts.
 - `SESSION_STORE_PATH`: Path to the JSON file used to persist sessions across restarts. Defaults to `website/session_store.json`.
+- `MOVIE_LIKENESS_STORE_PATH`: Path to the JSON file used to persist movie likeness batches and ratings. Defaults to `website/movie_likeness_store.json`.
 
 ## Flow
 

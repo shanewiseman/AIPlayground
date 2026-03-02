@@ -1,0 +1,205 @@
+{
+  "executive_summary": "The user leans toward prestige cinema, historical/war dramas, espionage thrillers, and select horror. Off-server picks focus on underrepresented classics and craft-driven titles that echo those tastes while avoiding items already present in Plex's library_candidates.",
+  "on_server_recommendations": [
+    {
+      "title": "Pulp Fiction",
+      "media_type": "movie",
+      "year": 1994,
+      "why_it_matches": "Iconic nonlinear crime drama with sharp dialogue and ensemble cast; aligns with user's appetite for stylish genre cinema and prestige storytelling.",
+      "supporting_signals": [
+        "Director: Quentin Tarantino",
+        "Genre: Crime/Drama",
+        "Nonlinear narrative",
+        "Cult classic",
+        "Memorable soundtrack"
+      ]
+    },
+    {
+      "title": "Django Unchained",
+      "media_type": "movie",
+      "year": 2012,
+      "why_it_matches": "Stylish genre filmmaking with historical and action elements; fits the user’s taste for high-energy, character-driven cinema from acclaimed auteurs.",
+      "supporting_signals": [
+        "Director: Quentin Tarantino",
+        "Genre: Western/Crime",
+        "Vivid visual style",
+        "Strong ensemble cast"
+      ]
+    },
+    {
+      "title": "Back to the Future",
+      "media_type": "movie",
+      "year": 1985,
+      "why_it_matches": "Iconic sci‑fi adventure with broad appeal and time-travel themes; complements the user’s interest in blockbuster, franchise-oriented cinema.",
+      "supporting_signals": [
+        "Genre: Sci‑Fi/Adventure",
+        "Time travel",
+        "1980s blockbuster",
+        "Quirky humor and memorable score"
+      ]
+    },
+    {
+      "title": "A Fistful of Dollars",
+      "media_type": "movie",
+      "year": 1964,
+      "why_it_matches": "Spaghetti Western staple with lean storytelling and brisk action; aligns with the user’s interest in genre history and action epics.",
+      "supporting_signals": [
+        "Genre: Western",
+        "Spaghetti Western",
+        "Iconic duels",
+        "Minimalist dialogue"
+      ]
+    },
+    {
+      "title": "Ben-Hur",
+      "media_type": "movie",
+      "year": 1959,
+      "why_it_matches": "Historical epic with grand scale; matches the user’s taste for historical/war drama and cinematic milestones.",
+      "supporting_signals": [
+        "Genre: Historical/War",
+        "Epic scope",
+        "Classic cinema symbolism"
+      ]
+    },
+    {
+      "title": "Matilda",
+      "media_type": "movie",
+      "year": 1996,
+      "why_it_matches": "Family-friendly comedy with clever humor; adds variety to a lineup dominated by action/franchise titles.",
+      "supporting_signals": [
+        "Genre: Family/Comedy",
+        "Adaptation",
+        "Whimsical tone"
+      ]
+    },
+    {
+      "title": "Arcane",
+      "media_type": "show",
+      "year": 2021,
+      "why_it_matches": "Rich world-building and serialized fantasy storytelling; aligns with the user's interest in high‑quality TV drama and fantasy narratives.",
+      "supporting_signals": [
+        "Animation/Genre Fantasy",
+        "Serialized TV",
+        "Character-driven arcs"
+      ]
+    },
+    {
+      "title": "Westworld",
+      "media_type": "show",
+      "year": 2016,
+      "why_it_matches": "Sci‑fi/psychological thriller with high-concept narratives and prestige TV pedigree; complements the sci‑fi and auteur-focused viewing taste.",
+      "supporting_signals": [
+        "Genre: Sci‑Fi/Thriller",
+        "Complex narratives",
+        "Prestige TV"
+      ]
+    }
+  ],
+  "off_server_recommendations": [
+    {
+      "title": "The Seventh Seal",
+      "media_type": "movie",
+      "year": 1957,
+      "why_it_matches": "Prestige auteur drama with existential/moral themes; fits historical/arthouse sensibility.",
+      "supporting_signals": [
+        "Director: Ingmar Bergman",
+        "Medieval plague-era setting",
+        "Philosophical tone",
+        "Cinema landmark (1957)"
+      ],
+      "lookup_hint": "The_Seventh_Seal_Bergman_1957"
+    },
+    {
+      "title": "Paths of Glory",
+      "media_type": "movie",
+      "year": 1957,
+      "why_it_matches": "WWI war drama with anti-war subtext; aligns with Historical/War-Drama and prestige storytelling.",
+      "supporting_signals": [
+        "Director: Stanley Kubrick",
+        "Anti-war wartime courtroom/field dynamics",
+        "Classic Kubrick craftsmanship"
+      ],
+      "lookup_hint": "Paths_of_Glory_Kubrick_1957"
+    },
+    {
+      "title": "The Exorcist",
+      "media_type": "movie",
+      "year": 1973,
+      "why_it_matches": "Iconic horror/thriller with lasting influence; aligns with Horror/Thriller-Audience.",
+      "supporting_signals": [
+        "Director: William Friedkin",
+        "Religious/occult horror, procedural tension",
+        "Iconic cinematic milestone"
+      ],
+      "lookup_hint": "The_Exorcist_Friedkin_1973"
+    },
+    {
+      "title": "The Manchurian Candidate",
+      "media_type": "movie",
+      "year": 1962,
+      "why_it_matches": "Cold War espionage thriller; strong fit for espionage and mind-control narratives.",
+      "supporting_signals": [
+        "Director: John Frankenheimer",
+        "Cold War paranoia",
+        "Psychological/spy suspense"
+      ],
+      "lookup_hint": "The_Manchurian_Candidate_Frankenheimer_1962"
+    },
+    {
+      "title": "The Witch",
+      "media_type": "movie",
+      "year": 2015,
+      "why_it_matches": "Period folk horror with restrained dread; complements Horror/Thriller-Audience and prestige sensibility.",
+      "supporting_signals": [
+        "Director: Robert Eggers",
+        "Period piece, atmospheric dread",
+        "Critical acclaim in horror/arthouse space"
+      ],
+      "lookup_hint": "The_Witch_Eggers_2015"
+    },
+    {
+      "title": "The Day of the Jackal",
+      "media_type": "movie",
+      "year": 1973,
+      "why_it_matches": "Espionage thriller with procedural precision; classic Cold War spy craft.",
+      "supporting_signals": [
+        "Director: Fred Zinnemann",
+        "Covert operations, assassin thriller",
+        "Tense, methodical plotting"
+      ],
+      "lookup_hint": "The_Day_of_the_Jackal_Zinnemann_1973"
+    },
+    {
+      "title": "Three Days of the Condor",
+      "media_type": "movie",
+      "year": 1975,
+      "why_it_matches": "Espionage thriller with paranoia and political intrigue; fits espionage and historical thriller tastes.",
+      "supporting_signals": [
+        "Director: Sydney Pollack",
+        "Cold War-era corporate/espionage tension",
+        "Sharp, grounded thriller"
+      ],
+      "lookup_hint": "Three_Days_of_the_Condor_Pollack_1975"
+    },
+    {
+      "title": "The Wages of Fear",
+      "media_type": "movie",
+      "year": 1953,
+      "why_it_matches": "Survival/road thriller with high-stakes tension; aligns with survival/post-apocalypse sensibilities.",
+      "supporting_signals": [
+        "Director: Henri-Georges Clouzot",
+        "Nerve-wracking journey under pressure",
+        "Classical international suspense"
+      ],
+      "lookup_hint": "The_Wages_of_Fear_Clouzot_1953"
+    }
+  ],
+  "source_gaps": [
+    "Cinematographer metadata is almost entirely absent across the history (nearly all items have empty 'cinematographers' arrays) — e.g., If I had Legs I'd Kick You; Hamnet; Mission: Impossible entries; many TV series.",
+    "Several TV entries and films lack credited directors/writers in the provided data (e.g., The Pitt, Fallout, Blue Lights, many recent series episodes).",
+    "Some items have missing basic metadata fields (null art/thumb or null summaries) — examples: The Rehearsal, Warfare, Beauty and the Beast entries show null or minimal metadata.",
+    "Music track entries (individual songs) lack year/credit details in the provided history (Santana, Pink Floyd, Rush tracks have empty credit fields).",
+    "Cinematographer metadata was not present in the supplied Plex items.",
+    "Cinematographer metadata is almost entirely absent across the history (nearly all items have empty 'cinematographers' arrays) — e.g., If I had Legs Id Kick You; Hamnet; Mission: Impossible entries; many TV series."
+  ]
+}

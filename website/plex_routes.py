@@ -17,10 +17,18 @@ from urllib.parse import parse_qs, quote, urlparse
 try:
     from .plex_api import PlexApiError
     from .plex_history_summary import ViewingSummaryError
+    from .plex_movie_likeness import (
+        render_movie_likeness_page,
+        save_movie_likeness_ratings,
+    )
     from .plex_recommendations import RecommendationError
 except ImportError:
     from plex_api import PlexApiError
     from plex_history_summary import ViewingSummaryError
+    from plex_movie_likeness import (
+        render_movie_likeness_page,
+        save_movie_likeness_ratings,
+    )
     from plex_recommendations import RecommendationError
 
 
@@ -120,6 +128,15 @@ def render_page(title: str, body: str) -> bytes:
       border-radius: 18px;
       background: rgba(255, 255, 255, 0.72);
     }}
+    .notice {{
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      border: 1px solid #bdd8cb;
+      border-radius: 14px;
+      background: #e8f5ef;
+      color: #235a49;
+      font-weight: 700;
+    }}
     .history-grid {{
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -156,6 +173,34 @@ def render_page(title: str, body: str) -> bytes:
     .history-subtitle {{
       margin: 0 0 8px;
       color: var(--muted);
+    }}
+    .rating-form {{
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }}
+    .rating-scale {{
+      margin: 14px 0 0;
+      padding: 0;
+      border: 0;
+    }}
+    .rating-scale legend {{
+      margin-bottom: 10px;
+      font-weight: 700;
+    }}
+    .rating-options {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }}
+    .rating-option {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
     }}
     pre {{
       margin: 0;
@@ -257,6 +302,12 @@ def render_page(title: str, body: str) -> bytes:
           showLoading();
         }});
       }});
+      document.querySelectorAll("form[data-loading='1']").forEach((form) => {{
+        form.addEventListener("submit", (event) => {{
+          if (event.defaultPrevented) return;
+          showLoading();
+        }});
+      }});
     }})();
   </script>
 </body>
@@ -276,6 +327,7 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         self.app.sessions.cleanup()
+        self.app.movie_likeness_store.cleanup()
         parsed = urlparse(self.path)
         routes = {
             "/": self.handle_home,
@@ -287,8 +339,47 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
             "/history": self.handle_history_page,
             "/summary": self.handle_summary_page,
             "/recommendations": self.handle_recommendations_page,
+            "/movie-likeness": self.handle_movie_likeness_page,
             "/artwork": self.handle_artwork,
             "/token.json": self.handle_token_json,
+        }
+        handler = routes.get(parsed.path)
+        if handler is None:
+            self.respond_html(
+                HTTPStatus.NOT_FOUND,
+                "Not found",
+                self.render_body("not_found"),
+            )
+            return
+        try:
+            handler(parsed)
+        except PlexApiError as exc:
+            self.respond_html(
+                HTTPStatus.BAD_GATEWAY,
+                "Plex error",
+                self.render_body("plex_error", error_message=html.escape(str(exc))),
+            )
+        except ViewingSummaryError as exc:
+            self.respond_html(
+                HTTPStatus.BAD_GATEWAY,
+                "Summary error",
+                self.render_body("summary_error", error_message=html.escape(str(exc))),
+            )
+        except RecommendationError as exc:
+            self.respond_html(
+                HTTPStatus.BAD_GATEWAY,
+                "Recommendation error",
+                self.render_body(
+                    "recommendations_error", error_message=html.escape(str(exc))
+                ),
+            )
+
+    def do_POST(self) -> None:
+        self.app.sessions.cleanup()
+        self.app.movie_likeness_store.cleanup()
+        parsed = urlparse(self.path)
+        routes = {
+            "/movie-likeness": self.handle_movie_likeness_submit,
         }
         handler = routes.get(parsed.path)
         if handler is None:
@@ -399,6 +490,7 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
         session.pop("pin_code", None)
         session.pop("history_summary", None)
         session.pop("recommendations", None)
+        self.app.movie_likeness_store.delete(session_id)
         self.respond_redirect("/login", session_id)
 
     def handle_logout(self, parsed: Any) -> None:
@@ -410,6 +502,7 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
         session.pop("recommendations", None)
         session.pop("pin_id", None)
         session.pop("pin_code", None)
+        self.app.movie_likeness_store.delete(session_id)
         self.respond_redirect("/", session_id)
 
     def handle_account_page(self, parsed: Any) -> None:
@@ -525,6 +618,58 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
         )
         self.respond_html(HTTPStatus.OK, "Viewing Summary", body)
 
+    def handle_movie_likeness_page(self, parsed: Any) -> None:
+        session_id, session = self.get_or_create_session()
+        token = session.get("plex_token")
+        account_id = session.get("plex_account_id")
+        if not token or not account_id:
+            self.respond_html(
+                HTTPStatus.UNAUTHORIZED,
+                "Login required",
+                self.render_body("login_required_recommendations"),
+            )
+            return
+
+        query = parse_qs(parsed.query)
+        refresh = query.get("refresh", ["0"])[0] == "1"
+        saved = query.get("saved", ["0"])[0] == "1"
+        body = render_movie_likeness_page(
+            session_id=session_id,
+            token=token,
+            account_id=int(account_id),
+            refresh=refresh,
+            saved=saved,
+            movie_likeness_store=self.app.movie_likeness_store,
+            plex_pms=self.app.plex_pms,
+            library_candidate_limit=self.app.config.library_candidate_limit,
+            render_body=self.render_body,
+        )
+        self.respond_html(HTTPStatus.OK, "Movie Likeness", body)
+
+    def handle_movie_likeness_submit(self, parsed: Any) -> None:
+        session_id, session = self.get_or_create_session()
+        token = session.get("plex_token")
+        account_id = session.get("plex_account_id")
+        if not token or not account_id:
+            self.respond_html(
+                HTTPStatus.UNAUTHORIZED,
+                "Login required",
+                self.render_body("login_required_recommendations"),
+            )
+            return
+
+        form = self._parse_form_body()
+        save_movie_likeness_ratings(
+            session_id=session_id,
+            token=token,
+            account_id=int(account_id),
+            form=form,
+            movie_likeness_store=self.app.movie_likeness_store,
+            plex_pms=self.app.plex_pms,
+            library_candidate_limit=self.app.config.library_candidate_limit,
+        )
+        self.respond_redirect("/movie-likeness?saved=1", session_id)
+
     def handle_recommendations_page(self, parsed: Any) -> None:
         """
         Handle the recommendations page request by retrieving and displaying personalized recommendations.
@@ -570,28 +715,9 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
 
         query = parse_qs(parsed.query)
         refresh = query.get("refresh", ["0"])[0] == "1"
-        summary_object = session.get("history_summary")
-        if refresh or not isinstance(summary_object, dict):
-            history_items = self.app.plex_pms.get_enriched_history(
-                token, int(account_id), self.app.config.history_item_limit
-            )
-            summary_object = self.app.history_summary_service.summarize(
-                account_id=int(account_id),
-                history_items=history_items,
-            )
-            session["history_summary"] = summary_object
-
-        recommendation_object = session.get("recommendations")
-        if refresh or not isinstance(recommendation_object, dict):
-            library_candidates = self.app.plex_pms.get_library_candidates(
-                token, int(account_id), self.app.config.library_candidate_limit
-            )
-            recommendation_object = self.app.recommendation_service.recommend(
-                account_id=int(account_id),
-                viewing_summary=summary_object,
-                library_candidates=library_candidates,
-            )
-            session["recommendations"] = recommendation_object
+        recommendation_object = self._ensure_recommendation_object(
+            session, token, int(account_id), refresh=refresh
+        )
         recommendation_retrieval_duration = self._format_elapsed_duration(
             time.perf_counter() - request_started_at
         )
@@ -621,6 +747,38 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
             recommendation_json=recommendation_json,
         )
         self.respond_html(HTTPStatus.OK, "Recommendations", body)
+
+    def _ensure_recommendation_object(
+        self,
+        session: dict[str, Any],
+        token: str,
+        account_id: int,
+        *,
+        refresh: bool,
+    ) -> dict[str, Any]:
+        summary_object = session.get("history_summary")
+        if refresh or not isinstance(summary_object, dict):
+            history_items = self.app.plex_pms.get_enriched_history(
+                token, account_id, self.app.config.history_item_limit
+            )
+            summary_object = self.app.history_summary_service.summarize(
+                account_id=account_id,
+                history_items=history_items,
+            )
+            session["history_summary"] = summary_object
+
+        recommendation_object = session.get("recommendations")
+        if refresh or not isinstance(recommendation_object, dict):
+            library_candidates = self.app.plex_pms.get_library_candidates(
+                token, account_id, self.app.config.library_candidate_limit
+            )
+            recommendation_object = self.app.recommendation_service.recommend(
+                account_id=account_id,
+                viewing_summary=summary_object,
+                library_candidates=library_candidates,
+            )
+            session["recommendations"] = recommendation_object
+        return recommendation_object
 
     def _render_recommendation_group(
         self, items: Any, *, include_plex_fields: bool
@@ -686,6 +844,17 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
         minutes = int(seconds // 60)
         remaining_seconds = seconds - (minutes * 60)
         return f"{minutes}m {remaining_seconds:.1f}s"
+
+    def _parse_form_body(self) -> dict[str, list[str]]:
+        content_length = 0
+        content_length_header = self.headers.get("Content-Length")
+        if content_length_header:
+            try:
+                content_length = max(0, int(content_length_header))
+            except ValueError:
+                content_length = 0
+        body = self.rfile.read(content_length) if content_length else b""
+        return parse_qs(body.decode("utf-8"), keep_blank_values=True)
 
     def handle_artwork(self, parsed: Any) -> None:
         _, session = self.get_or_create_session()

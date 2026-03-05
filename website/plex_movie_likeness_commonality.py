@@ -16,6 +16,11 @@ try:
 except ImportError:
     from plex_file_io import write_text_locked
 
+try:
+    from .plex_agent_instructions import PLEX_MOVIE_LIKENESS_COMMONALITY_INSTRUCTIONS
+except ImportError:
+    from plex_agent_instructions import PLEX_MOVIE_LIKENESS_COMMONALITY_INSTRUCTIONS
+
 
 class MovieLikenessCommonalityError(RuntimeError):
     pass
@@ -90,17 +95,7 @@ class MovieLikenessCommonalityService:
         agent = Agent(
             name="PlexMovieLikenessCommonality",
             model=model_name,
-            instructions=(
-                "You maintain a compact evolving commonality summary for a user's positively rated movies. "
-                "Use only the provided current_commonality_summary and newly_rated_movies. "
-                "Each movie includes title, summary, genres, and a 1-5 likeness rating. "
-                "Treat higher ratings as stronger evidence of durable preference. "
-                "Update the summary incrementally instead of rewriting it from scratch unless the current "
-                "summary is empty or contradicted by the new evidence. "
-                "Focus on recurring genres, tone, story context, pacing, setting, and thematic overlap. "
-                "Do not mention implementation details, score arithmetic, or specific recommendation titles. "
-                "Return one concise paragraph in commonality_summary plus brief source_gaps."
-            ),
+            instructions=PLEX_MOVIE_LIKENESS_COMMONALITY_INSTRUCTIONS,
             output_type=MovieCommonalityNarrative,
         )
         prompt = json.dumps(

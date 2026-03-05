@@ -18,6 +18,17 @@ try:
 except ImportError:
     from plex_file_io import write_text_locked
 
+try:
+    from .plex_agent_instructions import (
+        PLEX_OFF_SERVER_RECOMMENDATIONS_INSTRUCTIONS,
+        PLEX_ON_SERVER_RECOMMENDATIONS_INSTRUCTIONS,
+    )
+except ImportError:
+    from plex_agent_instructions import (
+        PLEX_OFF_SERVER_RECOMMENDATIONS_INSTRUCTIONS,
+        PLEX_ON_SERVER_RECOMMENDATIONS_INSTRUCTIONS,
+    )
+
 
 class RecommendationError(RuntimeError):
     pass
@@ -166,36 +177,13 @@ class PlexRecommendationService:
         on_server_agent = Agent(
             name="PlexOnServerRecommendations",
             model=model_name,
-            instructions=(
-                "You produce structured on-server entertainment recommendations from a viewing summary. "
-                "Use only the supplied viewing summary, supplied movie_likeness_commonality, "
-                "and supplied filtered_candidates. "
-                "The movie_likeness_commonality comes from direct user ratings and should be treated "
-                "as slightly more informative than inferred watch-history patterns when the signals conflict. "
-                "The filtered_candidates payload uses a fields legend with row arrays in that exact order. "
-                "Choose 5 to 10 on-server recommendations only from the provided filtered_candidates list, "
-                "with movies representing 75% of recommendations and shows 25%, "
-                "preserving exact title, media_type, and year values. "
-                "Ensure recommendations are distinct from each other and should not appear in watched_items. "
-                "Return only on-server recommendations and source_gaps."
-            ),
+            instructions=PLEX_ON_SERVER_RECOMMENDATIONS_INSTRUCTIONS,
             output_type=OnServerRecommendationNarrative,
         )
         off_server_agent = Agent(
             name="PlexOffServerRecommendations",
             model=model_name,
-            instructions=(
-                "You produce structured off-server entertainment recommendations from a viewing summary. "
-                "Use only the supplied viewing summary, supplied movie_likeness_commonality, "
-                "and supplied Plex library candidates. "
-                "The movie_likeness_commonality comes from direct user ratings and should be treated "
-                "as slightly more informative than inferred watch-history patterns when the signals conflict. "
-                "The library_candidates payload uses a fields legend with row arrays in that exact order. "
-                "Choose 5 to 10 off-server recommendations that do not appear in the provided library_candidates. "
-                "Use plot_context_observations, executive_summary, viewer_profile_tags, actors, directors, "
-                "cinematographers, and genres where available. Keep reasons compact and database-friendly. "
-                "Return an executive_summary, off_server_recommendations, and source_gaps."
-            ),
+            instructions=PLEX_OFF_SERVER_RECOMMENDATIONS_INSTRUCTIONS,
             output_type=OffServerRecommendationNarrative,
         )
         prompt_library_candidates = self._serialize_library_candidates_for_prompt(

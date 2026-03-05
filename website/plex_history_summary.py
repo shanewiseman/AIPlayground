@@ -12,6 +12,11 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+try:
+    from .plex_agent_instructions import PLEX_VIEWING_SUMMARY_INSTRUCTIONS
+except ImportError:
+    from plex_agent_instructions import PLEX_VIEWING_SUMMARY_INSTRUCTIONS
+
 
 class ViewingSummaryError(RuntimeError):
     pass
@@ -114,13 +119,7 @@ class PlexHistorySummaryService:
         agent = Agent(
             name="PlexViewingSummary",
             model=model_name,
-            instructions=(
-                "You analyze recent Plex viewing history and return a structured summary. "
-                "Use only the provided history data. Focus on the kinds of content watched, "
-                "recurring plot context, and notable actors, directors, and cinematographers. "
-                "Do not invent missing credits. If cinematographer data is absent or sparse, "
-                "say so in source_gaps. Keep observations compact and database-friendly."
-            ),
+            instructions=PLEX_VIEWING_SUMMARY_INSTRUCTIONS,
             output_type=NarrativeSummary,
         )
         prompt = json.dumps(

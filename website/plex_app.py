@@ -8,6 +8,7 @@ from pathlib import Path
 try:
     from .plex_config import AppConfig
     from .plex_history_summary import PlexHistorySummaryService
+    from .plex_movie_likeness_commonality import MovieLikenessCommonalityService
     from .plex_movie_likeness_store import MovieLikenessStore
     from .plex_pms import PlexPmsClient
     from .plex_recommendations import PlexRecommendationService
@@ -17,6 +18,7 @@ try:
 except ImportError:
     from plex_config import AppConfig
     from plex_history_summary import PlexHistorySummaryService
+    from plex_movie_likeness_commonality import MovieLikenessCommonalityService
     from plex_movie_likeness_store import MovieLikenessStore
     from plex_pms import PlexPmsClient
     from plex_recommendations import PlexRecommendationService
@@ -38,6 +40,7 @@ class PlexAuthServer(ThreadingHTTPServer):
         self.plex_tv = PlexTvClient(config)
         self.plex_pms = PlexPmsClient(config)
         self.history_summary_service = PlexHistorySummaryService()
+        self.movie_likeness_commonality_service = MovieLikenessCommonalityService()
         self.recommendation_service = PlexRecommendationService()
         self.route_templates = load_route_templates(
             Path(__file__).resolve().parent / "templates"

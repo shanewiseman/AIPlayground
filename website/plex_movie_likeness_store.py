@@ -28,7 +28,14 @@ class MovieLikenessStore:
     def get_state(self, session_id: str) -> dict[str, Any]:
         state = self._get_session_state(session_id)
         if not state:
-            return {"batch": [], "batch_generated_at": None, "ratings": {}}
+            return {
+                "batch": [],
+                "batch_generated_at": None,
+                "ratings": {},
+                "commonality_summary": "",
+                "commonality_updated_at": None,
+                "commonality_source_gaps": [],
+            }
         return {
             "batch": self._normalize_batch(state.get("batch")),
             "batch_generated_at": (
@@ -37,6 +44,15 @@ class MovieLikenessStore:
                 else None
             ),
             "ratings": self._normalize_ratings(state.get("ratings")),
+            "commonality_summary": self._normalize_summary(state.get("commonality_summary")),
+            "commonality_updated_at": (
+                state.get("commonality_updated_at")
+                if isinstance(state.get("commonality_updated_at"), str)
+                else None
+            ),
+            "commonality_source_gaps": self._normalize_strings(
+                state.get("commonality_source_gaps")
+            ),
         }
 
     def replace_batch(self, session_id: str, batch: list[dict[str, Any]]) -> str:
@@ -51,13 +67,29 @@ class MovieLikenessStore:
         state["ratings"] = self._normalize_ratings(ratings)
         self.save()
 
+    def save_commonality(
+        self,
+        session_id: str,
+        *,
+        commonality_summary: Any,
+        source_gaps: Any,
+        generated_at: Any,
+    ) -> None:
+        state = self._get_or_create_session_state(session_id)
+        state["commonality_summary"] = self._normalize_summary(commonality_summary)
+        state["commonality_source_gaps"] = self._normalize_strings(source_gaps)
+        state["commonality_updated_at"] = (
+            generated_at if isinstance(generated_at, str) else datetime.now().isoformat()
+        )
+        self.save()
+
     def clear_batch(self, session_id: str) -> None:
         state = self._get_session_state(session_id)
         if not state:
             return
         state.pop("batch", None)
         state.pop("batch_generated_at", None)
-        if not self._normalize_ratings(state.get("ratings")):
+        if not self._has_persisted_state(state):
             self._sessions.pop(session_id, None)
         self.save()
 
@@ -128,6 +160,30 @@ class MovieLikenessStore:
             if value in {1, 2, 3, 4, 5}:
                 normalized[str(key)] = int(value)
         return normalized
+
+    def _normalize_summary(self, value: Any) -> str:
+        if not isinstance(value, str):
+            return ""
+        return value.strip()
+
+    def _normalize_strings(self, values: Any) -> list[str]:
+        if not isinstance(values, list):
+            return []
+        normalized: list[str] = []
+        for value in values:
+            if not isinstance(value, str):
+                continue
+            trimmed = value.strip()
+            if trimmed and trimmed not in normalized:
+                normalized.append(trimmed)
+        return normalized
+
+    def _has_persisted_state(self, state: dict[str, Any]) -> bool:
+        return bool(
+            self._normalize_batch(state.get("batch"))
+            or self._normalize_ratings(state.get("ratings"))
+            or self._normalize_summary(state.get("commonality_summary"))
+        )
 
     def _coerce_created_at(self, value: Any) -> float:
         if isinstance(value, (int, float)):

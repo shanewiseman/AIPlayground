@@ -14,6 +14,12 @@
   {save_status}
 </div>
 <div class="panel">
+  <h2>Current commonality summary</h2>
+  <p><strong>Last updated:</strong> {commonality_updated_at}</p>
+  <p>{commonality_summary}</p>
+  <p><strong>Source gaps:</strong> {commonality_source_gaps}</p>
+</div>
+<div class="panel">
   <h2>Likeness input</h2>
   <form class="rating-form" method="post" action="/movie-likeness" data-loading="1">
     <div class="history-grid">

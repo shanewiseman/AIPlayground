@@ -12,6 +12,7 @@ Plex's hosted login flow and captures the resulting Plex token for later
 - `plex_tv.py`: Plex.tv PIN login, token polling, and user profile lookup.
 - `plex_pms.py`: Plex Media Server history, metadata, and artwork calls.
 - `plex_history_summary.py`: `openai-agents-python` integration for structured viewing summaries.
+- `plex_movie_likeness_commonality.py`: `openai-agents-python` integration for the evolving movie likeness commonality summary.
 - `plex_recommendations.py`: `openai-agents-python` integration for structured recommendation objects.
 - `plex_movie_likeness_store.py`: File-backed store for movie likeness batches and ratings, separate from the signed session payload.
 - `plex_api.py`: Shared Plex HTTP request helpers and error handling.

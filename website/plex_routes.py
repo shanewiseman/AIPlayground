@@ -17,6 +17,7 @@ from urllib.parse import parse_qs, quote, urlparse
 try:
     from .plex_api import PlexApiError
     from .plex_history_summary import ViewingSummaryError
+    from .plex_movie_likeness_commonality import MovieLikenessCommonalityError
     from .plex_movie_likeness import (
         render_movie_likeness_page,
         save_movie_likeness_ratings,
@@ -25,6 +26,7 @@ try:
 except ImportError:
     from plex_api import PlexApiError
     from plex_history_summary import ViewingSummaryError
+    from plex_movie_likeness_commonality import MovieLikenessCommonalityError
     from plex_movie_likeness import (
         render_movie_likeness_page,
         save_movie_likeness_ratings,
@@ -365,6 +367,14 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
                 "Summary error",
                 self.render_body("summary_error", error_message=html.escape(str(exc))),
             )
+        except MovieLikenessCommonalityError as exc:
+            self.respond_html(
+                HTTPStatus.BAD_GATEWAY,
+                "Movie likeness error",
+                self.render_body(
+                    "recommendations_error", error_message=html.escape(str(exc))
+                ),
+            )
         except RecommendationError as exc:
             self.respond_html(
                 HTTPStatus.BAD_GATEWAY,
@@ -402,6 +412,14 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
                 HTTPStatus.BAD_GATEWAY,
                 "Summary error",
                 self.render_body("summary_error", error_message=html.escape(str(exc))),
+            )
+        except MovieLikenessCommonalityError as exc:
+            self.respond_html(
+                HTTPStatus.BAD_GATEWAY,
+                "Movie likeness error",
+                self.render_body(
+                    "recommendations_error", error_message=html.escape(str(exc))
+                ),
             )
         except RecommendationError as exc:
             self.respond_html(
@@ -665,9 +683,11 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
             account_id=int(account_id),
             form=form,
             movie_likeness_store=self.app.movie_likeness_store,
+            movie_likeness_commonality_service=self.app.movie_likeness_commonality_service,
             plex_pms=self.app.plex_pms,
             library_candidate_limit=self.app.config.library_candidate_limit,
         )
+        session.pop("recommendations", None)
         self.respond_redirect("/movie-likeness?saved=1", session_id)
 
     def handle_recommendations_page(self, parsed: Any) -> None:
@@ -702,7 +722,7 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
             - Invokes history summarization and recommendation services
         """
         request_started_at = time.perf_counter()
-        _, session = self.get_or_create_session()
+        session_id, session = self.get_or_create_session()
         token = session.get("plex_token")
         account_id = session.get("plex_account_id")
         if not token or not account_id:
@@ -716,7 +736,7 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
         query = parse_qs(parsed.query)
         refresh = query.get("refresh", ["0"])[0] == "1"
         recommendation_object = self._ensure_recommendation_object(
-            session, token, int(account_id), refresh=refresh
+            session_id, session, token, int(account_id), refresh=refresh
         )
         recommendation_retrieval_duration = self._format_elapsed_duration(
             time.perf_counter() - request_started_at
@@ -750,6 +770,7 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
 
     def _ensure_recommendation_object(
         self,
+        session_id: str,
         session: dict[str, Any],
         token: str,
         account_id: int,
@@ -772,9 +793,11 @@ class PlexAuthHandler(BaseHTTPRequestHandler):
             library_candidates = self.app.plex_pms.get_library_candidates(
                 token, account_id, self.app.config.library_candidate_limit
             )
+            movie_likeness_commonality = self.app.movie_likeness_store.get_state(session_id)
             recommendation_object = self.app.recommendation_service.recommend(
                 account_id=account_id,
                 viewing_summary=summary_object,
+                movie_likeness_commonality=movie_likeness_commonality,
                 library_candidates=library_candidates,
             )
             session["recommendations"] = recommendation_object

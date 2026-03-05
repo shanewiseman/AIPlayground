@@ -106,6 +106,7 @@ class PlexRecommendationService:
         *,
         account_id: int,
         viewing_summary: dict[str, Any],
+        movie_likeness_commonality: dict[str, Any] | None,
         library_candidates: list[dict[str, Any]],
     ) -> dict[str, Any]:
         generated_at = datetime.now(timezone.utc).isoformat()
@@ -116,7 +117,10 @@ class PlexRecommendationService:
             library_candidates, viewing_summary.get("watched_items", [])
         )
         narrative = self._generate_recommendations(
-            viewing_summary, library_candidates, filtered_candidates
+            viewing_summary,
+            movie_likeness_commonality,
+            library_candidates,
+            filtered_candidates,
         )
         on_server_recommendations = self._normalize_on_server_recommendations(
             narrative.on_server_recommendations, filtered_candidates
@@ -143,6 +147,7 @@ class PlexRecommendationService:
     def _generate_recommendations(
         self,
         viewing_summary: dict[str, Any],
+        movie_likeness_commonality: dict[str, Any] | None,
         library_candidates: list[dict[str, Any]],
         filtered_candidates: list[dict[str, Any]],
     ) -> RecommendationNarrative:
@@ -158,7 +163,10 @@ class PlexRecommendationService:
             model=model_name,
             instructions=(
                 "You produce structured on-server entertainment recommendations from a viewing summary. "
-                "Use only the supplied viewing summary and supplied filtered_candidates. "
+                "Use only the supplied viewing summary, supplied movie_likeness_commonality, "
+                "and supplied filtered_candidates. "
+                "The movie_likeness_commonality comes from direct user ratings and should be treated "
+                "as slightly more informative than inferred watch-history patterns when the signals conflict. "
                 "The filtered_candidates payload uses a fields legend with row arrays in that exact order. "
                 "Choose 5 to 10 on-server recommendations only from the provided filtered_candidates list, "
                 "with movies representing 75% of recommendations and shows 25%, "
@@ -173,7 +181,10 @@ class PlexRecommendationService:
             model=model_name,
             instructions=(
                 "You produce structured off-server entertainment recommendations from a viewing summary. "
-                "Use only the supplied viewing summary and supplied Plex library candidates. "
+                "Use only the supplied viewing summary, supplied movie_likeness_commonality, "
+                "and supplied Plex library candidates. "
+                "The movie_likeness_commonality comes from direct user ratings and should be treated "
+                "as slightly more informative than inferred watch-history patterns when the signals conflict. "
                 "The library_candidates payload uses a fields legend with row arrays in that exact order. "
                 "Choose 5 to 10 off-server recommendations that do not appear in the provided library_candidates. "
                 "Use plot_context_observations, executive_summary, viewer_profile_tags, actors, directors, "
@@ -189,11 +200,15 @@ class PlexRecommendationService:
             filtered_candidates
         )
         prompt_viewing_summary = self._serialize_viewing_summary_for_prompt(viewing_summary)
+        prompt_movie_likeness_commonality = self._serialize_movie_likeness_commonality_for_prompt(
+            movie_likeness_commonality
+        )
         self._write_library_candidates_dump(prompt_library_candidates)
         on_server_prompt = json.dumps(
             {
                 "task": "Generate only recommendations that already exist on Plex.",
                 "viewing_summary": prompt_viewing_summary,
+                "movie_likeness_commonality": prompt_movie_likeness_commonality,
                 "filtered_candidates": prompt_filtered_candidates,
             },
             separators=(",", ":"),
@@ -202,6 +217,7 @@ class PlexRecommendationService:
             {
                 "task": "Generate only recommendations that do not currently exist on Plex.",
                 "viewing_summary": prompt_viewing_summary,
+                "movie_likeness_commonality": prompt_movie_likeness_commonality,
                 "library_candidates": prompt_library_candidates,
             },
             separators=(",", ":"),
@@ -378,6 +394,21 @@ class PlexRecommendationService:
             viewing_summary.get("watched_items", [])
         )
         return prompt_viewing_summary
+
+    def _serialize_movie_likeness_commonality_for_prompt(
+        self, movie_likeness_commonality: dict[str, Any] | None
+    ) -> dict[str, Any]:
+        if not isinstance(movie_likeness_commonality, dict):
+            return {
+                "commonality_summary": "",
+                "updated_at": None,
+                "source_gaps": ["No direct movie likeness commonality summary was available."],
+            }
+        return {
+            "commonality_summary": movie_likeness_commonality.get("commonality_summary") or "",
+            "updated_at": movie_likeness_commonality.get("commonality_updated_at"),
+            "source_gaps": movie_likeness_commonality.get("commonality_source_gaps", []),
+        }
 
     def _write_library_candidates_dump(
         self, library_candidates: dict[str, Any]

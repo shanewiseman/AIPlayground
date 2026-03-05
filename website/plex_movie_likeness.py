@@ -44,6 +44,20 @@ def render_movie_likeness_page(
         movie_count=html.escape(str(len(movie_items))),
         rated_count=html.escape(str(len(saved_ratings))),
         generated_at=html.escape(str(refreshed_state.get("batch_generated_at") or "unknown")),
+        commonality_summary=html.escape(
+            str(
+                refreshed_state.get("commonality_summary")
+                or "No commonality summary has been generated yet."
+            )
+        ),
+        commonality_updated_at=html.escape(
+            str(refreshed_state.get("commonality_updated_at") or "unknown")
+        ),
+        commonality_source_gaps=html.escape(
+            ", ".join(refreshed_state.get("commonality_source_gaps", []))
+            if isinstance(refreshed_state.get("commonality_source_gaps"), list)
+            else "None"
+        ),
         save_status=save_status,
         movie_likeness_markup=movie_markup,
     )
@@ -56,6 +70,7 @@ def save_movie_likeness_ratings(
     account_id: int,
     form: dict[str, list[str]],
     movie_likeness_store: Any,
+    movie_likeness_commonality_service: Any,
     plex_pms: Any,
     library_candidate_limit: int,
 ) -> None:
@@ -78,11 +93,47 @@ def save_movie_likeness_ratings(
     }
     saved_ratings = movie_likeness_state.get("ratings", {})
     updated_ratings = dict(saved_ratings)
+    newly_rated_items: list[dict[str, Any]] = []
     for rating_key in allowed_rating_keys:
         form_key = f"rating_{rating_key}"
         submitted_value = form.get(form_key, [""])[0]
         if submitted_value in {"1", "2", "3", "4", "5"}:
-            updated_ratings[rating_key] = int(submitted_value)
+            rating_value = int(submitted_value)
+            updated_ratings[rating_key] = rating_value
+            if saved_ratings.get(rating_key) == rating_value:
+                continue
+            matching_item = next(
+                (
+                    item
+                    for item in movie_items
+                    if isinstance(item, dict) and str(item.get("rating_key") or "") == rating_key
+                ),
+                None,
+            )
+            if matching_item is None:
+                continue
+            newly_rated_items.append(
+                {
+                    "rating_key": rating_key,
+                    "title": matching_item.get("title"),
+                    "summary": matching_item.get("summary"),
+                    "genres": matching_item.get("genres", []),
+                    "likeness_rating": rating_value,
+                }
+            )
+    if newly_rated_items:
+        commonality_result = movie_likeness_commonality_service.update_commonality(
+            current_commonality_summary=str(
+                movie_likeness_state.get("commonality_summary") or ""
+            ),
+            rated_movies=newly_rated_items,
+        )
+        movie_likeness_store.save_commonality(
+            session_id,
+            commonality_summary=commonality_result.get("commonality_summary"),
+            source_gaps=commonality_result.get("source_gaps"),
+            generated_at=commonality_result.get("generated_at"),
+        )
     movie_likeness_store.save_ratings(session_id, updated_ratings)
     movie_likeness_store.clear_batch(session_id)
 
@@ -139,18 +190,7 @@ def _render_movie_likeness_group(
                 "movie_likeness_item",
                 title=html.escape(str(item.get("title") or "Unknown title")),
                 year=html.escape(str(item.get("year") or "unknown")),
-                why_it_matches=html.escape(
-                    str(item.get("why_it_matches") or "No reason provided.")
-                ),
-                supporting_signals=html.escape(
-                    ", ".join(item.get("supporting_signals", []))
-                    if isinstance(item.get("supporting_signals"), list)
-                    else ""
-                ),
                 rating_key=html.escape(rating_key),
-                current_rating=html.escape(
-                    str(saved_rating) if saved_rating in {1, 2, 3, 4, 5} else "Not rated"
-                ),
                 never_seen_checked="",
                 rating_checked_1="checked" if saved_rating == 1 else "",
                 rating_checked_2="checked" if saved_rating == 2 else "",

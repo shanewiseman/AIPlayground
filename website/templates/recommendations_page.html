@@ -1,0 +1,31 @@
+<span class="status ok">AI recommendations</span>
+<h1>Recommendations</h1>
+<p class="lede">This page uses the viewing summary plus current Plex library candidates to produce two recommendation groups: titles already on your Plex server and titles not currently on the server.</p>
+<div class="actions">
+  <a class="button secondary" href="/summary" data-loading="1">Back to summary</a>
+  <a class="button secondary" href="/movie-likeness" data-loading="1">Rate on-server movies</a>
+  <a class="button secondary" href="/recommendations?refresh=1" data-loading="1">Regenerate recommendations</a>
+  <a class="button secondary" href="/login">Back to login</a>
+</div>
+<div class="panel">
+  <h2>Executive summary</h2>
+  <p>{executive_summary}</p>
+  <p><strong>Generated at:</strong> {generated_at}</p>
+  <p><strong>Request processing time:</strong> {recommendation_retrieval_duration}</p>
+</div>
+<div class="panel">
+  <h2>Already On Plex</h2>
+  <div class="history-grid">
+    {on_server_markup}
+  </div>
+</div>
+<div class="panel">
+  <h2>Not On Plex</h2>
+  <div class="history-grid">
+    {off_server_markup}
+  </div>
+</div>
+<div class="panel">
+  <h2>Structured object</h2>
+  <pre><code>{recommendation_json}</code></pre>
+</div>

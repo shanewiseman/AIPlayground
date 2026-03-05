@@ -1,0 +1,6 @@
+website/__pycache__/
+website/debug_output/
+!webasite/debug_output/__init__
+website/state/
+!website/state/__init__
+client_code/key.file

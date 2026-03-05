@@ -1,0 +1,19 @@
+<span class="status ok">AI summary</span>
+<h1>Viewing Summary</h1>
+<p class="lede">This structured object is generated from the recent Plex watch history and formatted to be stored later in a database.</p>
+<div class="actions">
+  <a class="button secondary" href="/history">Back to history</a>
+  <a class="button secondary" href="/recommendations" data-loading="1">AI recommendations</a>
+  <a class="button secondary" href="/summary?refresh=1" data-loading="1">Regenerate summary</a>
+  <a class="button secondary" href="/login">Back to login</a>
+</div>
+<div class="panel">
+  <h2>Executive summary</h2>
+  <p>{executive_summary}</p>
+  <p><strong>Items analyzed:</strong> {item_count}</p>
+  <p><strong>Generated at:</strong> {generated_at}</p>
+</div>
+<div class="panel">
+  <h2>Structured object</h2>
+  <pre><code>{summary_json}</code></pre>
+</div>

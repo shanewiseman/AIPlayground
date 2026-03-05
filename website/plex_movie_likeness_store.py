@@ -8,6 +8,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+try:
+    from .plex_file_io import write_text_locked
+except ImportError:
+    from plex_file_io import write_text_locked
+
 
 class MovieLikenessStore:
     def __init__(self, store_path: str, ttl_seconds: int = 3600) -> None:
@@ -111,9 +116,12 @@ class MovieLikenessStore:
             self.save()
 
     def save(self) -> None:
-        self._store_path.parent.mkdir(parents=True, exist_ok=True)
         payload = {"sessions": self._sessions}
-        self._store_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        write_text_locked(
+            self._store_path,
+            json.dumps(payload, indent=2),
+            encoding="utf-8",
+        )
 
     def _get_session_state(self, session_id: str | None) -> dict[str, Any] | None:
         if not session_id:

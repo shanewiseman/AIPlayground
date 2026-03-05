@@ -10,9 +10,11 @@ from urllib.parse import urlencode
 try:
     from .plex_api import PlexHttpClient
     from .plex_config import AppConfig
+    from .plex_file_io import write_text_locked
 except ImportError:
     from plex_api import PlexHttpClient
     from plex_config import AppConfig
+    from plex_file_io import write_text_locked
 
 
 class PlexPmsClient:
@@ -200,9 +202,10 @@ class PlexPmsClient:
         return normalized_payload
 
     def _write_library_candidate_cache(self, cache_payload: dict[str, Any]) -> None:
-        self._library_candidate_cache_path.parent.mkdir(parents=True, exist_ok=True)
-        self._library_candidate_cache_path.write_text(
-            json.dumps(cache_payload, indent=2), encoding="utf-8"
+        write_text_locked(
+            self._library_candidate_cache_path,
+            json.dumps(cache_payload, indent=2),
+            encoding="utf-8",
         )
 
     def _highest_metadata_key(self, metadata_items: list[dict[str, Any]]) -> int | None:

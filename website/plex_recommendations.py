@@ -13,6 +13,11 @@ from urllib.parse import quote_plus
 
 from pydantic import BaseModel, Field
 
+try:
+    from .plex_file_io import write_text_locked
+except ImportError:
+    from plex_file_io import write_text_locked
+
 
 class RecommendationError(RuntimeError):
     pass
@@ -325,7 +330,8 @@ class PlexRecommendationService:
         }
 
     def _write_token_estimate_dump(self, payload: dict[str, Any]) -> None:
-        self._token_estimate_dump_path.write_text(
+        write_text_locked(
+            self._token_estimate_dump_path,
             json.dumps(payload, indent=2),
             encoding="utf-8",
         )
@@ -334,7 +340,7 @@ class PlexRecommendationService:
         prompt_dump_path = self._prompt_dump_paths.get(prompt_name)
         if prompt_dump_path is None:
             raise RecommendationError(f"Unknown prompt dump target: {prompt_name}")
-        prompt_dump_path.write_text(prompt, encoding="utf-8")
+        write_text_locked(prompt_dump_path, prompt, encoding="utf-8")
 
     def _write_final_output_dump(self, final_output: Any) -> None:
         model_dump_json = getattr(final_output, "model_dump_json", None)
@@ -342,7 +348,7 @@ class PlexRecommendationService:
             output_text = str(model_dump_json(indent=2))
         else:
             output_text = str(final_output)
-        self._final_output_dump_path.write_text(output_text, encoding="utf-8")
+        write_text_locked(self._final_output_dump_path, output_text, encoding="utf-8")
 
     def _load_agents_sdk(self) -> tuple[Any, Any, Any]:
         if not self._agents_src.exists():
@@ -413,7 +419,8 @@ class PlexRecommendationService:
     def _write_library_candidates_dump(
         self, library_candidates: dict[str, Any]
     ) -> None:
-        self._library_candidates_dump_path.write_text(
+        write_text_locked(
+            self._library_candidates_dump_path,
             json.dumps(library_candidates, indent=2),
             encoding="utf-8",
         )

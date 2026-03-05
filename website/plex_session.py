@@ -10,6 +10,11 @@ import secrets
 import time
 from typing import Any
 
+try:
+    from .plex_file_io import write_text_locked
+except ImportError:
+    from plex_file_io import write_text_locked
+
 
 class SessionStore:
     def __init__(
@@ -81,12 +86,15 @@ class SessionStore:
             self.save()
 
     def save(self) -> None:
-        self._store_path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
             "secret": self._secret.decode("utf-8"),
             "sessions": self._sessions,
         }
-        self._store_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        write_text_locked(
+            self._store_path,
+            json.dumps(payload, indent=2),
+            encoding="utf-8",
+        )
 
     def _load_state(self) -> dict[str, Any]:
         if not self._store_path.exists():

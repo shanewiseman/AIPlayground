@@ -11,6 +11,11 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+try:
+    from .plex_file_io import write_text_locked
+except ImportError:
+    from plex_file_io import write_text_locked
+
 
 class MovieLikenessCommonalityError(RuntimeError):
     pass
@@ -121,7 +126,7 @@ class MovieLikenessCommonalityService:
         return final_output
 
     def _write_prompt_dump(self, prompt: str) -> None:
-        self._prompt_dump_path.write_text(prompt, encoding="utf-8")
+        write_text_locked(self._prompt_dump_path, prompt, encoding="utf-8")
 
     def _write_final_output_dump(self, final_output: Any) -> None:
         model_dump_json = getattr(final_output, "model_dump_json", None)
@@ -129,7 +134,7 @@ class MovieLikenessCommonalityService:
             output_text = str(model_dump_json(indent=2))
         else:
             output_text = str(final_output)
-        self._final_output_dump_path.write_text(output_text, encoding="utf-8")
+        write_text_locked(self._final_output_dump_path, output_text, encoding="utf-8")
 
     def _load_agents_sdk(self) -> tuple[Any, Any, Any]:
         if not self._agents_src.exists():

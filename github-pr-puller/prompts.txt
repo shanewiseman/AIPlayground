@@ -53,3 +53,6 @@ in the modified_files parameter in the submitted prompt, remove excessive whites
 
 
 for each outputed file, include an index number in the filename so as not to clobber a previous output file. Simply look for other files of the same name and update and increase the index number
+
+
+add additional logic around the analyze_with_openai_agents LLM submission to request a severity and risk attribute in the reponse. Have the report output_file and implementation output to incorporate these attributes, in addition have the implementation output sort comments based on their severity + risk.

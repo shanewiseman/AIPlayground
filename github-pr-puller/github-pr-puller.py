@@ -692,6 +692,17 @@ def analyze_with_openai_agents(
         ) from exc
 
     class CommentGuidance(BaseModel):
+        severity: str = Field(
+            description=(
+                "Priority severity of the comment. Use one of: critical, high, medium, low."
+            )
+        )
+        risk: str = Field(
+            description=(
+                "Implementation risk if not addressed or implemented incorrectly. "
+                "Use one of: high, medium, low."
+            )
+        )
         requested_change_summary: str = Field(
             description="Short summary of what reviewer is asking to change."
         )
@@ -726,6 +737,11 @@ def analyze_with_openai_agents(
             3. Keep guidance implementation-focused and avoid generic advice.
             4. If a comment is ambiguous, state assumptions explicitly in technical_explanation.
             5. If the comment is not actionable (e.g. a question or suggestion), ignore the comment and return empty strings for that entry, but still include it in the output list to maintain alignment with input comments. Indicate in the implementation_prompt that the comment was not actionable.
+            6. For every comment entry, include severity and risk using these labels:
+               severity: critical/high/medium/low
+               risk: high/medium/low
+            7. Base the severity and risk assessments on the potential impact to the codebase and the likelihood of issues if the comment is not addressed or implemented incorrectly. Consider factors such as how central the commented code is to the PR's functionality, how likely it is that the reviewer would request changes if the comment were addressed, and how much technical complexity or uncertainty is involved in implementing the requested change.
+               Additionally, consider the effects on runtime behavior if not addressed, exposure of sensitive data, and potential security implications.
             """
         ).strip(),
         output_type=PRGuidance,
@@ -782,6 +798,8 @@ def render_report(
                 """
             ).strip()
         )
+        sections.append(block("Severity", str(comment.severity)))
+        sections.append(block("Risk", str(comment.risk)))
         sections.append(block("Code Snippet (From Review Comment)", str(source_comment.get("code_snippet") or "")))
         sections.append(block("Requested Change Summary", comment.requested_change_summary))
         sections.append(block("Technical Explanation", comment.technical_explanation))
@@ -807,12 +825,40 @@ def _yaml_scalar(value: Any) -> str:
     return f"\"{escaped}\""
 
 
+def _severity_rank(value: str) -> int:
+    ranking = {
+        "critical": 4,
+        "high": 3,
+        "medium": 2,
+        "low": 1,
+    }
+    return ranking.get(str(value or "").strip().lower(), 0)
+
+
+def _risk_rank(value: str) -> int:
+    ranking = {
+        "high": 3,
+        "medium": 2,
+        "low": 1,
+    }
+    return ranking.get(str(value or "").strip().lower(), 0)
+
+
 def render_llm_implementation_file(analysis: Any, pr_info: dict[str, Any]) -> str:
+    sorted_comments = sorted(
+        list(analysis.comments),
+        key=lambda item: (
+            -_severity_rank(str(item.severity)),
+            -_risk_rank(str(item.risk)),
+        ),
+    )
+
     lines: list[str] = [
         "intent: |-",
         "  This file is meant for an implementation-focused LLM.",
         "  Implement each implementation_prompt using requested_change_summary and",
         "  technical_explanation as supporting context.",
+        "  Items are sorted by severity and risk, highest priority first.",
         "  If an implementation_prompt indicates the comment is not actionable, skip implementation but still include the comment in the output list to maintain alignment with input comments.",
         "  Stop in between each implementation_items to approve or revert and request confirmation before proceeding to the next item.",
         f"repository: {_yaml_scalar(pr_info.get('repository'))}",
@@ -824,10 +870,12 @@ def render_llm_implementation_file(analysis: Any, pr_info: dict[str, Any]) -> st
         "implementation_items:",
     ]
 
-    for idx, comment in enumerate(analysis.comments, start=1):
+    for idx, comment in enumerate(sorted_comments, start=1):
         lines.extend(
             [
                 f"  - item_number: {idx}",
+                f"    severity: {_yaml_scalar(str(comment.severity))}",
+                f"    risk: {_yaml_scalar(str(comment.risk))}",
                 f"    requested_change_summary_context: {_yaml_block(str(comment.requested_change_summary), indent=6)}",
                 f"    technical_explanation_context: {_yaml_block(str(comment.technical_explanation), indent=6)}",
                 f"    implementation_prompt_primary_instruction: {_yaml_block(str(comment.implementation_prompt), indent=6)}",

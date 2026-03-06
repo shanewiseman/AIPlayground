@@ -172,6 +172,11 @@ def parse_args() -> argparse.Namespace:
               GITHUB_TOKEN    GitHub personal access token with repo read access.
               OPENAI_API_KEY  OpenAI API key used by openai-agents-python.
 
+            Security warning:
+              By default this tool writes a prompt debug JSON alongside the report containing the
+              full prompt text and modified file contents. Treat this file as sensitive.
+              Use --no-prompt-debug to skip writing it.
+
             Examples:
               python github-pr-puller.py 123 owner/repo
               python github-pr-puller.py 123 owner/repo --model gpt-5-mini
@@ -220,6 +225,15 @@ def parse_args() -> argparse.Namespace:
         "--print-report",
         action="store_true",
         help="Also print the generated report to stdout in addition to writing the file.",
+    )
+    parser.add_argument(
+        "--no-prompt-debug",
+        action="store_true",
+        help=(
+            "Do not write the prompt debug JSON to disk. By default, a .prompt-debug.json is "
+            "saved alongside the report. WARNING: this file contains full prompt text and "
+            "modified file contents and may include sensitive data."
+        ),
     )
     return parser.parse_args()
 
@@ -738,7 +752,12 @@ def block(title: str, text: str) -> str:
     )
 
 
-def render_report(analysis: Any, pr_info: dict[str, Any], comments_count: int) -> str:
+def render_report(
+    analysis: Any,
+    pr_info: dict[str, Any],
+    comments_count: int,
+    source_comments: list[dict[str, Any]],
+) -> str:
     header = textwrap.dedent(
         f"""\
         # PR Review Synthesis
@@ -755,6 +774,7 @@ def render_report(analysis: Any, pr_info: dict[str, Any], comments_count: int) -
     sections.append(block("Implementation Strategy", analysis.implementation_strategy))
 
     for idx, comment in enumerate(analysis.comments, start=1):
+        source_comment = source_comments[idx - 1] if (idx - 1) < len(source_comments) else {}
         sections.append(
             textwrap.dedent(
                 f"""\
@@ -762,6 +782,7 @@ def render_report(analysis: Any, pr_info: dict[str, Any], comments_count: int) -
                 """
             ).strip()
         )
+        sections.append(block("Code Snippet (From Review Comment)", str(source_comment.get("code_snippet") or "")))
         sections.append(block("Requested Change Summary", comment.requested_change_summary))
         sections.append(block("Technical Explanation", comment.technical_explanation))
         sections.append(block("Implementation Prompt", comment.implementation_prompt))
@@ -909,13 +930,16 @@ def main() -> None:
         "prompt_payload": payload,
         "prompt_text": prompt,
     }
-    prompt_debug_path.write_text(json.dumps(prompt_debug_doc, indent=2), encoding="utf-8")
-    progress.log(f"Saved prompt debug payload to: {prompt_debug_file}")
-    progress.log(
-        "WARNING: Prompt debug payload file contains full prompt text and modified "
-        "file contents. Treat this file as sensitive; it may include secrets or "
-        "other confidential repository data."
-    )
+    if not args.no_prompt_debug:
+        prompt_debug_path.write_text(json.dumps(prompt_debug_doc, indent=2), encoding="utf-8")
+        progress.log(f"Saved prompt debug payload to: {prompt_debug_file}")
+        progress.log(
+            "WARNING: Prompt debug payload file contains full prompt text and modified "
+            "file contents. Treat this file as sensitive; it may include secrets or "
+            "other confidential repository data."
+        )
+    else:
+        progress.log("Skipping prompt debug payload per --no-prompt-debug")
 
     openai_started_at = time.monotonic()
     analysis = analyze_with_openai_agents(
@@ -927,7 +951,12 @@ def main() -> None:
     openai_elapsed_seconds = time.monotonic() - openai_started_at
     progress.log(f"OpenAI LLM logic completed in {openai_elapsed_seconds:.2f}s")
     progress.log("Rendering final output report")
-    report = render_report(analysis=analysis, pr_info=pr_info, comments_count=len(comments))
+    report = render_report(
+        analysis=analysis,
+        pr_info=pr_info,
+        comments_count=len(comments),
+        source_comments=comments,
+    )
     llm_impl_report = render_llm_implementation_file(analysis=analysis, pr_info=pr_info)
 
     if args.print_report:
@@ -937,7 +966,8 @@ def main() -> None:
     llm_impl_path.write_text(llm_impl_report, encoding="utf-8")
     print(f"Saved report to: {output_file}")
     print(f"Saved LLM implementation file to: {llm_implementation_file}")
-    print(f"Saved prompt debug payload to: {prompt_debug_file}")
+    if not args.no_prompt_debug:
+        print(f"Saved prompt debug payload to: {prompt_debug_file}")
     total_elapsed_seconds = time.monotonic() - run_started_at
     print(f"GitHub logic runtime (seconds): {github_elapsed_seconds:.2f}")
     print(f"OpenAI LLM runtime (seconds): {openai_elapsed_seconds:.2f}")

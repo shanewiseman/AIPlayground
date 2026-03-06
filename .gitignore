@@ -6,8 +6,10 @@ website/state/
 
 github-pr-puller/__pycache__/
 github-pr-puller/github.token
+**/*.prompt-debug.*.json
+**/*.llm-implementation.*
+**/*-pr*.md
 
 
 client_code/key.file
-
 

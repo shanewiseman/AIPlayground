@@ -342,14 +342,18 @@ def fetch_unresolved_pr_comments(
 
         review_threads = pr_node.get("reviewThreads") or {}
         thread_nodes = review_threads.get("nodes", [])
-        unresolved_thread_nodes = [thread for thread in thread_nodes if not thread.get("isResolved")]
+        active_thread_nodes = [
+            thread
+            for thread in thread_nodes
+            if not thread.get("isResolved") and not thread.get("isOutdated")
+        ]
         progress.log(
             "GitHub thread page "
             f"{threads_page_number}: total_threads={len(thread_nodes)}, "
-            f"unresolved_threads={len(unresolved_thread_nodes)}"
+            f"active_threads={len(active_thread_nodes)}"
         )
 
-        for thread in unresolved_thread_nodes:
+        for thread in active_thread_nodes:
             thread_id = str(thread.get("id") or "unknown")
             progress.log(
                 f"Collecting comments from unresolved thread {thread_id} on "
@@ -362,10 +366,14 @@ def fetch_unresolved_pr_comments(
                 first_page=first_page,
                 progress=progress,
             )
+            kept_comments = 0
             for comment in comments:
+                if comment.get("outdated"):
+                    continue
                 unresolved_comments.append(normalize_comment(thread, comment))
+                kept_comments += 1
             progress.log(
-                f"Thread {thread_id}: collected {len(comments)} comments "
+                f"Thread {thread_id}: collected {kept_comments}/{len(comments)} non-outdated comments "
                 f"(running_total={len(unresolved_comments)})"
             )
 
@@ -379,24 +387,20 @@ def fetch_unresolved_pr_comments(
     return pr_info or {}, unresolved_comments
 
 
-def build_llm_payload(pr_info: dict[str, Any], comments: list[dict[str, Any]]) -> dict[str, Any]:
-    return {
-        "pull_request": pr_info,
-        "guidance": {
-            "goal": (
-                "Summarize requested code changes from unresolved review comments and provide "
-                "technical implementation guidance."
-            ),
-            "audience": "An LLM that will implement the code changes.",
-        },
-        "unresolved_comments": comments,
-    }
+def build_llm_payload(comments: list[dict[str, Any]]) -> list[dict[str, str]]:
+    return [
+        {
+            "body": str(comment.get("body") or ""),
+            "code_snippet": str(comment.get("code_snippet") or ""),
+        }
+        for comment in comments
+    ]
 
 
-def build_analysis_prompt(payload: dict[str, Any]) -> str:
+def build_analysis_prompt(payload: list[dict[str, str]]) -> str:
     return (
-        "Analyze the following unresolved GitHub PR comments payload and produce structured "
-        "guidance.\n\n"
+        "Analyze the following unresolved GitHub PR comments. Each item only contains "
+        "'body' and 'code_snippet'. Produce structured implementation guidance.\n\n"
         f"{json.dumps(payload, indent=2)}"
     )
 
@@ -426,8 +430,6 @@ def analyze_with_openai_agents(
         ) from exc
 
     class CommentGuidance(BaseModel):
-        comment_id: str = Field(description="GitHub GraphQL comment ID from input.")
-        file_path: str = Field(description="File path associated with the comment.")
         requested_change_summary: str = Field(
             description="Short summary of what reviewer is asking to change."
         )
@@ -458,9 +460,8 @@ def analyze_with_openai_agents(
             Return concise but technically precise output for an implementation LLM.
             Requirements:
             1. Produce one comment entry per input unresolved comment.
-            2. Preserve and echo input comment IDs in each entry.
-            3. Keep guidance implementation-focused and avoid generic advice.
-            4. If a comment is ambiguous, state assumptions explicitly in technical_explanation.
+            2. Keep guidance implementation-focused and avoid generic advice.
+            3. If a comment is ambiguous, state assumptions explicitly in technical_explanation.
             """
         ).strip(),
         output_type=PRGuidance,
@@ -508,9 +509,6 @@ def render_report(analysis: Any, pr_info: dict[str, Any], comments_count: int) -
             textwrap.dedent(
                 f"""\
                 ## Comment {idx}
-
-                ID: `{comment.comment_id}`
-                File: `{comment.file_path}`
                 """
             ).strip()
         )
@@ -574,7 +572,7 @@ def main() -> None:
         f"Preparing LLM input payload with {len(comments)} comments "
         f"(max_comments={args.max_comments})"
     )
-    payload = build_llm_payload(pr_info=pr_info, comments=comments)
+    payload = build_llm_payload(comments=comments)
     prompt = build_analysis_prompt(payload)
     prompt_debug_file = build_prompt_debug_filename(output_file)
     prompt_debug_doc = {

@@ -39,3 +39,10 @@ store the payload of the prompt into a file, the filename should be named exactl
 add a timer to keep track how long from user input to report completion. print this value to the screen, measure in seconds.
 
 
+can you alter the timer implementation to breakdown the time it takes for the gihub logic portion, openai LLM and the total. 
+
+
+on the LLM submission only include the following key/values: body and code_snippet.
+Also, in addition to limiting PRs to unresolved, also ensure the outdated flag is not set to True
+
+

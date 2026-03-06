@@ -390,13 +390,16 @@ def post_thread_checkpoint_comment(
     owner: str,
     repo: str,
     pr_number: int,
+    thread_id: str,
     root_comment_id: int,
     *,
     progress: ProgressReporter,
 ) -> None:
     checkpoint_body = (
         f"{CHECKPOINT_COMMENT_PREFIX} This thread has been consumed by automation and "
-        f"a potential change is in process. timestamp_utc={datetime.now(timezone.utc).isoformat()}"
+        "a potential change is in process.\r\n\r\n"
+        f"thread_id={thread_id} \r\n"
+        f"timestamp_utc={datetime.now(timezone.utc).isoformat()} \r\n"
     )
     url = (
         f"{GITHUB_REST_API_BASE}/repos/{owner}/{repo}/pulls/{pr_number}/comments/"
@@ -420,7 +423,7 @@ def post_thread_checkpoint_comment(
             pass
         progress.log(
             "Posted checkpoint reply comment for consumed thread "
-            f"(root_comment_id={root_comment_id})"
+            f"(thread_id={thread_id}, root_comment_id={root_comment_id})"
         )
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
@@ -583,6 +586,7 @@ def fetch_unresolved_pr_comments(
                     owner=owner,
                     repo=repo,
                     pr_number=pr_number,
+                    thread_id=thread_id,
                     root_comment_id=root_comment_id,
                     progress=progress,
                 )
@@ -895,12 +899,20 @@ def analyze_with_openai_agents(
         severity: str = Field(
             description=(
                 "Priority severity of the comment. Use one of: critical, high, medium, low."
+            ),
+            reasoning=(
+                "Base severity on potential impact if not addressed, considering factors like "
+                "runtime behavior, sensitive data exposure, and security implications."
             )
         )
         risk: str = Field(
             description=(
                 "Implementation risk if not addressed or implemented incorrectly. "
                 "Use one of: high, medium, low."
+            ),
+            reasoning=(
+                "Base risk on potential impact if not addressed or implemented incorrectly, considering factors like "
+                "runtime behavior, sensitive data exposure, and security implications."
             )
         )
         requested_change_summary: str = Field(
@@ -946,6 +958,7 @@ def analyze_with_openai_agents(
             8. Base severity and risk on potential impact and likelihood of problems if not
                addressed or implemented incorrectly.
                Consider runtime behavior, sensitive data exposure, and security implications.
+            9. Use the reasoning attribute in the schema to explain how you determined severity and risk levels.
             """
         ).strip(),
         output_type=PRGuidance,

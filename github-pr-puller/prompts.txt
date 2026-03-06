@@ -65,3 +65,4 @@ change the logic from returning individual comments to returning comments groupe
 modify it so the file_path and code_snippet are submitted once per thread and have there be a list of comment bodies
 
 
+when posting the checkpoint comment into Github, include the thread id allowing for better cross reference

@@ -13,18 +13,9 @@ program then prints each returned text object in a well formated and pleasing in
 in the help menu can you provide examples for the pr_number and repository values, so the user has understanding of what is expected
 
 
-I received the following trace, 
+I received the following error from the GitHub GraphQL API (stack trace and local file paths omitted for brevity):
 
-Traceback (most recent call last):
-  File "/home/swiseman/git_repositories/openai-playground/github-pr-puller/github-pr-puller.py", line 480, in <module>
-    main()
-  File "/home/swiseman/git_repositories/openai-playground/github-pr-puller/github-pr-puller.py", line 449, in main
-    pr_info, comments = fetch_unresolved_pr_comments(
-  File "/home/swiseman/git_repositories/openai-playground/github-pr-puller/github-pr-puller.py", line 258, in fetch_unresolved_pr_comments
-    data = github_graphql(
-  File "/home/swiseman/git_repositories/openai-playground/github-pr-puller/github-pr-puller.py", line 196, in github_graphql
-    raise RuntimeError(f"GitHub GraphQL error: {result['errors']}")
-RuntimeError: GitHub GraphQL error: [{'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'side'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'side'}, 'locations': [{'line': 40, 'column': 15}], 'message': "Field 'side' doesn't exist on type 'PullRequestReviewComment'"}, {'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'startSide'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'startSide'}, 'locations': [{'line': 41, 'column': 15}], 'message': "Field 'startSide' doesn't exist on type 'PullRequestReviewComment'"}]
+GitHub GraphQL error: [{'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'side'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'side'}, 'locations': [{'line': 40, 'column': 15}], 'message': "Field 'side' doesn't exist on type 'PullRequestReviewComment'"}, {'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'startSide'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'startSide'}, 'locations': [{'line': 41, 'column': 15}], 'message': "Field 'startSide' doesn't exist on type 'PullRequestReviewComment'"}]
 
 
 can you provide indications of progression, communication with github, for each LLM call, etc

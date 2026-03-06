@@ -19,6 +19,8 @@ from typing import Any
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_MODEL = "gpt-5"
+MAX_FILE_CONTENT_CHARS = 50_000
+MAX_TOTAL_MODIFIED_FILES_CHARS = 200_000
 
 THREADS_QUERY = """
 query PullRequestThreads(
@@ -143,7 +145,7 @@ query FileContent($owner: String!, $name: String!, $expression: String!) {
 """
 
 MULTI_SPACE_OR_TAB_RE = re.compile(r"[ \t]+")
-MULTI_NEWLINE_RE = re.compile(r"\n+")
+MULTI_NEWLINE_RE = re.compile(r"\n{3,}")
 
 
 class ProgressReporter:
@@ -213,6 +215,11 @@ def parse_args() -> argparse.Namespace:
         "--quiet",
         action="store_true",
         help="Disable progress logs (logs are printed to stderr by default).",
+    )
+    parser.add_argument(
+        "--print-report",
+        action="store_true",
+        help="Also print the generated report to stdout in addition to writing the file.",
     )
     return parser.parse_args()
 
@@ -528,12 +535,66 @@ def fetch_pr_modified_files_with_content(
 def build_llm_payload(
     comments: list[dict[str, Any]],
     modified_files_with_content: list[dict[str, str]],
+    *,
+    progress: ProgressReporter | None = None,
 ) -> dict[str, Any]:
     def normalize_modified_file_content(text: str) -> str:
         normalized = text.replace("\r\n", "\n").replace("\r", "\n")
-        normalized = MULTI_SPACE_OR_TAB_RE.sub(" ", normalized)
-        normalized = MULTI_NEWLINE_RE.sub("\n", normalized)
+        lines = normalized.split("\n")
+        processed: list[str] = []
+        for line in lines:
+            match = re.match(r"^([ \t]*)(.*)$", line)
+            if match:
+                indent, rest = match.groups()
+                rest = MULTI_SPACE_OR_TAB_RE.sub(" ", rest)
+                rest = rest.rstrip(" \t")
+                processed.append(indent + rest)
+            else:
+                processed.append(line)
+        normalized = "\n".join(processed)
+        normalized = MULTI_NEWLINE_RE.sub("\n\n", normalized)
         return normalized
+
+    truncated_files = 0
+    budget_used = 0
+    modified_files_out: list[dict[str, str]] = []
+    total_input_files = len(modified_files_with_content)
+
+    for file_obj in modified_files_with_content:
+        path = str(file_obj.get("path") or "")
+        content = normalize_modified_file_content(str(file_obj.get("content") or ""))
+
+        if len(content) > MAX_FILE_CONTENT_CHARS:
+            truncated_files += 1
+            content = (
+                content[:MAX_FILE_CONTENT_CHARS]
+                + f"\n[... TRUNCATED to {MAX_FILE_CONTENT_CHARS} chars ...]\n"
+            )
+
+        if budget_used + len(content) > MAX_TOTAL_MODIFIED_FILES_CHARS:
+            if progress:
+                remaining = total_input_files - len(modified_files_out)
+                progress.log(
+                    "Prompt size guard: omitting "
+                    f"{remaining} modified file(s) due to total size limit "
+                    f"({MAX_TOTAL_MODIFIED_FILES_CHARS} chars)."
+                )
+            break
+
+        modified_files_out.append({"path": path, "content": content})
+        budget_used += len(content)
+
+    if progress and truncated_files:
+        progress.log(
+            "Prompt size guard: truncated "
+            f"{truncated_files} modified file(s) to {MAX_FILE_CONTENT_CHARS} chars each."
+        )
+    if progress:
+        progress.log(
+            "Prompt payload size (modified files content): "
+            f"{budget_used}/{MAX_TOTAL_MODIFIED_FILES_CHARS} chars across "
+            f"{len(modified_files_out)} file(s)."
+        )
 
     return {
         "review_comments": [
@@ -544,13 +605,7 @@ def build_llm_payload(
             }
             for comment in comments
         ],
-        "modified_files": [
-            {
-                "path": str(file_obj.get("path") or ""),
-                "content": normalize_modified_file_content(str(file_obj.get("content") or "")),
-            }
-            for file_obj in modified_files_with_content
-        ],
+        "modified_files": modified_files_out,
     }
 
 
@@ -798,16 +853,23 @@ def main() -> None:
     payload = build_llm_payload(
         comments=comments,
         modified_files_with_content=modified_files_with_content,
+        progress=progress,
     )
     prompt = build_analysis_prompt(payload)
+    progress.log(f"Prompt text size: {len(prompt)} chars")
     prompt_debug_file = build_prompt_debug_filename(output_file)
     llm_implementation_file = build_llm_implementation_filename(output_file)
+    output_path = Path(output_file)
+    prompt_debug_path = Path(prompt_debug_file)
+    llm_impl_path = Path(llm_implementation_file)
+    for parent in (output_path.parent, prompt_debug_path.parent, llm_impl_path.parent):
+        parent.mkdir(parents=True, exist_ok=True)
     prompt_debug_doc = {
         "model": args.model,
         "prompt_payload": payload,
         "prompt_text": prompt,
     }
-    Path(prompt_debug_file).write_text(json.dumps(prompt_debug_doc, indent=2), encoding="utf-8")
+    prompt_debug_path.write_text(json.dumps(prompt_debug_doc, indent=2), encoding="utf-8")
     progress.log(f"Saved prompt debug payload to: {prompt_debug_file}")
 
     openai_started_at = time.monotonic()
@@ -823,9 +885,11 @@ def main() -> None:
     report = render_report(analysis=analysis, pr_info=pr_info, comments_count=len(comments))
     llm_impl_report = render_llm_implementation_file(analysis=analysis, pr_info=pr_info)
 
-    #print(report)
-    Path(output_file).write_text(report, encoding="utf-8")
-    Path(llm_implementation_file).write_text(llm_impl_report, encoding="utf-8")
+    if args.print_report:
+        print(report)
+
+    output_path.write_text(report, encoding="utf-8")
+    llm_impl_path.write_text(llm_impl_report, encoding="utf-8")
     print(f"Saved report to: {output_file}")
     print(f"Saved LLM implementation file to: {llm_implementation_file}")
     print(f"Saved prompt debug payload to: {prompt_debug_file}")

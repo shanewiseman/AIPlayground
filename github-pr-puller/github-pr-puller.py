@@ -156,7 +156,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-file",
-        help="Optional markdown output file path for easy copy/paste.",
+        help=(
+            "Override output markdown path. By default, the script saves automatically "
+            "using the repo and PR number in the filename."
+        ),
     )
     parser.add_argument(
         "--max-comments",
@@ -179,6 +182,12 @@ def parse_repository(repository: str) -> tuple[str, str]:
     if not owner or not name:
         raise ValueError("Repository must be in 'owner/repo' format.")
     return owner, name
+
+
+def build_default_output_filename(owner: str, repo: str, pr_number: int) -> str:
+    safe_owner = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "-" for ch in owner)
+    safe_repo = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "-" for ch in repo)
+    return f"pr-review-{safe_owner}-{safe_repo}-pr-{pr_number}.md"
 
 
 def github_graphql(
@@ -513,6 +522,7 @@ def main() -> None:
         owner, repo = parse_repository(args.repository)
     except ValueError as exc:
         raise SystemExit(str(exc))
+    output_file = args.output_file or build_default_output_filename(owner, repo, args.pr_number)
 
     if not args.github_token:
         raise SystemExit(
@@ -552,9 +562,8 @@ def main() -> None:
     report = render_report(analysis=analysis, pr_info=pr_info, comments_count=len(comments))
 
     print(report)
-    if args.output_file:
-        Path(args.output_file).write_text(report, encoding="utf-8")
-        print(f"Saved report to: {args.output_file}")
+    Path(output_file).write_text(report, encoding="utf-8")
+    print(f"Saved report to: {output_file}")
 
 
 if __name__ == "__main__":

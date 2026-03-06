@@ -27,3 +27,9 @@ Traceback (most recent call last):
 RuntimeError: GitHub GraphQL error: [{'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'side'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'side'}, 'locations': [{'line': 40, 'column': 15}], 'message': "Field 'side' doesn't exist on type 'PullRequestReviewComment'"}, {'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'startSide'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'startSide'}, 'locations': [{'line': 41, 'column': 15}], 'message': "Field 'startSide' doesn't exist on type 'PullRequestReviewComment'"}]
 
 
+can you provide indications of progression, communication with github, for each LLM call, etc
+
+
+can you add a default output file, include the repos and pr number into the name of the default. Make storing to true by default and expect a command line argument if the file name is to be changed.
+
+

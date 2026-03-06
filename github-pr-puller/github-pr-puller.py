@@ -246,7 +246,7 @@ def build_prompt_debug_filename(output_file: str) -> str:
 
 def build_llm_implementation_filename(output_file: str) -> str:
     output_path = Path(output_file)
-    return str(output_path.with_name(f"{output_path.name}.llm-implementation.yaml"))
+    return str(output_path.with_name(f"{output_path.stem}.llm-implementation.yaml"))
 
 
 def add_output_index(file_path: str, index: int) -> str:
@@ -529,8 +529,17 @@ def fetch_pr_modified_files_with_content(
         raise RuntimeError("Unable to determine PR head commit SHA for file content retrieval.")
 
     file_contexts: list[dict[str, str]] = []
+    budget_used = 0
     ordered_paths = sorted(modified_paths)
     for idx, path in enumerate(ordered_paths, start=1):
+        if budget_used >= MAX_TOTAL_MODIFIED_FILES_CHARS:
+            remaining = len(ordered_paths) - idx + 1
+            progress.log(
+                "Prompt size guard: omitting "
+                f"{remaining} modified file(s) due to total size limit "
+                f"({MAX_TOTAL_MODIFIED_FILES_CHARS} chars)."
+            )
+            break
         progress.log(f"Fetching file content {idx}/{len(ordered_paths)}: {path}")
         expression = f"{head_ref_oid}:{path}"
         content_data = github_graphql(
@@ -553,6 +562,7 @@ def fetch_pr_modified_files_with_content(
             file_text = "[file content unavailable]"
 
         file_contexts.append({"path": path, "content": file_text})
+        budget_used += min(len(file_text), MAX_FILE_CONTENT_CHARS)
 
     progress.log(f"Finished file content collection: total_unique_files={len(file_contexts)}")
     return file_contexts
@@ -570,13 +580,10 @@ def build_llm_payload(
         processed: list[str] = []
         for line in lines:
             match = re.match(r"^([ \t]*)(.*)$", line)
-            if match:
-                indent, rest = match.groups()
-                rest = MULTI_SPACE_OR_TAB_RE.sub(" ", rest)
-                rest = rest.rstrip(" \t")
-                processed.append(indent + rest)
-            else:
-                processed.append(line)
+            indent, rest = match.groups()
+            rest = MULTI_SPACE_OR_TAB_RE.sub(" ", rest)
+            rest = rest.rstrip(" \t")
+            processed.append(indent + rest)
         normalized = "\n".join(processed)
         normalized = MULTI_NEWLINE_RE.sub("\n\n", normalized)
         return normalized
@@ -704,6 +711,7 @@ def analyze_with_openai_agents(
             2. Use the provided modified file contents to add implementation context.
             3. Keep guidance implementation-focused and avoid generic advice.
             4. If a comment is ambiguous, state assumptions explicitly in technical_explanation.
+            5. If the comment is not actionable (e.g. a question or suggestion), ignore the comment and return empty strings for that entry, but still include it in the output list to maintain alignment with input comments. Indicate in the implementation_prompt that the comment was not actionable.
             """
         ).strip(),
         output_type=PRGuidance,
@@ -784,6 +792,8 @@ def render_llm_implementation_file(analysis: Any, pr_info: dict[str, Any]) -> st
         "  This file is meant for an implementation-focused LLM.",
         "  Implement each implementation_prompt using requested_change_summary and",
         "  technical_explanation as supporting context.",
+        "  If an implementation_prompt indicates the comment is not actionable, skip implementation but still include the comment in the output list to maintain alignment with input comments.",
+        "  Stop in between each implementation_items to approve or revert and request confirmation before proceeding to the next item.",
         f"repository: {_yaml_scalar(pr_info.get('repository'))}",
         f"pull_request_number: {_yaml_scalar(pr_info.get('number'))}",
         f"pull_request_title: {_yaml_scalar(pr_info.get('title'))}",
@@ -901,6 +911,11 @@ def main() -> None:
     }
     prompt_debug_path.write_text(json.dumps(prompt_debug_doc, indent=2), encoding="utf-8")
     progress.log(f"Saved prompt debug payload to: {prompt_debug_file}")
+    progress.log(
+        "WARNING: Prompt debug payload file contains full prompt text and modified "
+        "file contents. Treat this file as sensitive; it may include secrets or "
+        "other confidential repository data."
+    )
 
     openai_started_at = time.monotonic()
     analysis = analyze_with_openai_agents(

@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import textwrap
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -57,8 +58,6 @@ query PullRequestThreads(
               startLine
               originalLine
               originalStartLine
-              side
-              startSide
               outdated
               author {
                 login
@@ -93,8 +92,6 @@ query ReviewThreadComments($threadId: ID!, $commentsCursor: String) {
           startLine
           originalLine
           originalStartLine
-          side
-          startSide
           outdated
           author {
             login
@@ -105,6 +102,17 @@ query ReviewThreadComments($threadId: ID!, $commentsCursor: String) {
   }
 }
 """
+
+
+class ProgressReporter:
+    def __init__(self, enabled: bool) -> None:
+        self.enabled = enabled
+
+    def log(self, message: str) -> None:
+        if not self.enabled:
+            return
+        timestamp = time.strftime("%H:%M:%S", time.localtime())
+        print(f"[{timestamp}] {message}", file=sys.stderr, flush=True)
 
 
 def parse_args() -> argparse.Namespace:
@@ -156,6 +164,11 @@ def parse_args() -> argparse.Namespace:
         default=600,
         help="Maximum unresolved comments to include in LLM input (default: 600).",
     )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Disable progress logs (logs are printed to stderr by default).",
+    )
     return parser.parse_args()
 
 
@@ -168,7 +181,17 @@ def parse_repository(repository: str) -> tuple[str, str]:
     return owner, name
 
 
-def github_graphql(token: str, query: str, variables: dict[str, Any]) -> dict[str, Any]:
+def github_graphql(
+    token: str,
+    query: str,
+    variables: dict[str, Any],
+    *,
+    operation_name: str,
+    progress: ProgressReporter | None = None,
+) -> dict[str, Any]:
+    request_started_at = time.monotonic()
+    if progress:
+        progress.log(f"GitHub API request started: {operation_name}")
     payload = json.dumps({"query": query, "variables": variables}).encode("utf-8")
     req = urllib.request.Request(
         url=GITHUB_GRAPHQL_URL,
@@ -187,27 +210,45 @@ def github_graphql(token: str, query: str, variables: dict[str, Any]) -> dict[st
             raw = response.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
+        if progress:
+            progress.log(f"GitHub API request failed ({operation_name}): HTTP {exc.code}")
         raise RuntimeError(f"GitHub API HTTP {exc.code}: {detail}") from exc
     except urllib.error.URLError as exc:
+        if progress:
+            progress.log(f"GitHub API request failed ({operation_name}): network error")
         raise RuntimeError(f"GitHub API request failed: {exc}") from exc
 
     result = json.loads(raw)
     if "errors" in result and result["errors"]:
+        if progress:
+            progress.log(f"GitHub API request failed ({operation_name}): GraphQL errors returned")
         raise RuntimeError(f"GitHub GraphQL error: {result['errors']}")
+    if progress:
+        duration = time.monotonic() - request_started_at
+        progress.log(f"GitHub API request completed: {operation_name} ({duration:.2f}s)")
     return result.get("data", {})
 
 
-def fetch_all_thread_comments(token: str, thread_id: str, first_page: dict[str, Any]) -> list[dict[str, Any]]:
+def fetch_all_thread_comments(
+    token: str,
+    thread_id: str,
+    first_page: dict[str, Any],
+    progress: ProgressReporter,
+) -> list[dict[str, Any]]:
     comments = list(first_page.get("nodes", []))
     page_info = first_page.get("pageInfo") or {}
     cursor = page_info.get("endCursor")
     has_next = bool(page_info.get("hasNextPage"))
+    page_number = 1
 
     while has_next:
+        page_number += 1
         data = github_graphql(
             token=token,
             query=THREAD_COMMENTS_QUERY,
             variables={"threadId": thread_id, "commentsCursor": cursor},
+            operation_name=f"ReviewThreadComments thread={thread_id} page={page_number}",
+            progress=progress,
         )
         node = data.get("node") or {}
         page = node.get("comments") or {}
@@ -237,8 +278,6 @@ def normalize_comment(thread: dict[str, Any], comment: dict[str, Any]) -> dict[s
         "start_line": comment.get("startLine"),
         "original_line": comment.get("originalLine"),
         "original_start_line": comment.get("originalStartLine"),
-        "side": comment.get("side"),
-        "start_side": comment.get("startSide"),
         "outdated": bool(comment.get("outdated")),
         "code_snippet": comment.get("diffHunk", ""),
     }
@@ -249,10 +288,14 @@ def fetch_unresolved_pr_comments(
     owner: str,
     repo: str,
     pr_number: int,
+    progress: ProgressReporter,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     threads_cursor: str | None = None
     unresolved_comments: list[dict[str, Any]] = []
     pr_info: dict[str, Any] | None = None
+    threads_page_number = 1
+
+    progress.log(f"Loading unresolved PR comments for {owner}/{repo}#{pr_number}")
 
     while True:
         data = github_graphql(
@@ -264,6 +307,8 @@ def fetch_unresolved_pr_comments(
                 "prNumber": pr_number,
                 "threadsCursor": threads_cursor,
             },
+            operation_name=f"PullRequestThreads page={threads_page_number}",
+            progress=progress,
         )
         repository_node = data.get("repository")
         if not repository_node:
@@ -282,23 +327,41 @@ def fetch_unresolved_pr_comments(
             }
 
         review_threads = pr_node.get("reviewThreads") or {}
-        for thread in review_threads.get("nodes", []):
-            if thread.get("isResolved"):
-                continue
+        thread_nodes = review_threads.get("nodes", [])
+        unresolved_thread_nodes = [thread for thread in thread_nodes if not thread.get("isResolved")]
+        progress.log(
+            "GitHub thread page "
+            f"{threads_page_number}: total_threads={len(thread_nodes)}, "
+            f"unresolved_threads={len(unresolved_thread_nodes)}"
+        )
+
+        for thread in unresolved_thread_nodes:
+            thread_id = str(thread.get("id") or "unknown")
+            progress.log(
+                f"Collecting comments from unresolved thread {thread_id} on "
+                f"{thread.get('path') or 'unknown file'}"
+            )
             first_page = thread.get("comments") or {}
             comments = fetch_all_thread_comments(
                 token=token,
-                thread_id=thread.get("id"),
+                thread_id=thread_id,
                 first_page=first_page,
+                progress=progress,
             )
             for comment in comments:
                 unresolved_comments.append(normalize_comment(thread, comment))
+            progress.log(
+                f"Thread {thread_id}: collected {len(comments)} comments "
+                f"(running_total={len(unresolved_comments)})"
+            )
 
         page_info = review_threads.get("pageInfo") or {}
         if not page_info.get("hasNextPage"):
             break
         threads_cursor = page_info.get("endCursor")
+        threads_page_number += 1
 
+    progress.log(f"Finished GitHub collection: total_unresolved_comments={len(unresolved_comments)}")
     return pr_info or {}, unresolved_comments
 
 
@@ -325,7 +388,11 @@ def maybe_load_agents_locally() -> None:
         sys.path.insert(0, str(local_src))
 
 
-def analyze_with_openai_agents(model: str, payload: dict[str, Any]) -> Any:
+def analyze_with_openai_agents(
+    model: str,
+    payload: dict[str, Any],
+    progress: ProgressReporter,
+) -> Any:
     maybe_load_agents_locally()
     try:
         from pydantic import BaseModel, Field
@@ -382,7 +449,12 @@ def analyze_with_openai_agents(model: str, payload: dict[str, Any]) -> Any:
         "guidance.\n\n"
         f"{json.dumps(payload, indent=2)}"
     )
+    comment_count = len(payload.get("unresolved_comments", []))
+    progress.log(f"LLM call 1 started (model={model}, unresolved_comments={comment_count})")
+    llm_started_at = time.monotonic()
     result = Runner.run_sync(agent, message)
+    duration = time.monotonic() - llm_started_at
+    progress.log(f"LLM call 1 completed in {duration:.2f}s")
     return result.final_output
 
 
@@ -434,6 +506,9 @@ def render_report(analysis: Any, pr_info: dict[str, Any], comments_count: int) -
 
 def main() -> None:
     args = parse_args()
+    progress = ProgressReporter(enabled=not args.quiet)
+    progress.log("Starting PR review synthesis run")
+
     try:
         owner, repo = parse_repository(args.repository)
     except ValueError as exc:
@@ -451,6 +526,7 @@ def main() -> None:
         owner=owner,
         repo=repo,
         pr_number=args.pr_number,
+        progress=progress,
     )
 
     if not comments:
@@ -466,8 +542,13 @@ def main() -> None:
         return
 
     comments = comments[: args.max_comments]
+    progress.log(
+        f"Preparing LLM input payload with {len(comments)} comments "
+        f"(max_comments={args.max_comments})"
+    )
     payload = build_llm_payload(pr_info=pr_info, comments=comments)
-    analysis = analyze_with_openai_agents(model=args.model, payload=payload)
+    analysis = analyze_with_openai_agents(model=args.model, payload=payload, progress=progress)
+    progress.log("Rendering final output report")
     report = render_report(analysis=analysis, pr_info=pr_info, comments_count=len(comments))
 
     print(report)

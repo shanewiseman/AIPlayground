@@ -522,6 +522,9 @@ def render_report(analysis: Any, pr_info: dict[str, Any], comments_count: int) -
 
 
 def main() -> None:
+    run_started_at = time.monotonic()
+    github_elapsed_seconds = 0.0
+    openai_elapsed_seconds = 0.0
     args = parse_args()
     progress = ProgressReporter(enabled=not args.quiet)
     progress.log("Starting PR review synthesis run")
@@ -539,6 +542,7 @@ def main() -> None:
     if not os.environ.get("OPENAI_API_KEY"):
         raise SystemExit("Missing OPENAI_API_KEY environment variable.")
 
+    github_started_at = time.monotonic()
     pr_info, comments = fetch_unresolved_pr_comments(
         token=args.github_token,
         owner=owner,
@@ -546,6 +550,8 @@ def main() -> None:
         pr_number=args.pr_number,
         progress=progress,
     )
+    github_elapsed_seconds = time.monotonic() - github_started_at
+    progress.log(f"GitHub logic completed in {github_elapsed_seconds:.2f}s")
 
     if not comments:
         print(
@@ -557,6 +563,10 @@ def main() -> None:
                 """
             ).strip()
         )
+        total_elapsed_seconds = time.monotonic() - run_started_at
+        print(f"GitHub logic runtime (seconds): {github_elapsed_seconds:.2f}")
+        print(f"OpenAI LLM runtime (seconds): {openai_elapsed_seconds:.2f}")
+        print(f"Total runtime (seconds): {total_elapsed_seconds:.2f}")
         return
 
     comments = comments[: args.max_comments]
@@ -575,19 +585,26 @@ def main() -> None:
     Path(prompt_debug_file).write_text(json.dumps(prompt_debug_doc, indent=2), encoding="utf-8")
     progress.log(f"Saved prompt debug payload to: {prompt_debug_file}")
 
+    openai_started_at = time.monotonic()
     analysis = analyze_with_openai_agents(
         model=args.model,
         prompt=prompt,
         comment_count=len(comments),
         progress=progress,
     )
+    openai_elapsed_seconds = time.monotonic() - openai_started_at
+    progress.log(f"OpenAI LLM logic completed in {openai_elapsed_seconds:.2f}s")
     progress.log("Rendering final output report")
     report = render_report(analysis=analysis, pr_info=pr_info, comments_count=len(comments))
 
-    print(report)
+    #print(report)
     Path(output_file).write_text(report, encoding="utf-8")
     print(f"Saved report to: {output_file}")
     print(f"Saved prompt debug payload to: {prompt_debug_file}")
+    total_elapsed_seconds = time.monotonic() - run_started_at
+    print(f"GitHub logic runtime (seconds): {github_elapsed_seconds:.2f}")
+    print(f"OpenAI LLM runtime (seconds): {openai_elapsed_seconds:.2f}")
+    print(f"Total runtime (seconds): {total_elapsed_seconds:.2f}")
 
 
 if __name__ == "__main__":

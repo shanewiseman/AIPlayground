@@ -36,3 +36,6 @@ can you add a default output file, include the repos and pr number into the name
 store the payload of the prompt into a file, the filename should be named exactly like the output file andindication it's for prompt debug and with a different appropriate extension
 
 
+add a timer to keep track how long from user input to report completion. print this value to the screen, measure in seconds.
+
+

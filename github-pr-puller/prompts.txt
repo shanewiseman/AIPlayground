@@ -33,3 +33,6 @@ can you provide indications of progression, communication with github, for each 
 can you add a default output file, include the repos and pr number into the name of the default. Make storing to true by default and expect a command line argument if the file name is to be changed.
 
 
+store the payload of the prompt into a file, the filename should be named exactly like the output file andindication it's for prompt debug and with a different appropriate extension
+
+

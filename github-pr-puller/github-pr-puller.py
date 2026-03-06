@@ -190,6 +190,11 @@ def build_default_output_filename(owner: str, repo: str, pr_number: int) -> str:
     return f"pr-review-{safe_owner}-{safe_repo}-pr-{pr_number}.md"
 
 
+def build_prompt_debug_filename(output_file: str) -> str:
+    output_path = Path(output_file)
+    return str(output_path.with_name(f"{output_path.name}.prompt-debug.json"))
+
+
 def github_graphql(
     token: str,
     query: str,
@@ -388,6 +393,14 @@ def build_llm_payload(pr_info: dict[str, Any], comments: list[dict[str, Any]]) -
     }
 
 
+def build_analysis_prompt(payload: dict[str, Any]) -> str:
+    return (
+        "Analyze the following unresolved GitHub PR comments payload and produce structured "
+        "guidance.\n\n"
+        f"{json.dumps(payload, indent=2)}"
+    )
+
+
 def maybe_load_agents_locally() -> None:
     """Allow running from this repo without pip installing openai-agents."""
     if "agents" in sys.modules:
@@ -399,7 +412,8 @@ def maybe_load_agents_locally() -> None:
 
 def analyze_with_openai_agents(
     model: str,
-    payload: dict[str, Any],
+    prompt: str,
+    comment_count: int,
     progress: ProgressReporter,
 ) -> Any:
     maybe_load_agents_locally()
@@ -453,15 +467,9 @@ def analyze_with_openai_agents(
     )
 
     set_tracing_disabled(True)
-    message = (
-        "Analyze the following unresolved GitHub PR comments payload and produce structured "
-        "guidance.\n\n"
-        f"{json.dumps(payload, indent=2)}"
-    )
-    comment_count = len(payload.get("unresolved_comments", []))
     progress.log(f"LLM call 1 started (model={model}, unresolved_comments={comment_count})")
     llm_started_at = time.monotonic()
-    result = Runner.run_sync(agent, message)
+    result = Runner.run_sync(agent, prompt)
     duration = time.monotonic() - llm_started_at
     progress.log(f"LLM call 1 completed in {duration:.2f}s")
     return result.final_output
@@ -557,13 +565,29 @@ def main() -> None:
         f"(max_comments={args.max_comments})"
     )
     payload = build_llm_payload(pr_info=pr_info, comments=comments)
-    analysis = analyze_with_openai_agents(model=args.model, payload=payload, progress=progress)
+    prompt = build_analysis_prompt(payload)
+    prompt_debug_file = build_prompt_debug_filename(output_file)
+    prompt_debug_doc = {
+        "model": args.model,
+        "prompt_payload": payload,
+        "prompt_text": prompt,
+    }
+    Path(prompt_debug_file).write_text(json.dumps(prompt_debug_doc, indent=2), encoding="utf-8")
+    progress.log(f"Saved prompt debug payload to: {prompt_debug_file}")
+
+    analysis = analyze_with_openai_agents(
+        model=args.model,
+        prompt=prompt,
+        comment_count=len(comments),
+        progress=progress,
+    )
     progress.log("Rendering final output report")
     report = render_report(analysis=analysis, pr_info=pr_info, comments_count=len(comments))
 
     print(report)
     Path(output_file).write_text(report, encoding="utf-8")
     print(f"Saved report to: {output_file}")
+    print(f"Saved prompt debug payload to: {prompt_debug_file}")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
 import os
 import re
@@ -17,10 +18,12 @@ from typing import Any
 
 
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
+GITHUB_REST_API_BASE = "https://api.github.com"
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_MODEL = "gpt-5"
 MAX_FILE_CONTENT_CHARS = 50_000
 MAX_TOTAL_MODIFIED_FILES_CHARS = 200_000
+CHECKPOINT_COMMENT_PREFIX = "[github-pr-puller checkpoint]"
 
 THREADS_QUERY = """
 query PullRequestThreads(
@@ -368,6 +371,67 @@ def fetch_all_thread_comments(
     return comments
 
 
+def is_checkpoint_comment(comment_body: Any) -> bool:
+    return str(comment_body or "").strip().startswith(CHECKPOINT_COMMENT_PREFIX)
+
+
+def get_thread_root_comment_database_id(comments: list[dict[str, Any]]) -> int | None:
+    for comment in comments:
+        db_id = comment.get("databaseId")
+        if isinstance(db_id, int):
+            return db_id
+        if isinstance(db_id, str) and db_id.isdigit():
+            return int(db_id)
+    return None
+
+
+def post_thread_checkpoint_comment(
+    token: str,
+    owner: str,
+    repo: str,
+    pr_number: int,
+    root_comment_id: int,
+    *,
+    progress: ProgressReporter,
+) -> None:
+    checkpoint_body = (
+        f"{CHECKPOINT_COMMENT_PREFIX} This thread has been consumed by automation and "
+        f"a potential change is in process. timestamp_utc={datetime.now(timezone.utc).isoformat()}"
+    )
+    url = (
+        f"{GITHUB_REST_API_BASE}/repos/{owner}/{repo}/pulls/{pr_number}/comments/"
+        f"{root_comment_id}/replies"
+    )
+    payload = json.dumps({"body": checkpoint_body}).encode("utf-8")
+    req = urllib.request.Request(
+        url=url,
+        data=payload,
+        method="POST",
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "User-Agent": "github-pr-puller-script",
+            "X-GitHub-Api-Version": GITHUB_API_VERSION,
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30):
+            pass
+        progress.log(
+            "Posted checkpoint reply comment for consumed thread "
+            f"(root_comment_id={root_comment_id})"
+        )
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(
+            "Failed to post checkpoint review reply comment. "
+            f"HTTP {exc.code}: {detail}"
+        ) from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"Failed to post checkpoint review reply comment: {exc}") from exc
+
+
 def normalize_comment(thread: dict[str, Any], comment: dict[str, Any]) -> dict[str, Any]:
     comment_id = comment.get("id")
     file_path = comment.get("path") or thread.get("path") or ""
@@ -399,7 +463,7 @@ def fetch_unresolved_pr_comments(
     progress: ProgressReporter,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     threads_cursor: str | None = None
-    unresolved_comments: list[dict[str, Any]] = []
+    unresolved_threads: list[dict[str, Any]] = []
     pr_info: dict[str, Any] | None = None
     threads_page_number = 1
 
@@ -460,16 +524,68 @@ def fetch_unresolved_pr_comments(
                 first_page=first_page,
                 progress=progress,
             )
-            kept_comments = 0
-            for comment in comments:
+            if not comments:
+                progress.log(f"Skipping thread {thread_id}: no comments found")
+                continue
+
+            # Process full thread history when no checkpoint exists; otherwise only comments
+            # after the most recent checkpoint marker.
+            last_checkpoint_index = -1
+            for idx, comment in enumerate(comments):
+                if is_checkpoint_comment(comment.get("body")):
+                    last_checkpoint_index = idx
+
+            candidate_comments = comments[last_checkpoint_index + 1 :]
+            if last_checkpoint_index >= 0:
+                progress.log(
+                    f"Thread {thread_id}: processing {len(candidate_comments)} comment(s) "
+                    "after last checkpoint marker"
+                )
+            else:
+                progress.log(
+                    f"Thread {thread_id}: no checkpoint marker found; processing full thread "
+                    f"({len(candidate_comments)} comment(s))"
+                )
+
+            thread_comments: list[dict[str, Any]] = []
+            for comment in candidate_comments:
                 if comment.get("outdated"):
                     continue
-                unresolved_comments.append(normalize_comment(thread, comment))
-                kept_comments += 1
-            progress.log(
-                f"Thread {thread_id}: collected {kept_comments}/{len(comments)} non-outdated comments "
-                f"(running_total={len(unresolved_comments)})"
+                if is_checkpoint_comment(comment.get("body")):
+                    continue
+                thread_comments.append(normalize_comment(thread, comment))
+
+            kept_comments = len(thread_comments)
+            if kept_comments == 0:
+                progress.log(f"Skipping thread {thread_id}: no eligible comments after filtering")
+                continue
+
+            unresolved_threads.append(
+                {
+                    "thread_id": thread.get("id"),
+                    "thread_path": thread.get("path"),
+                    "comments": thread_comments,
+                }
             )
+            progress.log(
+                f"Thread {thread_id}: collected {kept_comments}/{len(candidate_comments)} eligible comments "
+                f"(running_total_threads={len(unresolved_threads)})"
+            )
+            root_comment_id = get_thread_root_comment_database_id(comments)
+            if root_comment_id is None:
+                progress.log(
+                    f"Skipping checkpoint post for thread {thread_id}: no databaseId found "
+                    "for a root comment."
+                )
+            else:
+                post_thread_checkpoint_comment(
+                    token=token,
+                    owner=owner,
+                    repo=repo,
+                    pr_number=pr_number,
+                    root_comment_id=root_comment_id,
+                    progress=progress,
+                )
 
         page_info = review_threads.get("pageInfo") or {}
         if not page_info.get("hasNextPage"):
@@ -477,8 +593,15 @@ def fetch_unresolved_pr_comments(
         threads_cursor = page_info.get("endCursor")
         threads_page_number += 1
 
-    progress.log(f"Finished GitHub collection: total_unresolved_comments={len(unresolved_comments)}")
-    return pr_info or {}, unresolved_comments
+    total_unresolved_comments = sum(
+        len(thread_group.get("comments", [])) for thread_group in unresolved_threads
+    )
+    progress.log(
+        "Finished GitHub collection: "
+        f"total_unresolved_threads={len(unresolved_threads)}, "
+        f"total_unresolved_comments={total_unresolved_comments}"
+    )
+    return pr_info or {}, unresolved_threads
 
 
 def fetch_pr_modified_files_with_content(
@@ -582,8 +705,56 @@ def fetch_pr_modified_files_with_content(
     return file_contexts
 
 
+def count_thread_comments(thread_groups: list[dict[str, Any]]) -> int:
+    total = 0
+    for thread_group in thread_groups:
+        thread_comments = thread_group.get("comments", [])
+        if isinstance(thread_comments, list):
+            total += len(thread_comments)
+    return total
+
+
+def select_thread_groups_for_budget(
+    thread_groups: list[dict[str, Any]],
+    max_comments: int,
+    *,
+    progress: ProgressReporter,
+) -> list[dict[str, Any]]:
+    selected: list[dict[str, Any]] = []
+    running_comments = 0
+
+    for thread_group in thread_groups:
+        thread_comments = thread_group.get("comments", [])
+        if not isinstance(thread_comments, list):
+            continue
+        thread_comment_count = len(thread_comments)
+        if thread_comment_count == 0:
+            continue
+
+        if running_comments + thread_comment_count <= max_comments:
+            selected.append(thread_group)
+            running_comments += thread_comment_count
+            continue
+
+        if not selected:
+            selected.append(thread_group)
+            running_comments += thread_comment_count
+            progress.log(
+                "max-comments budget is smaller than first thread size; "
+                f"included first thread with {thread_comment_count} comment(s)."
+            )
+        else:
+            progress.log(
+                "max-comments budget reached; keeping full-thread boundaries and "
+                "omitting remaining thread(s)."
+            )
+        break
+
+    return selected
+
+
 def build_llm_payload(
-    comments: list[dict[str, Any]],
+    thread_groups: list[dict[str, Any]],
     modified_files_with_content: list[dict[str, str]],
     *,
     progress: ProgressReporter | None = None,
@@ -643,15 +814,39 @@ def build_llm_payload(
             f"{len(modified_files_out)} file(s)."
         )
 
-    return {
-        "review_comments": [
+    review_comments_payload: list[dict[str, Any]] = []
+    for thread_group in thread_groups:
+        thread_comments = thread_group.get("comments", [])
+        if not isinstance(thread_comments, list) or not thread_comments:
+            continue
+
+        file_path = str(thread_group.get("thread_path") or "")
+        code_snippet = ""
+        comment_bodies: list[str] = []
+
+        for comment in thread_comments:
+            comment_file_path = str(comment.get("file_path") or "")
+            if not file_path and comment_file_path:
+                file_path = comment_file_path
+
+            if not code_snippet:
+                snippet = str(comment.get("code_snippet") or "")
+                if snippet:
+                    code_snippet = snippet
+
+            comment_bodies.append(str(comment.get("body") or ""))
+
+        review_comments_payload.append(
             {
-                "file_path": str(comment.get("file_path") or ""),
-                "body": str(comment.get("body") or ""),
-                "code_snippet": str(comment.get("code_snippet") or ""),
+                "thread_id": str(thread_group.get("thread_id") or ""),
+                "file_path": file_path,
+                "code_snippet": code_snippet,
+                "comment_bodies": comment_bodies,
             }
-            for comment in comments
-        ],
+        )
+
+    return {
+        "review_comments": review_comments_payload,
         "modified_files": modified_files_out,
     }
 
@@ -660,7 +855,8 @@ def build_analysis_prompt(payload: dict[str, Any]) -> str:
     return (
         "Analyze the following unresolved GitHub PR comments. "
         "Use both the review comments and the full content of each modified file for context. "
-        "Each review comment item contains 'file_path', 'body', and 'code_snippet'. "
+        "Each review comment item is per thread and contains 'thread_id', 'file_path', "
+        "'code_snippet', and 'comment_bodies'. "
         "Each modified file item contains 'path' and full 'content'. "
         "Use the file contents actively when creating guidance.\n\n"
         f"{json.dumps(payload, indent=2)}"
@@ -679,6 +875,7 @@ def maybe_load_agents_locally() -> None:
 def analyze_with_openai_agents(
     model: str,
     prompt: str,
+    thread_count: int,
     comment_count: int,
     progress: ProgressReporter,
 ) -> Any:
@@ -691,7 +888,10 @@ def analyze_with_openai_agents(
             "Missing dependencies. Install with: pip install openai-agents pydantic"
         ) from exc
 
-    class CommentGuidance(BaseModel):
+    class ThreadGuidance(BaseModel):
+        thread_id: str = Field(
+            description="Thread ID from the input payload. Must match the corresponding input thread."
+        )
         severity: str = Field(
             description=(
                 "Priority severity of the comment. Use one of: critical, high, medium, low."
@@ -720,8 +920,8 @@ def analyze_with_openai_agents(
         implementation_strategy: str = Field(
             description="Suggested plan/order to implement requested changes."
         )
-        comments: list[CommentGuidance] = Field(
-            description="One guidance object per unresolved comment."
+        comments: list[ThreadGuidance] = Field(
+            description="One guidance object per unresolved review thread."
         )
 
     agent = Agent(
@@ -732,23 +932,30 @@ def analyze_with_openai_agents(
             You analyze unresolved GitHub pull request review comments.
             Return concise but technically precise output for an implementation LLM.
             Requirements:
-            1. Produce one comment entry per input unresolved comment.
-            2. Use the provided modified file contents to add implementation context.
-            3. Keep guidance implementation-focused and avoid generic advice.
-            4. If a comment is ambiguous, state assumptions explicitly in technical_explanation.
-            5. If the comment is not actionable (e.g. a question or suggestion), ignore the comment and return empty strings for that entry, but still include it in the output list to maintain alignment with input comments. Indicate in the implementation_prompt that the comment was not actionable.
-            6. For every comment entry, include severity and risk using these labels:
+            1. Produce one output entry per input unresolved review thread, in the same order.
+            2. Preserve and echo the exact input thread_id for each entry.
+            3. Use the provided modified file contents plus thread-level file_path, code_snippet,
+               and all comment_bodies to add implementation context.
+            4. Keep guidance implementation-focused and avoid generic advice.
+            5. If a thread is ambiguous, state assumptions explicitly in technical_explanation.
+            6. If the thread is not actionable (e.g. only questions/suggestions), keep the thread
+               entry but indicate non-actionable status in implementation_prompt.
+            7. For every thread entry, include severity and risk using these labels:
                severity: critical/high/medium/low
                risk: high/medium/low
-            7. Base the severity and risk assessments on the potential impact to the codebase and the likelihood of issues if the comment is not addressed or implemented incorrectly. Consider factors such as how central the commented code is to the PR's functionality, how likely it is that the reviewer would request changes if the comment were addressed, and how much technical complexity or uncertainty is involved in implementing the requested change.
-               Additionally, consider the effects on runtime behavior if not addressed, exposure of sensitive data, and potential security implications.
+            8. Base severity and risk on potential impact and likelihood of problems if not
+               addressed or implemented incorrectly.
+               Consider runtime behavior, sensitive data exposure, and security implications.
             """
         ).strip(),
         output_type=PRGuidance,
     )
 
     set_tracing_disabled(True)
-    progress.log(f"LLM call 1 started (model={model}, unresolved_comments={comment_count})")
+    progress.log(
+        "LLM call 1 started "
+        f"(model={model}, unresolved_threads={thread_count}, unresolved_comments={comment_count})"
+    )
     llm_started_at = time.monotonic()
     result = Runner.run_sync(agent, prompt)
     duration = time.monotonic() - llm_started_at
@@ -771,8 +978,9 @@ def block(title: str, text: str) -> str:
 def render_report(
     analysis: Any,
     pr_info: dict[str, Any],
+    threads_count: int,
     comments_count: int,
-    source_comments: list[dict[str, Any]],
+    source_threads: list[dict[str, Any]],
 ) -> str:
     header = textwrap.dedent(
         f"""\
@@ -781,6 +989,7 @@ def render_report(
         Repository: `{pr_info.get("repository")}`
         Pull Request: `#{pr_info.get("number")}` - {pr_info.get("title")}
         PR URL: {pr_info.get("url")}
+        Unresolved threads analyzed: {threads_count}
         Unresolved comments analyzed: {comments_count}
         """
     ).strip()
@@ -789,18 +998,51 @@ def render_report(
     sections.append(block("Overall Summary", analysis.overall_summary))
     sections.append(block("Implementation Strategy", analysis.implementation_strategy))
 
+    source_threads_by_id: dict[str, dict[str, Any]] = {}
+    for source_thread in source_threads:
+        thread_id = str(source_thread.get("thread_id") or "")
+        if thread_id:
+            source_threads_by_id[thread_id] = source_thread
+
     for idx, comment in enumerate(analysis.comments, start=1):
-        source_comment = source_comments[idx - 1] if (idx - 1) < len(source_comments) else {}
+        source_thread = source_threads_by_id.get(str(comment.thread_id))
+        if source_thread is None and (idx - 1) < len(source_threads):
+            source_thread = source_threads[idx - 1]
+
+        source_thread = source_thread or {}
+        source_thread_comments = source_thread.get("comments", [])
+        if not isinstance(source_thread_comments, list):
+            source_thread_comments = []
+        source_file_path = str(source_thread.get("thread_path") or "")
+        source_code_snippet = ""
+        source_comment_bodies: list[str] = []
+        for source_comment in source_thread_comments:
+            if not source_file_path:
+                source_file_path = str(source_comment.get("file_path") or "")
+            if not source_code_snippet:
+                snippet = str(source_comment.get("code_snippet") or "")
+                if snippet:
+                    source_code_snippet = snippet
+            source_comment_bodies.append(str(source_comment.get("body") or ""))
+
         sections.append(
             textwrap.dedent(
                 f"""\
-                ## Comment {idx}
+                ## Thread {idx}
                 """
             ).strip()
         )
+        sections.append(block("Thread ID", str(comment.thread_id)))
         sections.append(block("Severity", str(comment.severity)))
         sections.append(block("Risk", str(comment.risk)))
-        sections.append(block("Code Snippet (From Review Comment)", str(source_comment.get("code_snippet") or "")))
+        sections.append(block("File Path (From Review Thread)", source_file_path))
+        sections.append(block("Code Snippet (From Review Thread)", source_code_snippet))
+        sections.append(
+            block(
+                "Comment Bodies (From Review Thread)",
+                "\n\n".join(source_comment_bodies),
+            )
+        )
         sections.append(block("Requested Change Summary", comment.requested_change_summary))
         sections.append(block("Technical Explanation", comment.technical_explanation))
         sections.append(block("Implementation Prompt", comment.implementation_prompt))
@@ -844,7 +1086,11 @@ def _risk_rank(value: str) -> int:
     return ranking.get(str(value or "").strip().lower(), 0)
 
 
-def render_llm_implementation_file(analysis: Any, pr_info: dict[str, Any]) -> str:
+def render_llm_implementation_file(
+    analysis: Any,
+    pr_info: dict[str, Any],
+    source_threads: list[dict[str, Any]],
+) -> str:
     sorted_comments = sorted(
         list(analysis.comments),
         key=lambda item: (
@@ -852,6 +1098,11 @@ def render_llm_implementation_file(analysis: Any, pr_info: dict[str, Any]) -> st
             -_risk_rank(str(item.risk)),
         ),
     )
+    source_threads_by_id: dict[str, dict[str, Any]] = {}
+    for source_thread in source_threads:
+        thread_id = str(source_thread.get("thread_id") or "")
+        if thread_id:
+            source_threads_by_id[thread_id] = source_thread
 
     lines: list[str] = [
         "intent: |-",
@@ -871,11 +1122,33 @@ def render_llm_implementation_file(analysis: Any, pr_info: dict[str, Any]) -> st
     ]
 
     for idx, comment in enumerate(sorted_comments, start=1):
+        source_thread = source_threads_by_id.get(str(comment.thread_id))
+        if source_thread is None:
+            source_thread = {}
+        source_thread_comments = source_thread.get("comments", [])
+        if not isinstance(source_thread_comments, list):
+            source_thread_comments = []
+        source_file_path = str(source_thread.get("thread_path") or "")
+        source_code_snippet = ""
+        source_comment_bodies: list[str] = []
+        for source_comment in source_thread_comments:
+            if not source_file_path:
+                source_file_path = str(source_comment.get("file_path") or "")
+            if not source_code_snippet:
+                snippet = str(source_comment.get("code_snippet") or "")
+                if snippet:
+                    source_code_snippet = snippet
+            source_comment_bodies.append(str(source_comment.get("body") or ""))
+
         lines.extend(
             [
                 f"  - item_number: {idx}",
+                f"    thread_id: {_yaml_scalar(str(comment.thread_id))}",
                 f"    severity: {_yaml_scalar(str(comment.severity))}",
                 f"    risk: {_yaml_scalar(str(comment.risk))}",
+                f"    file_path_context: {_yaml_scalar(source_file_path)}",
+                f"    code_snippet_context: {_yaml_block(source_code_snippet, indent=6)}",
+                f"    comment_bodies_context: {_yaml_block(chr(10).join(source_comment_bodies), indent=6)}",
                 f"    requested_change_summary_context: {_yaml_block(str(comment.requested_change_summary), indent=6)}",
                 f"    technical_explanation_context: {_yaml_block(str(comment.technical_explanation), indent=6)}",
                 f"    implementation_prompt_primary_instruction: {_yaml_block(str(comment.implementation_prompt), indent=6)}",
@@ -916,7 +1189,7 @@ def main() -> None:
         raise SystemExit("Missing OPENAI_API_KEY environment variable.")
 
     github_started_at = time.monotonic()
-    pr_info, comments = fetch_unresolved_pr_comments(
+    pr_info, thread_groups = fetch_unresolved_pr_comments(
         token=args.github_token,
         owner=owner,
         repo=repo,
@@ -924,7 +1197,7 @@ def main() -> None:
         progress=progress,
     )
 
-    if not comments:
+    if not thread_groups:
         github_elapsed_seconds = time.monotonic() - github_started_at
         progress.log(f"GitHub logic completed in {github_elapsed_seconds:.2f}s")
         print(
@@ -942,9 +1215,25 @@ def main() -> None:
         print(f"Total runtime (seconds): {total_elapsed_seconds:.2f}")
         return
 
-    comments = comments[: args.max_comments]
+    total_comments = count_thread_comments(thread_groups)
+    selected_thread_groups = select_thread_groups_for_budget(
+        thread_groups=thread_groups,
+        max_comments=args.max_comments,
+        progress=progress,
+    )
+    selected_comments = count_thread_comments(selected_thread_groups)
     progress.log(
-        f"Collecting modified file contents for additional context (comments={len(comments)})"
+        f"Collected {len(thread_groups)} unresolved thread(s) and "
+        f"{total_comments} eligible comment(s) before max_comments cutoff"
+    )
+    progress.log(
+        "Selected "
+        f"{len(selected_thread_groups)} thread(s) and {selected_comments} comment(s) "
+        f"for LLM input (max_comments={args.max_comments}, thread-preserving)."
+    )
+    progress.log(
+        "Collecting modified file contents for additional context "
+        f"(selected_threads={len(selected_thread_groups)}, selected_comments={selected_comments})"
     )
     modified_files_with_content = fetch_pr_modified_files_with_content(
         token=args.github_token,
@@ -957,12 +1246,13 @@ def main() -> None:
     progress.log(f"GitHub logic completed in {github_elapsed_seconds:.2f}s")
 
     progress.log(
-        f"Preparing LLM input payload with {len(comments)} comments and "
+        f"Preparing LLM input payload with {len(selected_thread_groups)} threads, "
+        f"{selected_comments} comments and "
         f"{len(modified_files_with_content)} modified files "
         f"(max_comments={args.max_comments})"
     )
     payload = build_llm_payload(
-        comments=comments,
+        thread_groups=selected_thread_groups,
         modified_files_with_content=modified_files_with_content,
         progress=progress,
     )
@@ -993,7 +1283,8 @@ def main() -> None:
     analysis = analyze_with_openai_agents(
         model=args.model,
         prompt=prompt,
-        comment_count=len(comments),
+        thread_count=len(selected_thread_groups),
+        comment_count=selected_comments,
         progress=progress,
     )
     openai_elapsed_seconds = time.monotonic() - openai_started_at
@@ -1002,10 +1293,15 @@ def main() -> None:
     report = render_report(
         analysis=analysis,
         pr_info=pr_info,
-        comments_count=len(comments),
-        source_comments=comments,
+        threads_count=len(selected_thread_groups),
+        comments_count=selected_comments,
+        source_threads=selected_thread_groups,
     )
-    llm_impl_report = render_llm_implementation_file(analysis=analysis, pr_info=pr_info)
+    llm_impl_report = render_llm_implementation_file(
+        analysis=analysis,
+        pr_info=pr_info,
+        source_threads=selected_thread_groups,
+    )
 
     if args.print_report:
         print(report)

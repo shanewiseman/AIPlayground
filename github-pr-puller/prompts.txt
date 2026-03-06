@@ -56,3 +56,12 @@ for each outputed file, include an index number in the filename so as not to clo
 
 
 add additional logic around the analyze_with_openai_agents LLM submission to request a severity and risk attribute in the reponse. Have the report output_file and implementation output to incorporate these attributes, in addition have the implementation output sort comments based on their severity + risk.
+
+
+for each comment retrieved from GitHub, append to the thread a comment indicating this script has consumed the comment and a potential change is in process. If on comment retrieval the last comment is one of these checkpoint comments, do not consider it eligible for processing.
+
+
+change the logic from returning individual comments to returning comments grouped by the thread they belong to. If there is not a checkpoint marker return all comments in a given thread, other wise return all comments after the last checkpoint marker. 
+modify it so the file_path and code_snippet are submitted once per thread and have there be a list of comment bodies
+
+

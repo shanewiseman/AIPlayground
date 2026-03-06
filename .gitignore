@@ -3,4 +3,9 @@ website/debug_output/
 !webasite/debug_output/__init__
 website/state/
 !website/state/__init__
+
+github-pr-puller/__pycache__/
+
 client_code/key.file
+
+

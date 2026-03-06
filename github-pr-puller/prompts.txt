@@ -1,0 +1,10 @@
+in python, write script which adhears these requirements:
+
+program takes a number as an argument representing the idof a github pull request and the respository to use.
+program has implemented support for a help menu and explanation of allowed arguments
+program makes use of the offical github api to retrieve all pr comments, not in the resolved state, against the repository and PR number provided as arguments
+The API calls should retrieve the comment itself, the file which is being commented on and the code snippet under comment.
+program formats the retrieved data in a manner best suited to send an LLM for analysis.
+program sends the data to openapi using the openai-agents-python sdk.
+program expects the LLM to respond to the request with overall summary of the changes requested and a more technical explanation of each comment, written in a manner best suited to submit to an LLM to implement it. 
+program then prints each returned text object in a well formated and pleasing interface, copy and paste ability is high priority

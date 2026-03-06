@@ -249,6 +249,32 @@ def build_llm_implementation_filename(output_file: str) -> str:
     return str(output_path.with_name(f"{output_path.name}.llm-implementation.yaml"))
 
 
+def add_output_index(file_path: str, index: int) -> str:
+    path = Path(file_path)
+    indexed_name = f"{path.stem}.{index}{path.suffix}"
+    return str(path.with_name(indexed_name))
+
+
+def resolve_indexed_output_filenames(base_output_file: str) -> tuple[str, str, str, int]:
+    base_report = base_output_file
+    base_prompt_debug = build_prompt_debug_filename(base_output_file)
+    base_llm_impl = build_llm_implementation_filename(base_output_file)
+
+    index = 1
+    while True:
+        report_candidate = add_output_index(base_report, index)
+        prompt_candidate = add_output_index(base_prompt_debug, index)
+        llm_candidate = add_output_index(base_llm_impl, index)
+
+        if not (
+            Path(report_candidate).exists()
+            or Path(prompt_candidate).exists()
+            or Path(llm_candidate).exists()
+        ):
+            return report_candidate, prompt_candidate, llm_candidate, index
+        index += 1
+
+
 def github_graphql(
     token: str,
     query: str,
@@ -795,7 +821,13 @@ def main() -> None:
         owner, repo = parse_repository(args.repository)
     except ValueError as exc:
         raise SystemExit(str(exc))
-    output_file = args.output_file or build_default_output_filename(owner, repo, args.pr_number)
+    base_output_file = args.output_file or build_default_output_filename(owner, repo, args.pr_number)
+    output_file, prompt_debug_file, llm_implementation_file, output_index = (
+        resolve_indexed_output_filenames(base_output_file)
+    )
+    progress.log(
+        f"Selected output index {output_index} for report artifacts based on {base_output_file}"
+    )
 
     if not args.github_token:
         raise SystemExit(
@@ -857,8 +889,6 @@ def main() -> None:
     )
     prompt = build_analysis_prompt(payload)
     progress.log(f"Prompt text size: {len(prompt)} chars")
-    prompt_debug_file = build_prompt_debug_filename(output_file)
-    llm_implementation_file = build_llm_implementation_filename(output_file)
     output_path = Path(output_file)
     prompt_debug_path = Path(prompt_debug_file)
     llm_impl_path = Path(llm_implementation_file)

@@ -45,6 +45,11 @@ can you include the filename for each review comment, additional to body and cod
 
 in addition to the export of the reportin md format, export the report into a file using a structure with header explaining the intent of this file is to instruct an LLM to ingest and implement the content under the implementation prompt, using the request change and technical explanation as context.
 
+
 for the llm-implementation.md output , don't output in md format, output in a yaml format, reflect this in the filename
 
+
 in the modified_files parameter in the submitted prompt, remove excessive whitespace in the content. specficially, if there is more than 1 space or tab, reduce to 1, if there are more than 1 newline or return characters  reduce it to 1
+
+
+for each outputed file, include an index number in the filename so as not to clobber a previous output file. Simply look for other files of the same name and update and increase the index number

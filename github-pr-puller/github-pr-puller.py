@@ -37,6 +37,7 @@ query PullRequestThreads(
       number
       title
       url
+      headRefOid
       reviewThreads(first: 50, after: $threadsCursor) {
         pageInfo {
           hasNextPage
@@ -149,6 +150,10 @@ query FileContent($owner: String!, $name: String!, $expression: String!) {
 
 MULTI_SPACE_OR_TAB_RE = re.compile(r"[ \t]+")
 MULTI_NEWLINE_RE = re.compile(r"\n{3,}")
+SUGGESTION_BLOCK_RE = re.compile(
+    r"```suggestion[^\n]*\n(.*?)```",
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 class ProgressReporter:
@@ -451,10 +456,79 @@ def post_thread_checkpoint_comment(
         raise RuntimeError(f"Failed to post checkpoint review reply comment: {exc}") from exc
 
 
-def normalize_comment(thread: dict[str, Any], comment: dict[str, Any]) -> dict[str, Any]:
+def _to_int(value: Any) -> int | None:
+    """Convert an arbitrary value to int when possible."""
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped.startswith("-"):
+            stripped = stripped[1:]
+        if stripped.isdigit():
+            return int(value)
+    return None
+
+
+def _slice_file_by_comment_range(
+    file_text: str,
+    *,
+    start_line: Any,
+    end_line: Any,
+) -> str:
+    """Return file text between start_line and end_line (inclusive, 1-based)."""
+    normalized = file_text.replace("\r\n", "\n").replace("\r", "\n")
+    lines = normalized.split("\n")
+    if not lines:
+        return ""
+
+    start = _to_int(start_line)
+    end = _to_int(end_line)
+    if start is None and end is None:
+        return ""
+    if start is None:
+        start = end
+    if end is None:
+        end = start
+    if start is None or end is None:
+        return ""
+
+    lower = max(1, min(start, end))
+    upper = max(1, max(start, end))
+    if lower > len(lines):
+        return ""
+    upper = min(upper, len(lines))
+    return "\n".join(lines[lower - 1 : upper]).strip("\n")
+
+
+def _split_comment_body_and_suggestions(comment_body: str) -> tuple[str, list[str]]:
+    """Separate regular review text from GitHub markdown suggestion blocks."""
+    normalized = str(comment_body or "").replace("\r\n", "\n").replace("\r", "\n")
+    suggestions = [match.strip("\n") for match in SUGGESTION_BLOCK_RE.findall(normalized)]
+    body_without_suggestions = SUGGESTION_BLOCK_RE.sub("\n", normalized)
+    body_without_suggestions = MULTI_NEWLINE_RE.sub("\n\n", body_without_suggestions).strip()
+    clean_suggestions = [item for item in suggestions if item.strip()]
+    return body_without_suggestions, clean_suggestions
+
+
+def normalize_comment(
+    thread: dict[str, Any],
+    comment: dict[str, Any],
+    *,
+    source_file_content: str,
+) -> dict[str, Any]:
     """Normalize GitHub review comment fields used by downstream processing."""
     comment_id = comment.get("id")
     file_path = comment.get("path") or thread.get("path") or ""
+    start_line = comment.get("startLine")
+    line = comment.get("line")
+    code_snippet = _slice_file_by_comment_range(
+        source_file_content,
+        start_line=start_line,
+        end_line=line,
+    )
+    raw_body = str(comment.get("body") or "")
+    body_text, suggestions = _split_comment_body_and_suggestions(raw_body)
+
     return {
         "thread_id": thread.get("id"),
         "thread_path": thread.get("path"),
@@ -464,14 +538,16 @@ def normalize_comment(thread: dict[str, Any], comment: dict[str, Any]) -> dict[s
         "comment_url": comment.get("url"),
         "author": (comment.get("author") or {}).get("login"),
         "created_at": comment.get("createdAt"),
-        "body": comment.get("body", ""),
+        "body": raw_body,
+        "body_text": body_text,
+        "suggestions": suggestions,
         "file_path": str(file_path),
-        "line": comment.get("line"),
-        "start_line": comment.get("startLine"),
+        "line": line,
+        "start_line": start_line,
         "original_line": comment.get("originalLine"),
         "original_start_line": comment.get("originalStartLine"),
         "outdated": bool(comment.get("outdated")),
-        "code_snippet": comment.get("diffHunk", ""),
+        "code_snippet": code_snippet,
     }
 
 
@@ -486,7 +562,9 @@ def fetch_unresolved_pr_comments(
     threads_cursor: str | None = None
     unresolved_threads: list[dict[str, Any]] = []
     pr_info: dict[str, Any] | None = None
+    head_ref_oid: str | None = None
     threads_page_number = 1
+    file_content_cache: dict[str, str] = {}
 
     progress.log(f"Loading unresolved PR comments for {owner}/{repo}#{pr_number}")
 
@@ -518,6 +596,10 @@ def fetch_unresolved_pr_comments(
                 "url": pr_node.get("url"),
                 "repository": f"{owner}/{repo}",
             }
+        if head_ref_oid is None:
+            oid_value = pr_node.get("headRefOid")
+            if isinstance(oid_value, str) and oid_value:
+                head_ref_oid = oid_value
 
         review_threads = pr_node.get("reviewThreads") or {}
         thread_nodes = review_threads.get("nodes", [])
@@ -574,7 +656,40 @@ def fetch_unresolved_pr_comments(
                     continue
                 if is_checkpoint_comment(comment.get("body")):
                     continue
-                thread_comments.append(normalize_comment(thread, comment))
+                file_path = str(comment.get("path") or thread.get("path") or "")
+                source_file_content = ""
+                if file_path and head_ref_oid:
+                    if file_path not in file_content_cache:
+                        expression = f"{head_ref_oid}:{file_path}"
+                        progress.log(
+                            f"Fetching source file for snippet extraction: {file_path}"
+                        )
+                        content_data = github_graphql(
+                            token=token,
+                            query=FILE_CONTENT_QUERY,
+                            variables={
+                                "owner": owner,
+                                "name": repo,
+                                "expression": expression,
+                            },
+                            operation_name=f"ThreadSnippetFileContent {file_path}",
+                            progress=progress,
+                        )
+                        repository_node = content_data.get("repository") or {}
+                        object_node = repository_node.get("object") or {}
+                        if object_node.get("isBinary"):
+                            file_content_cache[file_path] = ""
+                        else:
+                            file_content_cache[file_path] = str(object_node.get("text") or "")
+                    source_file_content = file_content_cache.get(file_path, "")
+
+                thread_comments.append(
+                    normalize_comment(
+                        thread,
+                        comment,
+                        source_file_content=source_file_content,
+                    )
+                )
 
             kept_comments = len(thread_comments)
             if kept_comments == 0:
@@ -851,18 +966,28 @@ def build_llm_payload(
         file_path = str(thread_group.get("thread_path") or "")
         code_snippet = ""
         comment_bodies: list[str] = []
+        comment_suggestions: list[str] = []
 
         for comment in thread_comments:
             comment_file_path = str(comment.get("file_path") or "")
             if not file_path and comment_file_path:
                 file_path = comment_file_path
-
+                    
             if not code_snippet:
                 snippet = str(comment.get("code_snippet") or "")
                 if snippet:
                     code_snippet = snippet
 
-            comment_bodies.append(str(comment.get("body") or ""))
+            body_text = str(comment.get("body_text") or "").strip()
+            if body_text:
+                comment_bodies.append(body_text)
+
+            suggestions = comment.get("suggestions")
+            if isinstance(suggestions, list):
+                for suggestion in suggestions:
+                    clean = str(suggestion or "").strip()
+                    if clean:
+                        comment_suggestions.append(clean)
 
         review_comments_payload.append(
             {
@@ -870,6 +995,7 @@ def build_llm_payload(
                 "file_path": file_path,
                 "code_snippet": code_snippet,
                 "comment_bodies": comment_bodies,
+                "comment_suggestions": comment_suggestions,
             }
         )
 
@@ -885,7 +1011,8 @@ def build_analysis_prompt(payload: dict[str, Any]) -> str:
         "Analyze the following unresolved GitHub PR comments. "
         "Use both the review comments and the full content of each modified file for context. "
         "Each review comment item is per thread and contains 'thread_id', 'file_path', "
-        "'code_snippet', and 'comment_bodies'. "
+        "'code_snippet', 'comment_bodies' (non-suggestion text), and "
+        "'comment_suggestions' (suggested code blocks). "
         "Each modified file item contains 'path' and full 'content'. "
         "Use the file contents actively when creating guidance.\n\n"
         f"{json.dumps(payload, indent=2)}"
@@ -927,20 +1054,25 @@ def analyze_with_openai_agents(
         severity: str = Field(
             description=(
                 "Priority severity of the comment. Use one of: critical, high, medium, low."
-            ),
-            reasoning=(
-                "Base severity on potential impact if not addressed, considering factors like "
-                "runtime behavior, sensitive data exposure, and security implications."
             )
+        )
+        severity_reasoning: str = Field(
+            description=(
+                "Reasoning for the assigned severity level based on potential impact if not addressed, "
+                "considering factors like runtime behavior, sensitive data exposure, and security implications."
+            )
+
         )
         risk: str = Field(
             description=(
                 "Implementation risk if not addressed or implemented incorrectly. "
                 "Use one of: high, medium, low."
             ),
-            reasoning=(
-                "Base risk on potential impact if not addressed or implemented incorrectly, considering factors like "
-                "runtime behavior, sensitive data exposure, and security implications."
+        )
+        risk_reasoning: str = Field(
+            description=(
+                "Reasoning for the assigned risk level based on likelihood of problems if not addressed or implemented incorrectly, "
+                "considering factors like runtime behavior, sensitive data exposure, and security implications."
             )
         )
         requested_change_summary: str = Field(
@@ -977,7 +1109,7 @@ def analyze_with_openai_agents(
             1. Produce one output entry per input unresolved review thread, in the same order.
             2. Preserve and echo the exact input thread_id for each entry.
             3. Use the provided modified file contents plus thread-level file_path, code_snippet,
-               and all comment_bodies to add implementation context.
+               and all comment_bodies/comment_suggestions to add implementation context.
             4. Keep guidance implementation-focused and avoid generic advice.
             5. If a thread is ambiguous, state assumptions explicitly in technical_explanation.
             6. If the thread is not actionable (e.g. only questions/suggestions), keep the thread
@@ -988,7 +1120,7 @@ def analyze_with_openai_agents(
             8. Base severity and risk on potential impact and likelihood of problems if not
                addressed or implemented incorrectly.
                Consider runtime behavior, sensitive data exposure, and security implications.
-            9. Use the reasoning attribute in the schema to explain how you determined severity and risk levels.
+            9. Use the risk_reasoning and severity_reasoning attributes in the schema to explain how you determined severity and risk levels.
             """
         ).strip(),
         output_type=PRGuidance,
@@ -1061,6 +1193,7 @@ def render_report(
         source_file_path = str(source_thread.get("thread_path") or "")
         source_code_snippet = ""
         source_comment_bodies: list[str] = []
+        source_comment_suggestions: list[str] = []
         for source_comment in source_thread_comments:
             if not source_file_path:
                 source_file_path = str(source_comment.get("file_path") or "")
@@ -1068,7 +1201,15 @@ def render_report(
                 snippet = str(source_comment.get("code_snippet") or "")
                 if snippet:
                     source_code_snippet = snippet
-            source_comment_bodies.append(str(source_comment.get("body") or ""))
+            body_text = str(source_comment.get("body_text") or "").strip()
+            if body_text:
+                source_comment_bodies.append(body_text)
+            suggestions = source_comment.get("suggestions")
+            if isinstance(suggestions, list):
+                for suggestion in suggestions:
+                    clean = str(suggestion or "").strip()
+                    if clean:
+                        source_comment_suggestions.append(clean)
 
         sections.append(
             textwrap.dedent(
@@ -1079,13 +1220,21 @@ def render_report(
         )
         sections.append(block("Thread ID", str(comment.thread_id)))
         sections.append(block("Severity", str(comment.severity)))
+        sections.append(block("Severity Reasoning", str(comment.severity_reasoning)))
         sections.append(block("Risk", str(comment.risk)))
+        sections.append(block("Risk Reasoning", str(comment.risk_reasoning)))
         sections.append(block("File Path (From Review Thread)", source_file_path))
         sections.append(block("Code Snippet (From Review Thread)", source_code_snippet))
         sections.append(
             block(
-                "Comment Bodies (From Review Thread)",
+                "Comment Bodies (Non-Suggestion Text)",
                 "\n\n".join(source_comment_bodies),
+            )
+        )
+        sections.append(
+            block(
+                "Comment Suggestions (Extracted)",
+                "\n\n".join(source_comment_suggestions),
             )
         )
         sections.append(block("Requested Change Summary", comment.requested_change_summary))
@@ -1181,6 +1330,7 @@ def render_llm_implementation_file(
         source_file_path = str(source_thread.get("thread_path") or "")
         source_code_snippet = ""
         source_comment_bodies: list[str] = []
+        source_comment_suggestions: list[str] = []
         for source_comment in source_thread_comments:
             if not source_file_path:
                 source_file_path = str(source_comment.get("file_path") or "")
@@ -1188,7 +1338,15 @@ def render_llm_implementation_file(
                 snippet = str(source_comment.get("code_snippet") or "")
                 if snippet:
                     source_code_snippet = snippet
-            source_comment_bodies.append(str(source_comment.get("body") or ""))
+            body_text = str(source_comment.get("body_text") or "").strip()
+            if body_text:
+                source_comment_bodies.append(body_text)
+            suggestions = source_comment.get("suggestions")
+            if isinstance(suggestions, list):
+                for suggestion in suggestions:
+                    clean = str(suggestion or "").strip()
+                    if clean:
+                        source_comment_suggestions.append(clean)
 
         lines.extend(
             [
@@ -1199,6 +1357,7 @@ def render_llm_implementation_file(
                 f"    file_path_context: {_yaml_scalar(source_file_path)}",
                 f"    code_snippet_context: {_yaml_block(source_code_snippet, indent=6)}",
                 f"    comment_bodies_context: {_yaml_block(chr(10).join(source_comment_bodies), indent=6)}",
+                f"    comment_suggestions_context: {_yaml_block(chr(10).join(source_comment_suggestions), indent=6)}",
                 f"    requested_change_summary_context: {_yaml_block(str(comment.requested_change_summary), indent=6)}",
                 f"    technical_explanation_context: {_yaml_block(str(comment.technical_explanation), indent=6)}",
                 f"    implementation_prompt_primary_instruction: {_yaml_block(str(comment.implementation_prompt), indent=6)}",

@@ -18,7 +18,7 @@
 
 - Python 3.10+
 - `openai-agents` and `pydantic`
-- GitHub token with repo read access
+- GitHub token with Pull Request read + write access
 - OpenAI API key
 
 Install dependencies:

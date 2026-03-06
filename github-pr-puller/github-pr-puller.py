@@ -130,11 +130,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "pr_number",
         type=int,
-        help="Pull request number (integer).",
+        help="Pull request number (integer), for example: 347",
     )
     parser.add_argument(
         "repository",
-        help="Repository in 'owner/repo' format.",
+        help="Repository in 'owner/repo' format, for example: openai/openai-agents-python",
     )
     parser.add_argument(
         "--github-token",

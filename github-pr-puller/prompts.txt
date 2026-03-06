@@ -8,3 +8,8 @@ program formats the retrieved data in a manner best suited to send an LLM for an
 program sends the data to openapi using the openai-agents-python sdk.
 program expects the LLM to respond to the request with overall summary of the changes requested and a more technical explanation of each comment, written in a manner best suited to submit to an LLM to implement it. 
 program then prints each returned text object in a well formated and pleasing interface, copy and paste ability is high priority
+
+
+in the help menu can you provide examples for the pr_number and repository values, so the user has understanding of what is expected
+
+

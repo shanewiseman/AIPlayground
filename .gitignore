@@ -5,6 +5,8 @@ website/state/
 !website/state/__init__
 
 github-pr-puller/__pycache__/
+github-pr-puller/github.token
+
 
 client_code/key.file
 

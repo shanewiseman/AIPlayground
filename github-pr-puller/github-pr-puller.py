@@ -20,7 +20,7 @@ from typing import Any
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 GITHUB_REST_API_BASE = "https://api.github.com"
 GITHUB_API_VERSION = "2022-11-28"
-DEFAULT_MODEL = "gpt-5"
+DEFAULT_MODEL = "gpt-5-mini"
 MAX_FILE_CONTENT_CHARS = 50_000
 MAX_TOTAL_MODIFIED_FILES_CHARS = 200_000
 CHECKPOINT_COMMENT_PREFIX = "[github-pr-puller checkpoint]"
@@ -152,10 +152,14 @@ MULTI_NEWLINE_RE = re.compile(r"\n{3,}")
 
 
 class ProgressReporter:
+    """Emit timestamped progress messages to stderr when enabled."""
+
     def __init__(self, enabled: bool) -> None:
+        """Initialize the progress reporter."""
         self.enabled = enabled
 
     def log(self, message: str) -> None:
+        """Print a progress message with a local timestamp."""
         if not self.enabled:
             return
         timestamp = time.strftime("%H:%M:%S", time.localtime())
@@ -163,6 +167,7 @@ class ProgressReporter:
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments for the PR analysis workflow."""
     parser = argparse.ArgumentParser(
         description=(
             "Fetch unresolved GitHub pull request review comments, send them to an "
@@ -242,6 +247,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def parse_repository(repository: str) -> tuple[str, str]:
+    """Split an owner/repo repository string into owner and name."""
     if "/" not in repository:
         raise ValueError("Repository must be in 'owner/repo' format.")
     owner, name = repository.split("/", 1)
@@ -251,28 +257,33 @@ def parse_repository(repository: str) -> tuple[str, str]:
 
 
 def build_default_output_filename(owner: str, repo: str, pr_number: int) -> str:
+    """Build the default markdown report filename."""
     safe_owner = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "-" for ch in owner)
     safe_repo = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "-" for ch in repo)
     return f"pr-review-{safe_owner}-{safe_repo}-pr-{pr_number}.md"
 
 
 def build_prompt_debug_filename(output_file: str) -> str:
+    """Build the prompt debug JSON filename from the report filename."""
     output_path = Path(output_file)
     return str(output_path.with_name(f"{output_path.name}.prompt-debug.json"))
 
 
 def build_llm_implementation_filename(output_file: str) -> str:
+    """Build the LLM implementation YAML filename from the report filename."""
     output_path = Path(output_file)
     return str(output_path.with_name(f"{output_path.stem}.llm-implementation.yaml"))
 
 
 def add_output_index(file_path: str, index: int) -> str:
+    """Append a numeric index to a filename stem."""
     path = Path(file_path)
     indexed_name = f"{path.stem}.{index}{path.suffix}"
     return str(path.with_name(indexed_name))
 
 
 def resolve_indexed_output_filenames(base_output_file: str) -> tuple[str, str, str, int]:
+    """Return non-conflicting indexed output artifact filenames."""
     base_report = base_output_file
     base_prompt_debug = build_prompt_debug_filename(base_output_file)
     base_llm_impl = build_llm_implementation_filename(base_output_file)
@@ -300,6 +311,7 @@ def github_graphql(
     operation_name: str,
     progress: ProgressReporter | None = None,
 ) -> dict[str, Any]:
+    """Execute a GitHub GraphQL request and return the data object."""
     request_started_at = time.monotonic()
     if progress:
         progress.log(f"GitHub API request started: {operation_name}")
@@ -346,6 +358,7 @@ def fetch_all_thread_comments(
     first_page: dict[str, Any],
     progress: ProgressReporter,
 ) -> list[dict[str, Any]]:
+    """Load all review comments for a thread across paginated results."""
     comments = list(first_page.get("nodes", []))
     page_info = first_page.get("pageInfo") or {}
     cursor = page_info.get("endCursor")
@@ -372,10 +385,12 @@ def fetch_all_thread_comments(
 
 
 def is_checkpoint_comment(comment_body: Any) -> bool:
+    """Return True when a comment body matches the checkpoint marker prefix."""
     return str(comment_body or "").strip().startswith(CHECKPOINT_COMMENT_PREFIX)
 
 
 def get_thread_root_comment_database_id(comments: list[dict[str, Any]]) -> int | None:
+    """Return the first comment database ID from a thread, if available."""
     for comment in comments:
         db_id = comment.get("databaseId")
         if isinstance(db_id, int):
@@ -395,6 +410,7 @@ def post_thread_checkpoint_comment(
     *,
     progress: ProgressReporter,
 ) -> None:
+    """Post a checkpoint reply on a review thread root comment."""
     checkpoint_body = (
         f"{CHECKPOINT_COMMENT_PREFIX} This thread has been consumed by automation and "
         "a potential change is in process.\r\n\r\n"
@@ -436,6 +452,7 @@ def post_thread_checkpoint_comment(
 
 
 def normalize_comment(thread: dict[str, Any], comment: dict[str, Any]) -> dict[str, Any]:
+    """Normalize GitHub review comment fields used by downstream processing."""
     comment_id = comment.get("id")
     file_path = comment.get("path") or thread.get("path") or ""
     return {
@@ -465,6 +482,7 @@ def fetch_unresolved_pr_comments(
     pr_number: int,
     progress: ProgressReporter,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Fetch unresolved, non-outdated review threads and eligible comments."""
     threads_cursor: str | None = None
     unresolved_threads: list[dict[str, Any]] = []
     pr_info: dict[str, Any] | None = None
@@ -615,6 +633,7 @@ def fetch_pr_modified_files_with_content(
     pr_number: int,
     progress: ProgressReporter,
 ) -> list[dict[str, str]]:
+    """Fetch modified file paths and file contents for the PR head revision."""
     files_cursor: str | None = None
     files_page_number = 1
     head_ref_oid: str | None = None
@@ -710,6 +729,7 @@ def fetch_pr_modified_files_with_content(
 
 
 def count_thread_comments(thread_groups: list[dict[str, Any]]) -> int:
+    """Count the total number of comments across thread groups."""
     total = 0
     for thread_group in thread_groups:
         thread_comments = thread_group.get("comments", [])
@@ -724,6 +744,7 @@ def select_thread_groups_for_budget(
     *,
     progress: ProgressReporter,
 ) -> list[dict[str, Any]]:
+    """Select threads within comment budget while preserving thread boundaries."""
     selected: list[dict[str, Any]] = []
     running_comments = 0
 
@@ -763,7 +784,10 @@ def build_llm_payload(
     *,
     progress: ProgressReporter | None = None,
 ) -> dict[str, Any]:
+    """Build the structured payload sent to the LLM."""
+
     def normalize_modified_file_content(text: str) -> str:
+        """Normalize whitespace in modified file content for prompt compactness."""
         normalized = text.replace("\r\n", "\n").replace("\r", "\n")
         lines = normalized.split("\n")
         processed: list[str] = []
@@ -856,6 +880,7 @@ def build_llm_payload(
 
 
 def build_analysis_prompt(payload: dict[str, Any]) -> str:
+    """Build the natural-language prompt embedding the JSON payload."""
     return (
         "Analyze the following unresolved GitHub PR comments. "
         "Use both the review comments and the full content of each modified file for context. "
@@ -883,6 +908,7 @@ def analyze_with_openai_agents(
     comment_count: int,
     progress: ProgressReporter,
 ) -> Any:
+    """Run the OpenAI agent workflow and return structured PR guidance."""
     maybe_load_agents_locally()
     try:
         from pydantic import BaseModel, Field
@@ -893,6 +919,8 @@ def analyze_with_openai_agents(
         ) from exc
 
     class ThreadGuidance(BaseModel):
+        """Per-thread guidance generated from review comments."""
+
         thread_id: str = Field(
             description="Thread ID from the input payload. Must match the corresponding input thread."
         )
@@ -926,6 +954,8 @@ def analyze_with_openai_agents(
         )
 
     class PRGuidance(BaseModel):
+        """Top-level guidance summary and per-thread implementation details."""
+
         overall_summary: str = Field(
             description="Overall summary of requested PR changes across all unresolved comments."
         )
@@ -977,6 +1007,7 @@ def analyze_with_openai_agents(
 
 
 def block(title: str, text: str) -> str:
+    """Render a markdown section as a fenced plain-text block."""
     clean = (text or "").strip()
     if not clean:
         clean = "(empty)"
@@ -995,6 +1026,7 @@ def render_report(
     comments_count: int,
     source_threads: list[dict[str, Any]],
 ) -> str:
+    """Render the markdown review synthesis report."""
     header = textwrap.dedent(
         f"""\
         # PR Review Synthesis
@@ -1064,6 +1096,7 @@ def render_report(
 
 
 def _yaml_block(text: str, indent: int = 2) -> str:
+    """Render text as a YAML block scalar with consistent indentation."""
     prefix = " " * indent
     clean = (text or "").rstrip()
     if not clean:
@@ -1073,6 +1106,7 @@ def _yaml_block(text: str, indent: int = 2) -> str:
 
 
 def _yaml_scalar(value: Any) -> str:
+    """Render a value as a quoted YAML scalar."""
     if value is None:
         return "\"\""
     text = str(value)
@@ -1081,6 +1115,7 @@ def _yaml_scalar(value: Any) -> str:
 
 
 def _severity_rank(value: str) -> int:
+    """Map severity labels to descending sort rank values."""
     ranking = {
         "critical": 4,
         "high": 3,
@@ -1091,6 +1126,7 @@ def _severity_rank(value: str) -> int:
 
 
 def _risk_rank(value: str) -> int:
+    """Map risk labels to descending sort rank values."""
     ranking = {
         "high": 3,
         "medium": 2,
@@ -1104,6 +1140,7 @@ def render_llm_implementation_file(
     pr_info: dict[str, Any],
     source_threads: list[dict[str, Any]],
 ) -> str:
+    """Render the implementation handoff document in YAML format."""
     sorted_comments = sorted(
         list(analysis.comments),
         key=lambda item: (
@@ -1175,6 +1212,7 @@ def render_llm_implementation_file(
 
 
 def main() -> None:
+    """Run the end-to-end PR comment collection and LLM reporting workflow."""
     run_started_at = time.monotonic()
     github_elapsed_seconds = 0.0
     openai_elapsed_seconds = 0.0

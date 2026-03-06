@@ -46,3 +46,14 @@ on the LLM submission only include the following key/values: body and code_snipp
 Also, in addition to limiting PRs to unresolved, also ensure the outdated flag is not set to True
 
 
+in addition to the review comments, provide all unique files being modified and their entire respective content for additional LLM context, instruct the LLM calls to make use of the included files for additional context.
+
+
+can you include the filename for each review comment, additional to body and code_snippet
+
+
+in addition to the export of the reportin md format, export the report into a file using a structure with header explaining the intent of this file is to instruct an LLM to ingest and implement the content under the implementation prompt, using the request change and technical explanation as context.
+
+for the llm-implementation.md output , don't output in md format, output in a yaml format, reflect this in the filename
+
+in the modified_files parameter in the submitted prompt, remove excessive whitespace in the content. specficially, if there is more than 1 space or tab, reduce to 1, if there are more than 1 newline or return characters  reduce it to 1

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import textwrap
 import time
@@ -103,6 +104,47 @@ query ReviewThreadComments($threadId: ID!, $commentsCursor: String) {
 }
 """
 
+PR_FILES_QUERY = """
+query PullRequestFiles(
+  $owner: String!
+  $name: String!
+  $prNumber: Int!
+  $filesCursor: String
+) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $prNumber) {
+      headRefOid
+      files(first: 100, after: $filesCursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          path
+        }
+      }
+    }
+  }
+}
+"""
+
+FILE_CONTENT_QUERY = """
+query FileContent($owner: String!, $name: String!, $expression: String!) {
+  repository(owner: $owner, name: $name) {
+    object(expression: $expression) {
+      ... on Blob {
+        text
+        isBinary
+        byteSize
+      }
+    }
+  }
+}
+"""
+
+MULTI_SPACE_OR_TAB_RE = re.compile(r"[ \t]+")
+MULTI_NEWLINE_RE = re.compile(r"\n+")
+
 
 class ProgressReporter:
     def __init__(self, enabled: bool) -> None:
@@ -193,6 +235,11 @@ def build_default_output_filename(owner: str, repo: str, pr_number: int) -> str:
 def build_prompt_debug_filename(output_file: str) -> str:
     output_path = Path(output_file)
     return str(output_path.with_name(f"{output_path.name}.prompt-debug.json"))
+
+
+def build_llm_implementation_filename(output_file: str) -> str:
+    output_path = Path(output_file)
+    return str(output_path.with_name(f"{output_path.name}.llm-implementation.yaml"))
 
 
 def github_graphql(
@@ -387,20 +434,133 @@ def fetch_unresolved_pr_comments(
     return pr_info or {}, unresolved_comments
 
 
-def build_llm_payload(comments: list[dict[str, Any]]) -> list[dict[str, str]]:
-    return [
-        {
-            "body": str(comment.get("body") or ""),
-            "code_snippet": str(comment.get("code_snippet") or ""),
-        }
-        for comment in comments
-    ]
+def fetch_pr_modified_files_with_content(
+    token: str,
+    owner: str,
+    repo: str,
+    pr_number: int,
+    progress: ProgressReporter,
+) -> list[dict[str, str]]:
+    files_cursor: str | None = None
+    files_page_number = 1
+    head_ref_oid: str | None = None
+    modified_paths: set[str] = set()
+
+    progress.log(f"Loading modified file paths for {owner}/{repo}#{pr_number}")
+    while True:
+        data = github_graphql(
+            token=token,
+            query=PR_FILES_QUERY,
+            variables={
+                "owner": owner,
+                "name": repo,
+                "prNumber": pr_number,
+                "filesCursor": files_cursor,
+            },
+            operation_name=f"PullRequestFiles page={files_page_number}",
+            progress=progress,
+        )
+        repository_node = data.get("repository")
+        if not repository_node:
+            raise RuntimeError(f"Repository '{owner}/{repo}' was not found or is inaccessible.")
+
+        pr_node = repository_node.get("pullRequest")
+        if not pr_node:
+            raise RuntimeError(f"Pull request #{pr_number} was not found in '{owner}/{repo}'.")
+
+        if head_ref_oid is None:
+            oid_value = pr_node.get("headRefOid")
+            if isinstance(oid_value, str) and oid_value:
+                head_ref_oid = oid_value
+
+        files_node = pr_node.get("files") or {}
+        page_paths = 0
+        for file_node in files_node.get("nodes", []):
+            path = file_node.get("path")
+            if isinstance(path, str) and path:
+                modified_paths.add(path)
+                page_paths += 1
+
+        progress.log(
+            f"GitHub file page {files_page_number}: fetched={page_paths}, "
+            f"running_unique_files={len(modified_paths)}"
+        )
+
+        page_info = files_node.get("pageInfo") or {}
+        if not page_info.get("hasNextPage"):
+            break
+        files_cursor = page_info.get("endCursor")
+        files_page_number += 1
+
+    if not head_ref_oid:
+        raise RuntimeError("Unable to determine PR head commit SHA for file content retrieval.")
+
+    file_contexts: list[dict[str, str]] = []
+    ordered_paths = sorted(modified_paths)
+    for idx, path in enumerate(ordered_paths, start=1):
+        progress.log(f"Fetching file content {idx}/{len(ordered_paths)}: {path}")
+        expression = f"{head_ref_oid}:{path}"
+        content_data = github_graphql(
+            token=token,
+            query=FILE_CONTENT_QUERY,
+            variables={"owner": owner, "name": repo, "expression": expression},
+            operation_name=f"PullRequestFileContent {path}",
+            progress=progress,
+        )
+        repository_node = content_data.get("repository") or {}
+        object_node = repository_node.get("object") or {}
+
+        if object_node.get("isBinary"):
+            byte_size = object_node.get("byteSize")
+            file_text = f"[binary file omitted from text context; byte_size={byte_size}]"
+        else:
+            file_text = str(object_node.get("text") or "")
+
+        if not file_text:
+            file_text = "[file content unavailable]"
+
+        file_contexts.append({"path": path, "content": file_text})
+
+    progress.log(f"Finished file content collection: total_unique_files={len(file_contexts)}")
+    return file_contexts
 
 
-def build_analysis_prompt(payload: list[dict[str, str]]) -> str:
+def build_llm_payload(
+    comments: list[dict[str, Any]],
+    modified_files_with_content: list[dict[str, str]],
+) -> dict[str, Any]:
+    def normalize_modified_file_content(text: str) -> str:
+        normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+        normalized = MULTI_SPACE_OR_TAB_RE.sub(" ", normalized)
+        normalized = MULTI_NEWLINE_RE.sub("\n", normalized)
+        return normalized
+
+    return {
+        "review_comments": [
+            {
+                "file_path": str(comment.get("file_path") or ""),
+                "body": str(comment.get("body") or ""),
+                "code_snippet": str(comment.get("code_snippet") or ""),
+            }
+            for comment in comments
+        ],
+        "modified_files": [
+            {
+                "path": str(file_obj.get("path") or ""),
+                "content": normalize_modified_file_content(str(file_obj.get("content") or "")),
+            }
+            for file_obj in modified_files_with_content
+        ],
+    }
+
+
+def build_analysis_prompt(payload: dict[str, Any]) -> str:
     return (
-        "Analyze the following unresolved GitHub PR comments. Each item only contains "
-        "'body' and 'code_snippet'. Produce structured implementation guidance.\n\n"
+        "Analyze the following unresolved GitHub PR comments. "
+        "Use both the review comments and the full content of each modified file for context. "
+        "Each review comment item contains 'file_path', 'body', and 'code_snippet'. "
+        "Each modified file item contains 'path' and full 'content'. "
+        "Use the file contents actively when creating guidance.\n\n"
         f"{json.dumps(payload, indent=2)}"
     )
 
@@ -460,8 +620,9 @@ def analyze_with_openai_agents(
             Return concise but technically precise output for an implementation LLM.
             Requirements:
             1. Produce one comment entry per input unresolved comment.
-            2. Keep guidance implementation-focused and avoid generic advice.
-            3. If a comment is ambiguous, state assumptions explicitly in technical_explanation.
+            2. Use the provided modified file contents to add implementation context.
+            3. Keep guidance implementation-focused and avoid generic advice.
+            4. If a comment is ambiguous, state assumptions explicitly in technical_explanation.
             """
         ).strip(),
         output_type=PRGuidance,
@@ -519,6 +680,54 @@ def render_report(analysis: Any, pr_info: dict[str, Any], comments_count: int) -
     return "\n\n".join(sections).rstrip() + "\n"
 
 
+def _yaml_block(text: str, indent: int = 2) -> str:
+    prefix = " " * indent
+    clean = (text or "").rstrip()
+    if not clean:
+        return f"|-\n{prefix}(empty)"
+    indented_lines = "\n".join(f"{prefix}{line}" for line in clean.splitlines())
+    return f"|-\n{indented_lines}"
+
+
+def _yaml_scalar(value: Any) -> str:
+    if value is None:
+        return "\"\""
+    text = str(value)
+    escaped = text.replace("\\", "\\\\").replace("\"", "\\\"")
+    return f"\"{escaped}\""
+
+
+def render_llm_implementation_file(analysis: Any, pr_info: dict[str, Any]) -> str:
+    lines: list[str] = [
+        "intent: |-",
+        "  This file is meant for an implementation-focused LLM.",
+        "  Implement each implementation_prompt using requested_change_summary and",
+        "  technical_explanation as supporting context.",
+        f"repository: {_yaml_scalar(pr_info.get('repository'))}",
+        f"pull_request_number: {_yaml_scalar(pr_info.get('number'))}",
+        f"pull_request_title: {_yaml_scalar(pr_info.get('title'))}",
+        f"pull_request_url: {_yaml_scalar(pr_info.get('url'))}",
+        f"overall_summary_context: {_yaml_block(str(analysis.overall_summary), indent=2)}",
+        f"implementation_strategy_context: {_yaml_block(str(analysis.implementation_strategy), indent=2)}",
+        "implementation_items:",
+    ]
+
+    for idx, comment in enumerate(analysis.comments, start=1):
+        lines.extend(
+            [
+                f"  - item_number: {idx}",
+                f"    requested_change_summary_context: {_yaml_block(str(comment.requested_change_summary), indent=6)}",
+                f"    technical_explanation_context: {_yaml_block(str(comment.technical_explanation), indent=6)}",
+                f"    implementation_prompt_primary_instruction: {_yaml_block(str(comment.implementation_prompt), indent=6)}",
+            ]
+        )
+
+    if not analysis.comments:
+        lines.append("  []")
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def main() -> None:
     run_started_at = time.monotonic()
     github_elapsed_seconds = 0.0
@@ -548,10 +757,10 @@ def main() -> None:
         pr_number=args.pr_number,
         progress=progress,
     )
-    github_elapsed_seconds = time.monotonic() - github_started_at
-    progress.log(f"GitHub logic completed in {github_elapsed_seconds:.2f}s")
 
     if not comments:
+        github_elapsed_seconds = time.monotonic() - github_started_at
+        progress.log(f"GitHub logic completed in {github_elapsed_seconds:.2f}s")
         print(
             textwrap.dedent(
                 f"""\
@@ -569,12 +778,30 @@ def main() -> None:
 
     comments = comments[: args.max_comments]
     progress.log(
-        f"Preparing LLM input payload with {len(comments)} comments "
+        f"Collecting modified file contents for additional context (comments={len(comments)})"
+    )
+    modified_files_with_content = fetch_pr_modified_files_with_content(
+        token=args.github_token,
+        owner=owner,
+        repo=repo,
+        pr_number=args.pr_number,
+        progress=progress,
+    )
+    github_elapsed_seconds = time.monotonic() - github_started_at
+    progress.log(f"GitHub logic completed in {github_elapsed_seconds:.2f}s")
+
+    progress.log(
+        f"Preparing LLM input payload with {len(comments)} comments and "
+        f"{len(modified_files_with_content)} modified files "
         f"(max_comments={args.max_comments})"
     )
-    payload = build_llm_payload(comments=comments)
+    payload = build_llm_payload(
+        comments=comments,
+        modified_files_with_content=modified_files_with_content,
+    )
     prompt = build_analysis_prompt(payload)
     prompt_debug_file = build_prompt_debug_filename(output_file)
+    llm_implementation_file = build_llm_implementation_filename(output_file)
     prompt_debug_doc = {
         "model": args.model,
         "prompt_payload": payload,
@@ -594,10 +821,13 @@ def main() -> None:
     progress.log(f"OpenAI LLM logic completed in {openai_elapsed_seconds:.2f}s")
     progress.log("Rendering final output report")
     report = render_report(analysis=analysis, pr_info=pr_info, comments_count=len(comments))
+    llm_impl_report = render_llm_implementation_file(analysis=analysis, pr_info=pr_info)
 
     #print(report)
     Path(output_file).write_text(report, encoding="utf-8")
+    Path(llm_implementation_file).write_text(llm_impl_report, encoding="utf-8")
     print(f"Saved report to: {output_file}")
+    print(f"Saved LLM implementation file to: {llm_implementation_file}")
     print(f"Saved prompt debug payload to: {prompt_debug_file}")
     total_elapsed_seconds = time.monotonic() - run_started_at
     print(f"GitHub logic runtime (seconds): {github_elapsed_seconds:.2f}")

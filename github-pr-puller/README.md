@@ -55,7 +55,7 @@ python3 github-pr-puller/github-pr-puller.py 123 shanewiseman/AIPlayground --out
 - `repository` (required): repository in `owner/repo` format (example: `openai/openai-agents-python`).
 - `--github-token`: overrides `GITHUB_TOKEN`.
 - `--model`: model for the agent (default: `gpt-5-mini`).
-- `--service-tier`: OpenAI service tier for all LLM submissions. Valid values: `standard`, `flex`, `priority` (default: `flex`).
+- `--service-tier`: OpenAI service tier for all LLM submissions. Valid values: `standard`, `flex`, `priority` (default: `flex`). Note: `standard` is mapped to the OpenAI API service tier value `default`, which is what appears in logs and prompt-debug output.
 - `--output-file`: base report filename override.
 - `--max-comments`: max comments to include in LLM input (default: `600`).
 - `--quiet`: disable progress logs.

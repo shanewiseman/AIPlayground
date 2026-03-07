@@ -528,16 +528,19 @@ def _slice_file_by_comment_range(
     start_line: Any,
     end_line: Any,
 ) -> str:
-    """Return file text between start_line and end_line (inclusive, 1-based)."""
-    normalized = file_text.replace("\r\n", "\n").replace("\r", "\n")    
+    """Return a snippet from file_text around the requested absolute file line range.
+
+    Supports unified diff text by parsing hunk headers (`@@ -a,b +c,d @@`) and
+    mapping absolute file line numbers to diff-line indices before slicing.
+    """
+    normalized = file_text.replace("\r\n", "\n").replace("\r", "\n")
     lines = normalized.split("\n")
     if not lines:
         return ""
 
-    start = _to_int(start_line) + 1 if start_line is not None else None
+    start = _to_int(start_line)
     end = _to_int(end_line)
-       
-    #TODO there needs to be indication of where this logic goes, it diverts without much indication of path
+
     if start is None and end is None:
         return ""
     if start is None:
@@ -547,21 +550,70 @@ def _slice_file_by_comment_range(
     if start is None or end is None:
         return ""
 
+    target_start = min(start, end)
+    target_end = max(start, end)
+    context_lines = 2
 
-    lower = max(1, min(start, end) - 10)  # include up to 10 lines of context before the comment range
-    upper = max(1, max(start, end) + 10)  # include up to 10 lines of context after the comment range
-    
+    # Unified diff handling: map absolute file lines to diff-line indices via hunk headers.
+    hunk_header_re = re.compile(
+        r"^@@ -(?P<old_start>\d+)(?:,(?P<old_count>\d+))? "
+        r"\+(?P<new_start>\d+)(?:,(?P<new_count>\d+))? @@"
+    )
+    matching_diff_indexes: list[int] = []
+    current_old_line: int | None = None
+    current_new_line: int | None = None
 
+    for idx, line_text in enumerate(lines):
+        header_match = hunk_header_re.match(line_text)
+        if header_match:
+            current_old_line = int(header_match.group("old_start"))
+            current_new_line = int(header_match.group("new_start"))
+            continue
+
+        if current_old_line is None or current_new_line is None:
+            continue
+
+        prefix = line_text[:1]
+        if prefix == " ":
+            if (
+                target_start <= current_old_line <= target_end
+                or target_start <= current_new_line <= target_end
+            ):
+                matching_diff_indexes.append(idx)
+            current_old_line += 1
+            current_new_line += 1
+        elif prefix == "-":
+            if target_start <= current_old_line <= target_end:
+                matching_diff_indexes.append(idx)
+            current_old_line += 1
+        elif prefix == "+":
+            if target_start <= current_new_line <= target_end:
+                matching_diff_indexes.append(idx)
+            current_new_line += 1
+        elif line_text.startswith("\\ No newline at end of file"):
+            continue
+        else:
+            # If a line in the hunk is missing a diff prefix, treat it as shared context.
+            if (
+                target_start <= current_old_line <= target_end
+                or target_start <= current_new_line <= target_end
+            ):
+                matching_diff_indexes.append(idx)
+            current_old_line += 1
+            current_new_line += 1
+
+    if matching_diff_indexes:
+        lower_idx = max(0, min(matching_diff_indexes) - context_lines)
+        upper_idx = min(len(lines), max(matching_diff_indexes) + context_lines + 1)
+        return "\n".join(lines[lower_idx:upper_idx]).strip("\n")
+
+    # Fallback for non-diff/plain text: treat start/end as absolute line numbers.
+    lower = max(1, target_start - context_lines)
+    upper = max(1, target_end + context_lines)
     if lower > len(lines):
-        # TODO I think I need to import progress
-        # progress.log(
-        #     f"Skipping code snippet extraction: comment range ({lower}-{upper}) "
-        #     f"exceeds file length ({len(lines)} lines)"
-        # )
         return ""
     upper = min(upper, len(lines))
-    print(f"{lower} {upper} {len(lines)}")
-    return "\n".join(lines[lower - 1 : upper]).strip("\n")
+    return "\n".join(lines[lower - 1 : upper + 1]).strip("\n")
 
 
 def _split_comment_body_and_suggestions(comment_body: str) -> tuple[str, list[str]]:
@@ -581,9 +633,8 @@ def normalize_comment(
     """Normalize GitHub review comment fields used by downstream processing."""
     comment_id = comment.get("id")
     file_path = comment.get("path") or thread.get("path") or ""
-   
-   
-   #The comment diff can drift as other commits are made
+        
+    #The comment diff can drift as other commits are made
     start_line = comment.get("originalStartLine") or comment.get("startLine")    
     line = comment.get("originalLine") or comment.get("line")
     code_snippet = _slice_file_by_comment_range(
@@ -1190,11 +1241,21 @@ def analyze_with_openai_agents(
     result = Runner.run_sync(agent, prompt)
     duration = time.monotonic() - llm_started_at
     usage = getattr(getattr(result, "context_wrapper", None), "usage", None)
-    submission_tokens = int(getattr(usage, "input_tokens", 0) or 0)
-    returned_tokens = int(getattr(usage, "output_tokens", 0) or 0)
-    total_tokens = int(getattr(usage, "total_tokens", 0) or (submission_tokens + returned_tokens))
-    request_count = int(getattr(usage, "requests", 0) or 0)
-    if submission_tokens or returned_tokens:
+
+    def _int_or_zero(value: Any) -> int:
+        """Convert provider usage values to int, defaulting to 0 on bad input."""
+        try:
+            return int(value or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    submission_tokens = _int_or_zero(getattr(usage, "input_tokens", 0))
+    returned_tokens = _int_or_zero(getattr(usage, "output_tokens", 0))
+    total_tokens = _int_or_zero(
+        getattr(usage, "total_tokens", 0) or (submission_tokens + returned_tokens)
+    )
+    request_count = _int_or_zero(getattr(usage, "requests", 0))
+    if submission_tokens or returned_tokens or total_tokens or request_count:
         progress.log(
             "LLM token usage "
             f"(submission={submission_tokens}, returned={returned_tokens}, "

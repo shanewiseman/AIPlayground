@@ -37,7 +37,6 @@ query PullRequestThreads(
       number
       title
       url
-      headRefOid
       reviewThreads(first: 50, after: $threadsCursor) {
         pageInfo {
           hasNextPage
@@ -154,6 +153,7 @@ SUGGESTION_BLOCK_RE = re.compile(
     r"```suggestion[^\n]*\n(.*?)```",
     re.IGNORECASE | re.DOTALL,
 )
+DIFF_BLOCK_MARKER_RE = re.compile(r"(?m)^(diff --git |@@ |--- |\+\+\+ )")
 
 
 class ProgressReporter:
@@ -290,14 +290,14 @@ def add_output_index(file_path: str, index: int) -> str:
 def resolve_indexed_output_filenames(base_output_file: str) -> tuple[str, str, str, int]:
     """Return non-conflicting indexed output artifact filenames."""
     base_report = base_output_file
-    base_prompt_debug = build_prompt_debug_filename(base_output_file)
-    base_llm_impl = build_llm_implementation_filename(base_output_file)
 
     index = 1
     while True:
+        # First, apply the numeric index to the report filename.
         report_candidate = add_output_index(base_report, index)
-        prompt_candidate = add_output_index(base_prompt_debug, index)
-        llm_candidate = add_output_index(base_llm_impl, index)
+        # Then derive related artifact names from the indexed report path.
+        prompt_candidate = build_prompt_debug_filename(report_candidate)
+        llm_candidate = build_llm_implementation_filename(report_candidate)
 
         if not (
             Path(report_candidate).exists()
@@ -476,13 +476,21 @@ def _slice_file_by_comment_range(
     end_line: Any,
 ) -> str:
     """Return file text between start_line and end_line (inclusive, 1-based)."""
-    normalized = file_text.replace("\r\n", "\n").replace("\r", "\n")
+    normalized = file_text.replace("\r\n", "\n").replace("\r", "\n")    
     lines = normalized.split("\n")
     if not lines:
         return ""
 
-    start = _to_int(start_line)
+    start = _to_int(start_line) + 1 if start_line is not None else None
     end = _to_int(end_line)
+    
+    with open("debug_comment_snippet.txt", "w", encoding="utf-8") as debug_file:
+        debug_file.write(f"start_line={start_line}, end2_line={end_line}\n")
+        for line in lines:
+            debug_file.write(f"{line}\n")
+        
+   
+    #TODO there needs to be indication of where this logic goes, it diverts without much indication of path
     if start is None and end is None:
         return ""
     if start is None:
@@ -492,12 +500,31 @@ def _slice_file_by_comment_range(
     if start is None or end is None:
         return ""
 
-    lower = max(1, min(start, end))
-    upper = max(1, max(start, end))
+
+
+
+    lower = max(1, min(start, end) - 10)  # include up to 10 lines of context before the comment range
+    upper = max(1, max(start, end) + 10)  # include up to 10 lines of context after the comment range
+    
+    print(f"DEBUG: start={start}, end={end}, lower={lower}, upper={upper}, total_lines={len(lines)}")
+    exit(0)
     if lower > len(lines):
+        # TODO I think I need to import progress
+        progress.log(
+            f"Skipping code snippet extraction: comment range ({lower}-{upper}) "
+            f"exceeds file length ({len(lines)} lines)"
+        )
         return ""
     upper = min(upper, len(lines))
-    return "\n".join(lines[lower - 1 : upper]).strip("\n")
+    
+    with open("debug_comment_snippet.txt", "a", encoding="utf-8") as debug_file:
+        debug_file.write(f"start_line={start_line}, end2_line={end_line}\n")
+        debug_file.write(f"{lines}")
+
+    
+    exit(0)
+    
+    return "\n".join(lines[lower - 1 : upper - 1]).strip("\n")
 
 
 def _split_comment_body_and_suggestions(comment_body: str) -> tuple[str, list[str]]:
@@ -513,16 +540,14 @@ def _split_comment_body_and_suggestions(comment_body: str) -> tuple[str, list[st
 def normalize_comment(
     thread: dict[str, Any],
     comment: dict[str, Any],
-    *,
-    source_file_content: str,
 ) -> dict[str, Any]:
     """Normalize GitHub review comment fields used by downstream processing."""
     comment_id = comment.get("id")
     file_path = comment.get("path") or thread.get("path") or ""
-    start_line = comment.get("startLine")
+    start_line = comment.get("startLine")    
     line = comment.get("line")
     code_snippet = _slice_file_by_comment_range(
-        source_file_content,
+        str(comment.get("diffHunk") or ""),
         start_line=start_line,
         end_line=line,
     )
@@ -562,9 +587,7 @@ def fetch_unresolved_pr_comments(
     threads_cursor: str | None = None
     unresolved_threads: list[dict[str, Any]] = []
     pr_info: dict[str, Any] | None = None
-    head_ref_oid: str | None = None
     threads_page_number = 1
-    file_content_cache: dict[str, str] = {}
 
     progress.log(f"Loading unresolved PR comments for {owner}/{repo}#{pr_number}")
 
@@ -596,10 +619,6 @@ def fetch_unresolved_pr_comments(
                 "url": pr_node.get("url"),
                 "repository": f"{owner}/{repo}",
             }
-        if head_ref_oid is None:
-            oid_value = pr_node.get("headRefOid")
-            if isinstance(oid_value, str) and oid_value:
-                head_ref_oid = oid_value
 
         review_threads = pr_node.get("reviewThreads") or {}
         thread_nodes = review_threads.get("nodes", [])
@@ -656,38 +675,10 @@ def fetch_unresolved_pr_comments(
                     continue
                 if is_checkpoint_comment(comment.get("body")):
                     continue
-                file_path = str(comment.get("path") or thread.get("path") or "")
-                source_file_content = ""
-                if file_path and head_ref_oid:
-                    if file_path not in file_content_cache:
-                        expression = f"{head_ref_oid}:{file_path}"
-                        progress.log(
-                            f"Fetching source file for snippet extraction: {file_path}"
-                        )
-                        content_data = github_graphql(
-                            token=token,
-                            query=FILE_CONTENT_QUERY,
-                            variables={
-                                "owner": owner,
-                                "name": repo,
-                                "expression": expression,
-                            },
-                            operation_name=f"ThreadSnippetFileContent {file_path}",
-                            progress=progress,
-                        )
-                        repository_node = content_data.get("repository") or {}
-                        object_node = repository_node.get("object") or {}
-                        if object_node.get("isBinary"):
-                            file_content_cache[file_path] = ""
-                        else:
-                            file_content_cache[file_path] = str(object_node.get("text") or "")
-                    source_file_content = file_content_cache.get(file_path, "")
-
                 thread_comments.append(
                     normalize_comment(
                         thread,
                         comment,
-                        source_file_content=source_file_content,
                     )
                 )
 
@@ -1138,17 +1129,26 @@ def analyze_with_openai_agents(
     return result.final_output
 
 
-def block(title: str, text: str) -> str:
-    """Render a markdown section as a fenced plain-text block."""
+def block(title: str, text: str, *, language: str = "text") -> str:
+    """Render a markdown section as a fenced code block."""
     clean = (text or "").strip()
     if not clean:
         clean = "(empty)"
     return (
         f"## {title}\n\n"
-        "```text\n"
+        f"```{language}\n"
         f"{clean}\n"
         "```\n"
     )
+
+
+def is_diff_content(text: str) -> bool:
+    """Return True when content appears to be unified diff text."""
+    clean = (text or "").strip()
+    if not clean:
+        return False
+    exit()
+    return bool(DIFF_BLOCK_MARKER_RE.search(clean))
 
 
 def render_report(
@@ -1173,7 +1173,6 @@ def render_report(
 
     sections: list[str] = [header]
     sections.append(block("Overall Summary", analysis.overall_summary))
-    sections.append(block("Implementation Strategy", analysis.implementation_strategy))
 
     source_threads_by_id: dict[str, dict[str, Any]] = {}
     for source_thread in source_threads:
@@ -1194,7 +1193,7 @@ def render_report(
         source_code_snippet = ""
         source_comment_bodies: list[str] = []
         source_comment_suggestions: list[str] = []
-        for source_comment in source_thread_comments:
+        for source_comment in source_thread_comments:            
             if not source_file_path:
                 source_file_path = str(source_comment.get("file_path") or "")
             if not source_code_snippet:
@@ -1224,21 +1223,22 @@ def render_report(
         sections.append(block("Risk", str(comment.risk)))
         sections.append(block("Risk Reasoning", str(comment.risk_reasoning)))
         sections.append(block("File Path (From Review Thread)", source_file_path))
-        sections.append(block("Code Snippet (From Review Thread)", source_code_snippet))
+        snippet_language = "diff"
         sections.append(
             block(
-                "Comment Bodies (Non-Suggestion Text)",
-                "\n\n".join(source_comment_bodies),
+                "Code Snippet (From Review Thread)",
+                source_code_snippet,
+                language=snippet_language,
             )
         )
         sections.append(
             block(
-                "Comment Suggestions (Extracted)",
+                "Comment Suggestions (From Review Thread)",
                 "\n\n".join(source_comment_suggestions),
+                language="text",
             )
         )
         sections.append(block("Requested Change Summary", comment.requested_change_summary))
-        sections.append(block("Technical Explanation", comment.technical_explanation))
         sections.append(block("Implementation Prompt", comment.implementation_prompt))
 
     return "\n\n".join(sections).rstrip() + "\n"

@@ -45,6 +45,7 @@ Examples:
 ```bash
 python3 github-pr-puller/github-pr-puller.py 123 openai/openai-agents-python
 python3 github-pr-puller/github-pr-puller.py 123 shanewiseman/AIPlayground --model gpt-5-mini
+python3 github-pr-puller/github-pr-puller.py 123 shanewiseman/AIPlayground --service-tier priority
 python3 github-pr-puller/github-pr-puller.py 123 shanewiseman/AIPlayground --output-file report.md
 ```
 
@@ -54,6 +55,7 @@ python3 github-pr-puller/github-pr-puller.py 123 shanewiseman/AIPlayground --out
 - `repository` (required): repository in `owner/repo` format (example: `openai/openai-agents-python`).
 - `--github-token`: overrides `GITHUB_TOKEN`.
 - `--model`: model for the agent (default: `gpt-5-mini`).
+- `--service-tier`: OpenAI service tier for all LLM submissions. Valid values: `standard`, `flex`, `priority` (default: `flex`).
 - `--output-file`: base report filename override.
 - `--max-comments`: max comments to include in LLM input (default: `600`).
 - `--quiet`: disable progress logs.

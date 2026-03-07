@@ -21,6 +21,12 @@ GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 GITHUB_REST_API_BASE = "https://api.github.com"
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_MODEL = "gpt-5-mini"
+DEFAULT_SERVICE_TIER = "flex"
+SERVICE_TIER_TO_API_VALUE = {
+    "standard": "default",
+    "flex": "flex",
+    "priority": "priority",
+}
 MAX_FILE_CONTENT_CHARS = 50_000
 MAX_TOTAL_MODIFIED_FILES_CHARS = 200_000
 CHECKPOINT_COMMENT_PREFIX = "[github-pr-puller checkpoint]"
@@ -230,6 +236,7 @@ def parse_args() -> argparse.Namespace:
             Examples:
               python github-pr-puller.py 123 owner/repo
               python github-pr-puller.py 123 owner/repo --model gpt-5-mini
+              python github-pr-puller.py 123 owner/repo --service-tier priority
               python github-pr-puller.py 123 owner/repo --output-file report.md
             """
         ),
@@ -252,6 +259,15 @@ def parse_args() -> argparse.Namespace:
         "--model",
         default=DEFAULT_MODEL,
         help=f"Model for openai-agents-python (default: {DEFAULT_MODEL}).",
+    )
+    parser.add_argument(
+        "--service-tier",
+        choices=tuple(SERVICE_TIER_TO_API_VALUE.keys()),
+        default=DEFAULT_SERVICE_TIER,
+        help=(
+            "OpenAI service tier for all LLM submissions "
+            "(choices: standard, flex, priority; default: flex)."
+        ),
     )
     parser.add_argument(
         "--output-file",
@@ -1038,6 +1054,7 @@ def maybe_load_agents_locally() -> None:
 
 def analyze_with_openai_agents(
     model: str,
+    service_tier: str,
     prompt: str,
     thread_count: int,
     comment_count: int,
@@ -1047,7 +1064,7 @@ def analyze_with_openai_agents(
     maybe_load_agents_locally()
     try:
         from pydantic import BaseModel, Field
-        from agents import Agent, Runner, set_tracing_disabled
+        from agents import Agent, ModelSettings, Runner, set_tracing_disabled
     except ImportError as exc:
         raise RuntimeError(
             "Missing dependencies. Install with: pip install openai-agents pydantic"
@@ -1109,6 +1126,9 @@ def analyze_with_openai_agents(
     agent = Agent(
         name="GitHub PR Review Analyst",
         model=model,
+        model_settings=ModelSettings(
+            extra_args={"service_tier": service_tier},
+        ),
         instructions=textwrap.dedent(
             """
             You analyze unresolved GitHub pull request review comments.
@@ -1137,7 +1157,8 @@ def analyze_with_openai_agents(
     set_tracing_disabled(True)
     progress.log(
         "LLM call 1 started "
-        f"(model={model}, unresolved_threads={thread_count}, unresolved_comments={comment_count})"
+        f"(model={model}, service_tier={service_tier}, "
+        f"unresolved_threads={thread_count}, unresolved_comments={comment_count})"
     )
     llm_started_at = time.monotonic()
     result = Runner.run_sync(agent, prompt)
@@ -1418,6 +1439,7 @@ def main() -> None:
     github_elapsed_seconds = 0.0
     openai_elapsed_seconds = 0.0
     args = parse_args()
+    service_tier = SERVICE_TIER_TO_API_VALUE[args.service_tier]
     progress = ProgressReporter(enabled=not args.quiet)
     progress.log("Starting PR review synthesis run")
 
@@ -1517,6 +1539,7 @@ def main() -> None:
         parent.mkdir(parents=True, exist_ok=True)
     prompt_debug_doc = {
         "model": args.model,
+        "service_tier": service_tier,
         "prompt_payload": payload,
         "prompt_text": prompt,
     }
@@ -1534,6 +1557,7 @@ def main() -> None:
     openai_started_at = time.monotonic()
     analysis = analyze_with_openai_agents(
         model=args.model,
+        service_tier=service_tier,
         prompt=prompt,
         thread_count=len(selected_thread_groups),
         comment_count=selected_comments,

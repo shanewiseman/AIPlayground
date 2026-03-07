@@ -1,0 +1,197 @@
+intent: |-
+  This file is meant for an implementation-focused LLM.
+  Implement each implementation_prompt using requested_change_summary and
+  technical_explanation as supporting context.
+repository: "shanewiseman/AIPlayground"
+pull_request_number: "2"
+pull_request_title: "Script to pull PR review comments, process, submit to LLM"
+pull_request_url: "https://github.com/shanewiseman/AIPlayground/pull/2"
+overall_summary_context: |-
+  Address five issues: (1) Preserve leading indentation and structure when normalizing modified file contents; only collapse internal runs of spaces/tabs and reduce excessive blank lines without eliminating all blank lines. (2) Ensure parent directories for output files exist before writing (output report, prompt debug, LLM implementation YAML). (3) Replace the stray commented-out print with an explicit CLI flag to optionally print the report to stdout. (4) Redact local filesystem paths from prompts.txt by replacing the full traceback with a summarized GraphQL error message. (5) Add hard size limits to the LLM payload: per-file truncation of modified file content, a total character budget across all modified files, and progress logging when truncation/omission occurs.
+implementation_strategy_context: |-
+  1) Update normalize_modified_file_content in build_llm_payload to preserve leading indentation and collapse only internal whitespace; adjust newline collapsing to keep at most one blank line. 2) Before any write_text calls, mkdir parents for output_file, prompt_debug_file, and llm_implementation_file. 3) Add a --print-report CLI flag and, if set, print the generated report; remove the commented print. 4) Edit github-pr-puller/prompts.txt to replace the plaintext traceback block with the reviewer’s redacted message. 5) Introduce constants for MAX_FILE_CONTENT_CHARS and MAX_TOTAL_MODIFIED_FILES_CHARS; update build_llm_payload to truncate large files and stop including further files when the total budget is exceeded; log truncation/omission via ProgressReporter; update call sites and optionally log final prompt size.
+implementation_items:
+  - item_number: 1
+    requested_change_summary_context: |-
+      Preserve code indentation when normalizing modified file content; only collapse internal whitespace and avoid removing all blank lines.
+    technical_explanation_context: |-
+      Current normalize_modified_file_content uses MULTI_SPACE_OR_TAB_RE over the entire blob, collapsing leading indentation and destroying code structure. It also reduces all repeated newlines to a single newline, eliminating blank lines entirely. For source code, this harms readability and can mislead downstream LLMs. We should normalize per line: keep leading indentation ([ \t]*), collapse only internal runs of spaces/tabs in the remainder, strip trailing whitespace, then collapse 3+ consecutive newlines to two (one blank line). Assumption: It’s acceptable to slightly diverge from the original prompt requirement that asked to reduce multiple newlines to one; preserving a single blank line is preferable for code context as per this review.
+    implementation_prompt_primary_instruction: |-
+      In github-pr-puller/github-pr-puller.py, update normalize_modified_file_content inside build_llm_payload as follows:
+      
+      - Keep MULTI_SPACE_OR_TAB_RE as-is. Stop using MULTI_NEWLINE_RE to reduce all newlines to one. Either:
+        a) redefine MULTI_NEWLINE_RE = re.compile(r"\n{3,}") and replace occurrences with "\n\n", or
+        b) inline re.sub for the 3+ to 2 collapse.
+      
+      Recommended patch:
+      
+      1) Change the function body:
+      
+      def normalize_modified_file_content(text: str) -> str:
+          # Normalize line endings first
+          normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+          # Preserve leading indentation; collapse only internal runs of spaces/tabs; trim trailing whitespace
+          lines = normalized.split("\n")
+          processed: list[str] = []
+          for line in lines:
+              m = re.match(r"^([ \t]*)(.*)$", line)
+              if m:
+                  indent, rest = m.groups()
+                  rest = MULTI_SPACE_OR_TAB_RE.sub(" ", rest)
+                  rest = rest.rstrip(" \t")
+                  processed.append(indent + rest)
+              else:
+                  processed.append(line)
+          normalized = "\n".join(processed)
+          # Collapse 3+ consecutive newlines to 2 (preserve a single blank line)
+          normalized = re.sub(r"\n{3,}", "\n\n", normalized)
+          return normalized
+      
+      2) If you prefer to keep MULTI_NEWLINE_RE, redefine it near the top:
+      MULTI_NEWLINE_RE = re.compile(r"\n{3,}")
+      …and then use:
+      normalized = MULTI_NEWLINE_RE.sub("\n\n", normalized)
+      
+      Import note: re is already imported at the top of the file.
+  - item_number: 2
+    requested_change_summary_context: |-
+      Create parent directories for output files before writing prompt debug, report, and LLM implementation files.
+    technical_explanation_context: |-
+      Path.write_text will fail with FileNotFoundError if the parent directory does not exist (e.g., when --output-file includes a non-existent directory). We must mkdir the parent with parents=True, exist_ok=True before each write to ensure robustness.
+    implementation_prompt_primary_instruction: |-
+      In main() of github-pr-puller/github-pr-puller.py:
+      
+      1) After computing output_file, and later after deriving prompt_debug_file and llm_implementation_file, ensure parent directories exist before write_text calls. Add a small helper or inline mkdirs.
+      
+      Example minimal changes right before the first write of prompt_debug_file:
+      
+      # After computing prompt_debug_file and llm_implementation_file
+      prompt_debug_path = Path(prompt_debug_file)
+      llm_impl_path = Path(llm_implementation_file)
+      output_path = Path(output_file)
+      
+      # Ensure parents exist
+      for p in (prompt_debug_path.parent, llm_impl_path.parent, output_path.parent):
+          p.mkdir(parents=True, exist_ok=True)
+      
+      # Then write files
+      prompt_debug_path.write_text(json.dumps(prompt_debug_doc, indent=2), encoding="utf-8")
+      ...
+      output_path.write_text(report, encoding="utf-8")
+      llm_impl_path.write_text(llm_impl_report, encoding="utf-8")
+      
+      Be sure to move the mkdir loop before the first write (currently the prompt debug file is written earlier than the others).
+  - item_number: 3
+    requested_change_summary_context: |-
+      Remove the commented-out print(report) or replace it with an explicit CLI switch to print the report.
+    technical_explanation_context: |-
+      A stray commented print introduces ambiguity in output behavior. Providing a --print-report flag allows intentional, discoverable control to also echo the report to stdout without impacting default file-based output.
+    implementation_prompt_primary_instruction: |-
+      In github-pr-puller/github-pr-puller.py:
+      
+      1) Add a new CLI flag in parse_args():
+      parser.add_argument(
+          "--print-report",
+          action="store_true",
+          help="Also print the generated report to stdout in addition to writing the file.",
+      )
+      
+      2) In main(), after generating report and before writing files, conditionally print:
+      if args.print_report:
+          print(report)
+      
+      3) Remove the commented line '#print(report)'. No other behavior changes needed.
+  - item_number: 4
+    requested_change_summary_context: |-
+      Redact local filesystem paths from prompts.txt by replacing the full traceback with a summarized GraphQL error message.
+    technical_explanation_context: |-
+      The current prompts.txt includes a full local stack trace with absolute paths, which leaks developer machine details into the repo. Keeping only the actionable GraphQL error message satisfies context while avoiding sensitive path disclosure.
+    implementation_prompt_primary_instruction: |-
+      Edit github-pr-puller/prompts.txt and replace the block beginning with "I received the following trace," through the end of the traceback with the reviewer’s redacted message. Concretely, replace:
+      
+      I received the following trace,
+      
+      Traceback (most recent call last):
+        File "/home/swiseman/... (entire traceback block) ...
+      RuntimeError: GitHub GraphQL error: [...]
+      
+      with:
+      
+      I received the following error from the GitHub GraphQL API (stack trace and local file paths omitted for brevity):
+      
+      GitHub GraphQL error: [{'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'side'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'side'}, 'locations': [{'line': 40, 'column': 15}], 'message': "Field 'side' doesn't exist on type 'PullRequestReviewComment'"}, {'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'startSide'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'startSide'}, 'locations': [{'line': 41, 'column': 15}], 'message': "Field 'startSide' doesn't exist on type 'PullRequestReviewComment'"}]
+      
+      Leave the rest of the file intact.
+  - item_number: 5
+    requested_change_summary_context: |-
+      Add hard size limits to the JSON payload embedded in the prompt to prevent context overflows: per-file truncation, total budget across all modified files, and logging when truncation/omission occurs.
+    technical_explanation_context: |-
+      build_analysis_prompt currently dumps the full payload (including entire contents of all modified files) into a single prompt string. Large files/PRs can exceed the model’s context limit and increase cost. Implementing per-file truncation and a total character budget across all modified_files content keeps runs predictable. Log any truncation/omission so users can understand why some content was shortened or skipped. Assumption: Exact thresholds aren’t specified; choose conservative defaults and make them easy to adjust.
+    implementation_prompt_primary_instruction: |-
+      In github-pr-puller/github-pr-puller.py:
+      
+      1) Define tunable limits near the existing constants:
+      
+      MAX_FILE_CONTENT_CHARS = 50_000  # per file cap
+      MAX_TOTAL_MODIFIED_FILES_CHARS = 200_000  # total budget across all modified files
+      
+      2) Update build_llm_payload signature to accept progress and enforce limits:
+      
+      def build_llm_payload(
+          comments: list[dict[str, Any]],
+          modified_files_with_content: list[dict[str, str]],
+          *,
+          progress: ProgressReporter | None = None,
+      ) -> dict[str, Any]:
+          def normalize_modified_file_content(...):
+              ...  # use the updated, indentation-preserving version
+      
+          truncated_files = 0
+          budget_used = 0
+          modified_files_out: list[dict[str, str]] = []
+      
+          for file_obj in modified_files_with_content:
+              path = str(file_obj.get("path") or "")
+              content = normalize_modified_file_content(str(file_obj.get("content") or ""))
+              if len(content) > MAX_FILE_CONTENT_CHARS:
+                  truncated_files += 1
+                  content = content[:MAX_FILE_CONTENT_CHARS] + f"\n[... TRUNCATED to {MAX_FILE_CONTENT_CHARS} chars ...]\n"
+              # Enforce total budget across all files
+              if budget_used + len(content) > MAX_TOTAL_MODIFIED_FILES_CHARS:
+                  if progress:
+                      remaining = len(modified_files_with_content) - len(modified_files_out)
+                      progress.log(
+                          f"Prompt size guard: omitting {remaining} modified files due to total size limit "
+                          f"({MAX_TOTAL_MODIFIED_FILES_CHARS} chars)."
+                      )
+                  break
+              modified_files_out.append({"path": path, "content": content})
+              budget_used += len(content)
+      
+          if progress and truncated_files:
+              progress.log(
+                  f"Prompt size guard: truncated {truncated_files} modified file(s) to {MAX_FILE_CONTENT_CHARS} chars each."
+              )
+      
+          return {
+              "review_comments": [
+                  {"file_path": str(c.get("file_path") or ""), "body": str(c.get("body") or ""), "code_snippet": str(c.get("code_snippet") or "")}
+                  for c in comments
+              ],
+              "modified_files": modified_files_out,
+          }
+      
+      3) Update the call site in main():
+      
+      payload = build_llm_payload(
+          comments=comments,
+          modified_files_with_content=modified_files_with_content,
+          progress=progress,
+      )
+      
+      4) Optionally, log prompt size after building it in main():
+      
+      prompt = build_analysis_prompt(payload)
+      progress.log(f"Prompt text size: {len(prompt)} chars")
+      
+      These guards cap individual file sizes and the aggregate content size, and they log when any truncation or omission occurs.

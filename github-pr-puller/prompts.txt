@@ -1,0 +1,68 @@
+in python, write script which adhears these requirements:
+
+program takes a number as an argument representing the idof a github pull request and the respository to use.
+program has implemented support for a help menu and explanation of allowed arguments
+program makes use of the offical github api to retrieve all pr comments, not in the resolved state, against the repository and PR number provided as arguments
+The API calls should retrieve the comment itself, the file which is being commented on and the code snippet under comment.
+program formats the retrieved data in a manner best suited to send an LLM for analysis.
+program sends the data to openapi using the openai-agents-python sdk.
+program expects the LLM to respond to the request with overall summary of the changes requested and a more technical explanation of each comment, written in a manner best suited to submit to an LLM to implement it. 
+program then prints each returned text object in a well formated and pleasing interface, copy and paste ability is high priority
+
+
+in the help menu can you provide examples for the pr_number and repository values, so the user has understanding of what is expected
+
+
+I received the following error from the GitHub GraphQL API (stack trace and local file paths omitted for brevity):
+
+GitHub GraphQL error: [{'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'side'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'side'}, 'locations': [{'line': 40, 'column': 15}], 'message': "Field 'side' doesn't exist on type 'PullRequestReviewComment'"}, {'path': ['query PullRequestThreads', 'repository', 'pullRequest', 'reviewThreads', 'nodes', 'comments', 'nodes', 'startSide'], 'extensions': {'code': 'undefinedField', 'typeName': 'PullRequestReviewComment', 'fieldName': 'startSide'}, 'locations': [{'line': 41, 'column': 15}], 'message': "Field 'startSide' doesn't exist on type 'PullRequestReviewComment'"}]
+
+
+can you provide indications of progression, communication with github, for each LLM call, etc
+
+
+can you add a default output file, include the repos and pr number into the name of the default. Make storing to true by default and expect a command line argument if the file name is to be changed.
+
+
+store the payload of the prompt into a file, the filename should be named exactly like the output file andindication it's for prompt debug and with a different appropriate extension
+
+
+add a timer to keep track how long from user input to report completion. print this value to the screen, measure in seconds.
+
+
+can you alter the timer implementation to breakdown the time it takes for the gihub logic portion, openai LLM and the total. 
+
+
+on the LLM submission only include the following key/values: body and code_snippet.
+Also, in addition to limiting PRs to unresolved, also ensure the outdated flag is not set to True
+
+
+in addition to the review comments, provide all unique files being modified and their entire respective content for additional LLM context, instruct the LLM calls to make use of the included files for additional context.
+
+
+can you include the filename for each review comment, additional to body and code_snippet
+
+
+in addition to the export of the reportin md format, export the report into a file using a structure with header explaining the intent of this file is to instruct an LLM to ingest and implement the content under the implementation prompt, using the request change and technical explanation as context.
+
+
+for the llm-implementation.md output , don't output in md format, output in a yaml format, reflect this in the filename
+
+
+in the modified_files parameter in the submitted prompt, remove excessive whitespace in the content. specficially, if there is more than 1 space or tab, reduce to 1, if there are more than 1 newline or return characters  reduce it to 1
+
+
+for each outputed file, include an index number in the filename so as not to clobber a previous output file. Simply look for other files of the same name and update and increase the index number
+
+
+add additional logic around the analyze_with_openai_agents LLM submission to request a severity and risk attribute in the reponse. Have the report output_file and implementation output to incorporate these attributes, in addition have the implementation output sort comments based on their severity + risk.
+
+
+for each comment retrieved from GitHub, append to the thread a comment indicating this script has consumed the comment and a potential change is in process. If on comment retrieval the last comment is one of these checkpoint comments, do not consider it eligible for processing.
+
+
+change the logic from returning individual comments to returning comments grouped by the thread they belong to. If there is not a checkpoint marker return all comments in a given thread, other wise return all comments after the last checkpoint marker. 
+modify it so the file_path and code_snippet are submitted once per thread and have there be a list of comment bodies
+
+
+when posting the checkpoint comment into Github, include the thread id allowing for better cross reference

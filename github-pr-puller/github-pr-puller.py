@@ -1043,6 +1043,32 @@ def build_analysis_prompt(payload: dict[str, Any]) -> str:
     )
 
 
+def estimate_token_count(text: str) -> int:
+    """Estimate tokens from text length when provider usage metrics are unavailable."""
+    clean = text or ""
+    if not clean:
+        return 0
+    # Fast approximation used only as a fallback.
+    return max(1, (len(clean) + 3) // 4)
+
+
+def output_to_text_for_token_estimate(output: Any) -> str:
+    """Convert final output object to text for fallback token estimation."""
+    if output is None:
+        return ""
+    model_dump_json = getattr(output, "model_dump_json", None)
+    if callable(model_dump_json):
+        try:
+            return model_dump_json(indent=2)
+        except TypeError:
+            return model_dump_json()
+        except Exception:
+            pass
+    if isinstance(output, (dict, list, tuple)):
+        return json.dumps(output, indent=2, default=str)
+    return str(output)
+
+
 def maybe_load_agents_locally() -> None:
     """Allow running from this repo without pip installing openai-agents."""
     if "agents" in sys.modules:
@@ -1163,6 +1189,28 @@ def analyze_with_openai_agents(
     llm_started_at = time.monotonic()
     result = Runner.run_sync(agent, prompt)
     duration = time.monotonic() - llm_started_at
+    usage = getattr(getattr(result, "context_wrapper", None), "usage", None)
+    submission_tokens = int(getattr(usage, "input_tokens", 0) or 0)
+    returned_tokens = int(getattr(usage, "output_tokens", 0) or 0)
+    total_tokens = int(getattr(usage, "total_tokens", 0) or (submission_tokens + returned_tokens))
+    request_count = int(getattr(usage, "requests", 0) or 0)
+    if submission_tokens or returned_tokens:
+        progress.log(
+            "LLM token usage "
+            f"(submission={submission_tokens}, returned={returned_tokens}, "
+            f"total={total_tokens}, requests={request_count})"
+        )
+    else:
+        estimated_submission_tokens = estimate_token_count(prompt)
+        estimated_returned_tokens = estimate_token_count(
+            output_to_text_for_token_estimate(result.final_output)
+        )
+        estimated_total_tokens = estimated_submission_tokens + estimated_returned_tokens
+        progress.log(
+            "LLM token usage unavailable from provider; estimated "
+            f"(submission~{estimated_submission_tokens}, returned~{estimated_returned_tokens}, "
+            f"total~{estimated_total_tokens})"
+        )
     progress.log(f"LLM call 1 completed in {duration:.2f}s")
     return result.final_output
 

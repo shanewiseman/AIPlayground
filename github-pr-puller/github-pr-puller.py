@@ -154,6 +154,43 @@ SUGGESTION_BLOCK_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 DIFF_BLOCK_MARKER_RE = re.compile(r"(?m)^(diff --git |@@ |--- |\+\+\+ )")
+LANGUAGE_BY_EXTENSION = {
+    ".c": "c",
+    ".cc": "cpp",
+    ".cpp": "cpp",
+    ".cs": "csharp",
+    ".css": "css",
+    ".go": "go",
+    ".h": "c",
+    ".hpp": "cpp",
+    ".html": "html",
+    ".java": "java",
+    ".js": "javascript",
+    ".json": "json",
+    ".kt": "kotlin",
+    ".kts": "kotlin",
+    ".md": "markdown",
+    ".php": "php",
+    ".py": "python",
+    ".rb": "ruby",
+    ".rs": "rust",
+    ".sh": "bash",
+    ".sql": "sql",
+    ".swift": "swift",
+    ".toml": "toml",
+    ".ts": "typescript",
+    ".tsx": "tsx",
+    ".txt": "text",
+    ".xml": "xml",
+    ".yaml": "yaml",
+    ".yml": "yaml",
+}
+LANGUAGE_BY_FILENAME = {
+    "dockerfile": "dockerfile",
+    "makefile": "make",
+    "cmakelists.txt": "cmake",
+    "requirements.txt": "text",
+}
 
 
 class ProgressReporter:
@@ -483,13 +520,7 @@ def _slice_file_by_comment_range(
 
     start = _to_int(start_line) + 1 if start_line is not None else None
     end = _to_int(end_line)
-    
-    with open("debug_comment_snippet.txt", "w", encoding="utf-8") as debug_file:
-        debug_file.write(f"start_line={start_line}, end2_line={end_line}\n")
-        for line in lines:
-            debug_file.write(f"{line}\n")
-        
-   
+       
     #TODO there needs to be indication of where this logic goes, it diverts without much indication of path
     if start is None and end is None:
         return ""
@@ -501,30 +532,20 @@ def _slice_file_by_comment_range(
         return ""
 
 
-
-
     lower = max(1, min(start, end) - 10)  # include up to 10 lines of context before the comment range
     upper = max(1, max(start, end) + 10)  # include up to 10 lines of context after the comment range
     
-    print(f"DEBUG: start={start}, end={end}, lower={lower}, upper={upper}, total_lines={len(lines)}")
-    exit(0)
+
     if lower > len(lines):
         # TODO I think I need to import progress
-        progress.log(
-            f"Skipping code snippet extraction: comment range ({lower}-{upper}) "
-            f"exceeds file length ({len(lines)} lines)"
-        )
+        # progress.log(
+        #     f"Skipping code snippet extraction: comment range ({lower}-{upper}) "
+        #     f"exceeds file length ({len(lines)} lines)"
+        # )
         return ""
     upper = min(upper, len(lines))
-    
-    with open("debug_comment_snippet.txt", "a", encoding="utf-8") as debug_file:
-        debug_file.write(f"start_line={start_line}, end2_line={end_line}\n")
-        debug_file.write(f"{lines}")
-
-    
-    exit(0)
-    
-    return "\n".join(lines[lower - 1 : upper - 1]).strip("\n")
+    print(f"{lower} {upper} {len(lines)}")
+    return "\n".join(lines[lower - 1 : upper]).strip("\n")
 
 
 def _split_comment_body_and_suggestions(comment_body: str) -> tuple[str, list[str]]:
@@ -544,8 +565,11 @@ def normalize_comment(
     """Normalize GitHub review comment fields used by downstream processing."""
     comment_id = comment.get("id")
     file_path = comment.get("path") or thread.get("path") or ""
-    start_line = comment.get("startLine")    
-    line = comment.get("line")
+   
+   
+   #The comment diff can drift as other commits are made
+    start_line = comment.get("originalStartLine") or comment.get("startLine")    
+    line = comment.get("originalLine") or comment.get("line")
     code_snippet = _slice_file_by_comment_range(
         str(comment.get("diffHunk") or ""),
         start_line=start_line,
@@ -1147,8 +1171,28 @@ def is_diff_content(text: str) -> bool:
     clean = (text or "").strip()
     if not clean:
         return False
-    exit()
     return bool(DIFF_BLOCK_MARKER_RE.search(clean))
+
+
+def detect_code_block_language(file_path: str, snippet: str) -> str:
+    """Infer the markdown fence language for a snippet."""
+    clean_snippet = (snippet or "").strip()
+    if not clean_snippet:
+        return "text"
+    if is_diff_content(clean_snippet):
+        return "diff"
+
+    normalized_path = str(file_path or "").strip()
+    if normalized_path:
+        lower_name = Path(normalized_path).name.lower()
+        if lower_name in LANGUAGE_BY_FILENAME:
+            return LANGUAGE_BY_FILENAME[lower_name]
+        if lower_name.endswith(".d.ts"):
+            return "typescript"
+        suffix = Path(lower_name).suffix
+        if suffix in LANGUAGE_BY_EXTENSION:
+            return LANGUAGE_BY_EXTENSION[suffix]
+    return "text"
 
 
 def render_report(
@@ -1223,22 +1267,27 @@ def render_report(
         sections.append(block("Risk", str(comment.risk)))
         sections.append(block("Risk Reasoning", str(comment.risk_reasoning)))
         sections.append(block("File Path (From Review Thread)", source_file_path))
-        snippet_language = "diff"
         sections.append(
             block(
                 "Code Snippet (From Review Thread)",
                 source_code_snippet,
-                language=snippet_language,
+                language="diff",
             )
         )
         sections.append(
             block(
                 "Comment Suggestions (From Review Thread)",
                 "\n\n".join(source_comment_suggestions),
-                language="text",
+                language=detect_code_block_language(source_file_path, "\n\n".join(source_comment_suggestions))
             )
         )
-        sections.append(block("Requested Change Summary", comment.requested_change_summary))
+        sections.append(
+            block(
+                "Requested Change Summary",
+                comment.requested_change_summary,
+                language=detect_code_block_language(source_file_path, comment.requested_change_summary)
+            )
+        )
         sections.append(block("Implementation Prompt", comment.implementation_prompt))
 
     return "\n\n".join(sections).rstrip() + "\n"

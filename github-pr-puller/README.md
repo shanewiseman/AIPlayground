@@ -53,7 +53,7 @@ python3 github-pr-puller/github-pr-puller.py 123 shanewiseman/AIPlayground --out
 - `pr_number` (required): PR number (example: `347`).
 - `repository` (required): repository in `owner/repo` format (example: `openai/openai-agents-python`).
 - `--github-token`: overrides `GITHUB_TOKEN`.
-- `--model`: model for the agent (default: `gpt-5`).
+- `--model`: model for the agent (default: `gpt-5-mini`).
 - `--output-file`: base report filename override.
 - `--max-comments`: max comments to include in LLM input (default: `600`).
 - `--quiet`: disable progress logs.
@@ -98,4 +98,3 @@ On future runs:
   - GitHub logic
   - OpenAI LLM logic
   - Total runtime
-

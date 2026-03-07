@@ -711,33 +711,26 @@ def fetch_unresolved_pr_comments(
                 progress.log(f"Skipping thread {thread_id}: no eligible comments after filtering")
                 continue
 
+            root_comment_id = get_thread_root_comment_database_id(comments)
+            if root_comment_id is None:
+                progress.log(
+                    f"Thread {thread_id}: no databaseId found for a root comment; "
+                    "checkpoint metadata will not be recorded for this thread."
+                )
+
             unresolved_threads.append(
                 {
                     "thread_id": thread.get("id"),
                     "thread_path": thread.get("path"),
                     "comments": thread_comments,
+                    # Stored for deferred checkpoint posting after a successful LLM run.
+                    "root_comment_id": root_comment_id,
                 }
             )
             progress.log(
                 f"Thread {thread_id}: collected {kept_comments}/{len(candidate_comments)} eligible comments "
                 f"(running_total_threads={len(unresolved_threads)})"
             )
-            root_comment_id = get_thread_root_comment_database_id(comments)
-            if root_comment_id is None:
-                progress.log(
-                    f"Skipping checkpoint post for thread {thread_id}: no databaseId found "
-                    "for a root comment."
-                )
-            else:
-                post_thread_checkpoint_comment(
-                    token=token,
-                    owner=owner,
-                    repo=repo,
-                    pr_number=pr_number,
-                    thread_id=thread_id,
-                    root_comment_id=root_comment_id,
-                    progress=progress,
-                )
 
         page_info = review_threads.get("pageInfo") or {}
         if not page_info.get("hasNextPage"):
@@ -1548,6 +1541,27 @@ def main() -> None:
     )
     openai_elapsed_seconds = time.monotonic() - openai_started_at
     progress.log(f"OpenAI LLM logic completed in {openai_elapsed_seconds:.2f}s")
+    for thread_group in selected_thread_groups:
+        thread_id = str(thread_group.get("thread_id") or "")
+        root_comment_id = thread_group.get("root_comment_id")
+        if not thread_id:
+            continue
+        if root_comment_id is None:
+            progress.log(f"Skipping checkpoint post for thread {thread_id}: no recorded root_comment_id")
+            continue
+        try:
+            post_thread_checkpoint_comment(
+                token=args.github_token,
+                owner=owner,
+                repo=repo,
+                pr_number=args.pr_number,
+                thread_id=thread_id,
+                root_comment_id=root_comment_id,
+                progress=progress,
+            )
+        except Exception as exc:
+            progress.log(f"Failed to post checkpoint for thread {thread_id}: {exc}")
+
     progress.log("Rendering final output report")
     report = render_report(
         analysis=analysis,

@@ -237,7 +237,6 @@ def parse_args() -> argparse.Namespace:
               python github-pr-puller.py 123 owner/repo
               python github-pr-puller.py 123 owner/repo --model gpt-5-mini
               python github-pr-puller.py 123 owner/repo --service-tier priority
-              python github-pr-puller.py 123 owner/repo --output-file report.md
             """
         ),
     )
@@ -267,13 +266,6 @@ def parse_args() -> argparse.Namespace:
         help=(
             "OpenAI service tier for all LLM submissions "
             "(choices: standard, flex, priority; default: flex)."
-        ),
-    )
-    parser.add_argument(
-        "--output-file",
-        help=(
-            "Override output markdown path. By default, the script saves automatically "
-            "using the repo and PR number in the filename."
         ),
     )
     parser.add_argument(
@@ -323,13 +315,13 @@ def build_default_output_filename(owner: str, repo: str, pr_number: int) -> str:
 
 def build_prompt_debug_filename(output_file: str) -> str:
     """Build the prompt debug JSON filename from the report filename."""
-    output_path = Path(output_file)
+    output_path = Path(f"./prompt-debug/{output_file}")
     return str(output_path.with_name(f"{output_path.name}.prompt-debug.json"))
 
 
 def build_llm_implementation_filename(output_file: str) -> str:
     """Build the LLM implementation YAML filename from the report filename."""
-    output_path = Path(output_file)
+    output_path = Path(f"./llm-implementation/{output_file}")
     return str(output_path.with_name(f"{output_path.stem}.llm-implementation.yaml"))
 
 
@@ -613,7 +605,7 @@ def _slice_file_by_comment_range(
     if lower > len(lines):
         return ""
     upper = min(upper, len(lines))
-    return "\n".join(lines[lower - 1 : upper + 1]).strip("\n")
+    return "\n".join(lines[lower - 1 : upper]).strip("\n")
 
 
 def _split_comment_body_and_suggestions(comment_body: str) -> tuple[str, list[str]]:
@@ -1568,7 +1560,7 @@ def main() -> None:
         owner, repo = parse_repository(args.repository)
     except ValueError as exc:
         raise SystemExit(str(exc))
-    base_output_file = args.output_file or build_default_output_filename(owner, repo, args.pr_number)
+    base_output_file = build_default_output_filename(owner, repo, args.pr_number)
     prompt_cache_key = f"github-pr-puller:{owner}/{repo}:pr:{args.pr_number}:analysis:v1"
     output_file, prompt_debug_file, llm_implementation_file, output_index = (
         resolve_indexed_output_filenames(base_output_file)

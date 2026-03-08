@@ -1089,8 +1089,14 @@ def build_analysis_prompt(payload: dict[str, Any]) -> str:
         "'code_snippet', 'comment_bodies' (non-suggestion text), and "
         "'comment_suggestions' (suggested code blocks). "
         "Each modified file item contains 'path' and full 'content'. "
-        "Use the file contents actively when creating guidance.\n\n"
-        f"{json.dumps(payload, indent=2)}"
+        "Use the file contents actively when creating guidance."
+        "You're not required to follow the suggested code in the comment_suggestions; "
+        "use them as guidance but feel free to deviate when generating the implementation prompt. "
+        "\n\n"
+        
+        # The order of the sections below are important, caching modified_files will help
+        f"modified_files: {json.dumps(payload.get('modified_files'), indent=2)}\n\n"
+        f"review_comments: {json.dumps(payload.get('review_comments'), indent=2)}"
     )
 
 
@@ -1132,6 +1138,7 @@ def maybe_load_agents_locally() -> None:
 def analyze_with_openai_agents(
     model: str,
     service_tier: str,
+    prompt_cache_key: str,
     prompt: str,
     thread_count: int,
     comment_count: int,
@@ -1204,7 +1211,10 @@ def analyze_with_openai_agents(
         name="GitHub PR Review Analyst",
         model=model,
         model_settings=ModelSettings(
-            extra_args={"service_tier": service_tier},
+            extra_args={
+                "service_tier": service_tier,
+                "prompt_cache_key": prompt_cache_key,
+            },
         ),
         instructions=textwrap.dedent(
             """
@@ -1234,7 +1244,7 @@ def analyze_with_openai_agents(
     set_tracing_disabled(True)
     progress.log(
         "LLM call 1 started "
-        f"(model={model}, service_tier={service_tier}, "
+        f"(model={model}, service_tier={service_tier}, prompt_cache_key={prompt_cache_key}, "
         f"unresolved_threads={thread_count}, unresolved_comments={comment_count})"
     )
     llm_started_at = time.monotonic()
@@ -1557,6 +1567,7 @@ def main() -> None:
     except ValueError as exc:
         raise SystemExit(str(exc))
     base_output_file = args.output_file or build_default_output_filename(owner, repo, args.pr_number)
+    prompt_cache_key = f"github-pr-puller:{owner}/{repo}:pr:{args.pr_number}:analysis:v1"
     output_file, prompt_debug_file, llm_implementation_file, output_index = (
         resolve_indexed_output_filenames(base_output_file)
     )
@@ -1649,6 +1660,7 @@ def main() -> None:
     prompt_debug_doc = {
         "model": args.model,
         "service_tier": service_tier,
+        "prompt_cache_key": prompt_cache_key,
         "prompt_payload": payload,
         "prompt_text": prompt,
     }
@@ -1667,6 +1679,7 @@ def main() -> None:
     analysis = analyze_with_openai_agents(
         model=args.model,
         service_tier=service_tier,
+        prompt_cache_key=prompt_cache_key,
         prompt=prompt,
         thread_count=len(selected_thread_groups),
         comment_count=selected_comments,

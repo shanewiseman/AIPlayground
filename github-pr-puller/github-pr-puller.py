@@ -1260,6 +1260,8 @@ def analyze_with_openai_agents(
             return 0
 
     submission_tokens = _int_or_zero(getattr(usage, "input_tokens", 0))
+    cached_tokens = _int_or_zero(getattr(getattr(usage, "prompt_token_details", None), "cached_tokens", 0))
+    
     returned_tokens = _int_or_zero(getattr(usage, "output_tokens", 0))
     total_tokens = _int_or_zero(
         getattr(usage, "total_tokens", 0) or (submission_tokens + returned_tokens)
@@ -1268,7 +1270,7 @@ def analyze_with_openai_agents(
     if submission_tokens or returned_tokens or total_tokens or request_count:
         progress.log(
             "LLM token usage "
-            f"(submission={submission_tokens}, returned={returned_tokens}, "
+            f"(submission={submission_tokens}, cached={cached_tokens}, returned={returned_tokens}, "
             f"total={total_tokens}, requests={request_count})"
         )
     else:

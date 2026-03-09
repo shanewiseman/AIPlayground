@@ -27,8 +27,8 @@ SERVICE_TIER_TO_API_VALUE = {
     "flex": "flex",
     "priority": "priority",
 }
-MAX_FILE_CONTENT_CHARS = 50_000
-MAX_TOTAL_MODIFIED_FILES_CHARS = 200_000
+MAX_FILE_CONTENT_CHARS = 200_000
+MAX_TOTAL_MODIFIED_FILES_CHARS = 500_000
 CHECKPOINT_COMMENT_PREFIX = "[github-pr-puller checkpoint]"
 
 THREADS_QUERY = """
@@ -998,6 +998,7 @@ def build_llm_payload(
                 content[:MAX_FILE_CONTENT_CHARS]
                 + f"\n[... TRUNCATED to {MAX_FILE_CONTENT_CHARS} chars ...]\n"
             )
+            progress.log(f"{file_obj} as been truncated")
 
         if budget_used + len(content) > MAX_TOTAL_MODIFIED_FILES_CHARS:
             if progress:

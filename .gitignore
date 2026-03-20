@@ -6,7 +6,7 @@ website/state/
 
 github-pr-puller/__pycache__/
 github-pr-puller/github.token
-**/*.prompt-debug.*.json
+**/*.prompt-debug.*
 **/*.llm-implementation.*
 **/*-pr*.md
 

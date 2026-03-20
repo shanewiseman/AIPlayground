@@ -21,8 +21,14 @@ GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 GITHUB_REST_API_BASE = "https://api.github.com"
 GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_MODEL = "gpt-5-mini"
-MAX_FILE_CONTENT_CHARS = 50_000
-MAX_TOTAL_MODIFIED_FILES_CHARS = 200_000
+DEFAULT_SERVICE_TIER = "flex"
+SERVICE_TIER_TO_API_VALUE = {
+    "standard": "default",
+    "flex": "flex",
+    "priority": "priority",
+}
+MAX_FILE_CONTENT_CHARS = 200_000
+MAX_TOTAL_MODIFIED_FILES_CHARS = 500_000
 CHECKPOINT_COMMENT_PREFIX = "[github-pr-puller checkpoint]"
 
 THREADS_QUERY = """
@@ -230,7 +236,7 @@ def parse_args() -> argparse.Namespace:
             Examples:
               python github-pr-puller.py 123 owner/repo
               python github-pr-puller.py 123 owner/repo --model gpt-5-mini
-              python github-pr-puller.py 123 owner/repo --output-file report.md
+              python github-pr-puller.py 123 owner/repo --service-tier priority
             """
         ),
     )
@@ -254,10 +260,12 @@ def parse_args() -> argparse.Namespace:
         help=f"Model for openai-agents-python (default: {DEFAULT_MODEL}).",
     )
     parser.add_argument(
-        "--output-file",
+        "--service-tier",
+        choices=tuple(SERVICE_TIER_TO_API_VALUE.keys()),
+        default=DEFAULT_SERVICE_TIER,
         help=(
-            "Override output markdown path. By default, the script saves automatically "
-            "using the repo and PR number in the filename."
+            "OpenAI service tier for all LLM submissions "
+            "(choices: standard, flex, priority; default: flex)."
         ),
     )
     parser.add_argument(
@@ -307,13 +315,13 @@ def build_default_output_filename(owner: str, repo: str, pr_number: int) -> str:
 
 def build_prompt_debug_filename(output_file: str) -> str:
     """Build the prompt debug JSON filename from the report filename."""
-    output_path = Path(output_file)
+    output_path = Path(f"./prompt-debug/{output_file}")
     return str(output_path.with_name(f"{output_path.name}.prompt-debug.json"))
 
 
 def build_llm_implementation_filename(output_file: str) -> str:
     """Build the LLM implementation YAML filename from the report filename."""
-    output_path = Path(output_file)
+    output_path = Path(f"./llm-implementation/{output_file}")
     return str(output_path.with_name(f"{output_path.stem}.llm-implementation.yaml"))
 
 
@@ -512,16 +520,19 @@ def _slice_file_by_comment_range(
     start_line: Any,
     end_line: Any,
 ) -> str:
-    """Return file text between start_line and end_line (inclusive, 1-based)."""
-    normalized = file_text.replace("\r\n", "\n").replace("\r", "\n")    
+    """Return a snippet from file_text around the requested absolute file line range.
+
+    Supports unified diff text by parsing hunk headers (`@@ -a,b +c,d @@`) and
+    mapping absolute file line numbers to diff-line indices before slicing.
+    """
+    normalized = file_text.replace("\r\n", "\n").replace("\r", "\n")
     lines = normalized.split("\n")
     if not lines:
         return ""
 
-    start = _to_int(start_line) + 1 if start_line is not None else None
+    start = _to_int(start_line)
     end = _to_int(end_line)
-       
-    #TODO there needs to be indication of where this logic goes, it diverts without much indication of path
+
     if start is None and end is None:
         return ""
     if start is None:
@@ -531,20 +542,69 @@ def _slice_file_by_comment_range(
     if start is None or end is None:
         return ""
 
+    target_start = min(start, end)
+    target_end = max(start, end)
+    context_lines = 2
 
-    lower = max(1, min(start, end) - 10)  # include up to 10 lines of context before the comment range
-    upper = max(1, max(start, end) + 10)  # include up to 10 lines of context after the comment range
-    
+    # Unified diff handling: map absolute file lines to diff-line indices via hunk headers.
+    hunk_header_re = re.compile(
+        r"^@@ -(?P<old_start>\d+)(?:,(?P<old_count>\d+))? "
+        r"\+(?P<new_start>\d+)(?:,(?P<new_count>\d+))? @@"
+    )
+    matching_diff_indexes: list[int] = []
+    current_old_line: int | None = None
+    current_new_line: int | None = None
 
+    for idx, line_text in enumerate(lines):
+        header_match = hunk_header_re.match(line_text)
+        if header_match:
+            current_old_line = int(header_match.group("old_start"))
+            current_new_line = int(header_match.group("new_start"))
+            continue
+
+        if current_old_line is None or current_new_line is None:
+            continue
+
+        prefix = line_text[:1]
+        if prefix == " ":
+            if (
+                target_start <= current_old_line <= target_end
+                or target_start <= current_new_line <= target_end
+            ):
+                matching_diff_indexes.append(idx)
+            current_old_line += 1
+            current_new_line += 1
+        elif prefix == "-":
+            if target_start <= current_old_line <= target_end:
+                matching_diff_indexes.append(idx)
+            current_old_line += 1
+        elif prefix == "+":
+            if target_start <= current_new_line <= target_end:
+                matching_diff_indexes.append(idx)
+            current_new_line += 1
+        elif line_text.startswith("\\ No newline at end of file"):
+            continue
+        else:
+            # If a line in the hunk is missing a diff prefix, treat it as shared context.
+            if (
+                target_start <= current_old_line <= target_end
+                or target_start <= current_new_line <= target_end
+            ):
+                matching_diff_indexes.append(idx)
+            current_old_line += 1
+            current_new_line += 1
+
+    if matching_diff_indexes:
+        lower_idx = max(0, min(matching_diff_indexes) - context_lines)
+        upper_idx = min(len(lines), max(matching_diff_indexes) + context_lines + 1)
+        return "\n".join(lines[lower_idx:upper_idx]).strip("\n")
+
+    # Fallback for non-diff/plain text: treat start/end as absolute line numbers.
+    lower = max(1, target_start - context_lines)
+    upper = max(1, target_end + context_lines)
     if lower > len(lines):
-        # TODO I think I need to import progress
-        # progress.log(
-        #     f"Skipping code snippet extraction: comment range ({lower}-{upper}) "
-        #     f"exceeds file length ({len(lines)} lines)"
-        # )
         return ""
     upper = min(upper, len(lines))
-    print(f"{lower} {upper} {len(lines)}")
     return "\n".join(lines[lower - 1 : upper]).strip("\n")
 
 
@@ -565,9 +625,8 @@ def normalize_comment(
     """Normalize GitHub review comment fields used by downstream processing."""
     comment_id = comment.get("id")
     file_path = comment.get("path") or thread.get("path") or ""
-   
-   
-   #The comment diff can drift as other commits are made
+        
+    #The comment diff can drift as other commits are made
     start_line = comment.get("originalStartLine") or comment.get("startLine")    
     line = comment.get("originalLine") or comment.get("line")
     code_snippet = _slice_file_by_comment_range(
@@ -939,6 +998,7 @@ def build_llm_payload(
                 content[:MAX_FILE_CONTENT_CHARS]
                 + f"\n[... TRUNCATED to {MAX_FILE_CONTENT_CHARS} chars ...]\n"
             )
+            progress.log(f"{file_obj} as been truncated")
 
         if budget_used + len(content) > MAX_TOTAL_MODIFIED_FILES_CHARS:
             if progress:
@@ -1022,9 +1082,41 @@ def build_analysis_prompt(payload: dict[str, Any]) -> str:
         "'code_snippet', 'comment_bodies' (non-suggestion text), and "
         "'comment_suggestions' (suggested code blocks). "
         "Each modified file item contains 'path' and full 'content'. "
-        "Use the file contents actively when creating guidance.\n\n"
-        f"{json.dumps(payload, indent=2)}"
+        "Use the file contents actively when creating guidance."
+        "You're not required to follow the suggested code in the comment_suggestions; "
+        "use them as guidance but feel free to deviate when generating the implementation prompt. "
+        "\n\n"
+        
+        # The order of the sections below are important, caching modified_files will help
+        f"modified_files: {json.dumps(payload.get('modified_files'), indent=2)}\n\n"
+        f"review_comments: {json.dumps(payload.get('review_comments'), indent=2)}"
     )
+
+
+def estimate_token_count(text: str) -> int:
+    """Estimate tokens from text length when provider usage metrics are unavailable."""
+    clean = text or ""
+    if not clean:
+        return 0
+    # Fast approximation used only as a fallback.
+    return max(1, (len(clean) + 3) // 4)
+
+
+def output_to_text_for_token_estimate(output: Any) -> str:
+    """Convert final output object to text for fallback token estimation."""
+    if output is None:
+        return ""
+    model_dump_json = getattr(output, "model_dump_json", None)
+    if callable(model_dump_json):
+        try:
+            return model_dump_json(indent=2)
+        except TypeError:
+            return model_dump_json()
+        except Exception:
+            pass
+    if isinstance(output, (dict, list, tuple)):
+        return json.dumps(output, indent=2, default=str)
+    return str(output)
 
 
 def maybe_load_agents_locally() -> None:
@@ -1038,6 +1130,8 @@ def maybe_load_agents_locally() -> None:
 
 def analyze_with_openai_agents(
     model: str,
+    service_tier: str,
+    prompt_cache_key: str,
     prompt: str,
     thread_count: int,
     comment_count: int,
@@ -1047,7 +1141,7 @@ def analyze_with_openai_agents(
     maybe_load_agents_locally()
     try:
         from pydantic import BaseModel, Field
-        from agents import Agent, Runner, set_tracing_disabled
+        from agents import Agent, ModelSettings, Runner, set_tracing_disabled
     except ImportError as exc:
         raise RuntimeError(
             "Missing dependencies. Install with: pip install openai-agents pydantic"
@@ -1109,6 +1203,12 @@ def analyze_with_openai_agents(
     agent = Agent(
         name="GitHub PR Review Analyst",
         model=model,
+        model_settings=ModelSettings(
+            extra_args={
+                "service_tier": service_tier,
+                "prompt_cache_key": prompt_cache_key,
+            },
+        ),
         instructions=textwrap.dedent(
             """
             You analyze unresolved GitHub pull request review comments.
@@ -1137,11 +1237,46 @@ def analyze_with_openai_agents(
     set_tracing_disabled(True)
     progress.log(
         "LLM call 1 started "
-        f"(model={model}, unresolved_threads={thread_count}, unresolved_comments={comment_count})"
+        f"(model={model}, service_tier={service_tier}, prompt_cache_key={prompt_cache_key}, "
+        f"unresolved_threads={thread_count}, unresolved_comments={comment_count})"
     )
     llm_started_at = time.monotonic()
     result = Runner.run_sync(agent, prompt)
     duration = time.monotonic() - llm_started_at
+    usage = getattr(getattr(result, "context_wrapper", None), "usage", None)
+
+    def _int_or_zero(value: Any) -> int:
+        """Convert provider usage values to int, defaulting to 0 on bad input."""
+        try:
+            return int(value or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    submission_tokens = _int_or_zero(getattr(usage, "input_tokens", 0))
+    cached_tokens = _int_or_zero(getattr(getattr(usage, "prompt_token_details", None), "cached_tokens", 0))
+    
+    returned_tokens = _int_or_zero(getattr(usage, "output_tokens", 0))
+    total_tokens = _int_or_zero(
+        getattr(usage, "total_tokens", 0) or (submission_tokens + returned_tokens)
+    )
+    request_count = _int_or_zero(getattr(usage, "requests", 0))
+    if submission_tokens or returned_tokens or total_tokens or request_count:
+        progress.log(
+            "LLM token usage "
+            f"(submission={submission_tokens}, cached={cached_tokens}, returned={returned_tokens}, "
+            f"total={total_tokens}, requests={request_count})"
+        )
+    else:
+        estimated_submission_tokens = estimate_token_count(prompt)
+        estimated_returned_tokens = estimate_token_count(
+            output_to_text_for_token_estimate(result.final_output)
+        )
+        estimated_total_tokens = estimated_submission_tokens + estimated_returned_tokens
+        progress.log(
+            "LLM token usage unavailable from provider; estimated "
+            f"(submission~{estimated_submission_tokens}, returned~{estimated_returned_tokens}, "
+            f"total~{estimated_total_tokens})"
+        )
     progress.log(f"LLM call 1 completed in {duration:.2f}s")
     return result.final_output
 
@@ -1418,6 +1553,7 @@ def main() -> None:
     github_elapsed_seconds = 0.0
     openai_elapsed_seconds = 0.0
     args = parse_args()
+    service_tier = SERVICE_TIER_TO_API_VALUE[args.service_tier]
     progress = ProgressReporter(enabled=not args.quiet)
     progress.log("Starting PR review synthesis run")
 
@@ -1425,7 +1561,8 @@ def main() -> None:
         owner, repo = parse_repository(args.repository)
     except ValueError as exc:
         raise SystemExit(str(exc))
-    base_output_file = args.output_file or build_default_output_filename(owner, repo, args.pr_number)
+    base_output_file = build_default_output_filename(owner, repo, args.pr_number)
+    prompt_cache_key = f"github-pr-puller:{owner}/{repo}:pr:{args.pr_number}:analysis:v1"
     output_file, prompt_debug_file, llm_implementation_file, output_index = (
         resolve_indexed_output_filenames(base_output_file)
     )
@@ -1517,6 +1654,8 @@ def main() -> None:
         parent.mkdir(parents=True, exist_ok=True)
     prompt_debug_doc = {
         "model": args.model,
+        "service_tier": service_tier,
+        "prompt_cache_key": prompt_cache_key,
         "prompt_payload": payload,
         "prompt_text": prompt,
     }
@@ -1534,6 +1673,8 @@ def main() -> None:
     openai_started_at = time.monotonic()
     analysis = analyze_with_openai_agents(
         model=args.model,
+        service_tier=service_tier,
+        prompt_cache_key=prompt_cache_key,
         prompt=prompt,
         thread_count=len(selected_thread_groups),
         comment_count=selected_comments,
